@@ -18,7 +18,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
+    <Reference Include="Gware.Core.MSSQL">
+      <HintPath>..\..\GWareBase\GWareBase\Gware.Core.MSSQL\bin\Debug\netcoreapp2.1\Gware.Core.MSSQL.dll</HintPath>
+    </Reference>
+    <Reference Include="Gware.Standard">
+      <HintPath>..\..\GWareBase\GWareBase\Gware.Standard\bin\Debug\netstandard2.0\Gware.Standard.dll</HintPath>
+    </Reference>
+    <Reference Include="Gware.Standard.Web">
+      <HintPath>..\..\GWareBase\GWareBase\Gware.Standard.Web\bin\Debug\netstandard2.0\Gware.Standard.Web.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

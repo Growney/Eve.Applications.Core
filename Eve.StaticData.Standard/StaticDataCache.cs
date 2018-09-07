@@ -9,8 +9,8 @@ namespace Eve.Static.Standard
     public class StaticDataCache : IStaticDataCache
     {
         private Dictionary<Type, Dictionary<int, object>> m_cache = new Dictionary<Type, Dictionary<int, object>>();
-        private ICommandController m_controller;
-        private object m_alterLock = new object();
+        private readonly ICommandController m_controller;
+        private readonly object m_alterLock = new object();
 
         public StaticDataCache(IControllerProvider provider)
         {
@@ -19,10 +19,9 @@ namespace Eve.Static.Standard
 
         public T GetItem<T>(int primaryKey) where T : LoadedFromAdapterBase, new()
         {
-            T retVal;
             Type tType = typeof(T);
 
-            if(!CacheContains<T>(primaryKey, out retVal, tType))
+            if (!CacheContains<T>(primaryKey, out T retVal, tType))
             {
                 if (retVal == null)
                 {
@@ -59,7 +58,7 @@ namespace Eve.Static.Standard
         public bool CacheContains<T>(int primaryKey,out T item,Type typeOfT = null) where T : class
         {
             bool retVal = false;
-            item = default(T);
+            item = default;
             Type tType = typeOfT ?? typeof(T);
             lock (m_alterLock)
             {

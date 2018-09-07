@@ -1,15 +1,33 @@
 ﻿@inherits BlazorLayoutComponent
+@inject Services.AppState state
+<div>
+    <div>
 
-<div class="sidebar">
-    <NavMenu />
-</div>
-
-<div class="main">
-    <div class="top-row px-4">
-        <a href="http://blazor.net" target="_blank" class="ml-md-auto">About</a>
     </div>
-
-    <div class="content px-4">
+    <div>
         @Body
     </div>
+    <div class="dialog-container @(ShowRegistration?"show":"")">
+        <div class="dialog">
+            <h3>Login to an existing ESA account</h3>
+
+        </div>
+
+    </div>
 </div>
+
+@functions
+{
+    bool ShowRegistration { get; set; }
+
+    protected override void OnInit()
+    {
+        state.OnDisplayRegistration += DisplayRegistration;
+    }
+
+    private void DisplayRegistration()
+    {
+        ShowRegistration = true;
+        StateHasChanged();
+    }
+}

@@ -1,7 +1,9 @@
-﻿@page "/"
+﻿@inject Services.AppState state
 
-<h1>Hello, world!</h1>
+@page "/"
 
-Welcome to your new app.
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+<div>
+    <h2>test</h2>
+    <button onclick="@(() => { state.TriggerDisplayRegistration(); })"> Display Registration </button>
+</div>
