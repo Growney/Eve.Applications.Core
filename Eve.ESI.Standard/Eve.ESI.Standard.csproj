@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>7.2</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="Gware.Standard">
+      <HintPath>..\..\GWareBase\GWareBase\Gware.Standard\bin\Debug\netstandard2.0\Gware.Standard.dll</HintPath>
+    </Reference>
+    <Reference Include="Gware.Standard.Web">
+      <HintPath>..\..\GWareBase\GWareBase\Gware.Standard.Web\bin\Debug\netstandard2.0\Gware.Standard.Web.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Eve.StaticData.Standard\Eve.StaticData.Standard.csproj" />
+  </ItemGroup>
+
+</Project>

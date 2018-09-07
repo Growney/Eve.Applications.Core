@@ -1,0 +1,7 @@
+﻿CREATE TABLE [dbo].[IntegerList]
+(
+	[CallID] UNIQUEIDENTIFIER NOT NULL,
+	[Value] BIGINT NOT NULL
+)
+GO
+CREATE CLUSTERED INDEX IX_IntegerList_CallID ON dbo.IntegerList (CallID)

@@ -1,0 +1,16 @@
+﻿CREATE TABLE [dbo].[ESICallResponse]
+(
+	[Id] BIGINT IDENTITY(1,1) UNIQUE,
+	[CallID] UNIQUEIDENTIFIER NOT NULL,
+	[ParameterGuid] UNIQUEIDENTIFIER NOT NULL,
+	[Uri] VARCHAR(MAX) NOT NULL,
+	[Executed] DATETIME NOT NULL,
+	[ResponseCode] SMALLINT NOT NULL,
+	[ETag] VARCHAR(MAX) NOT NULL,
+	[Expires] DATETIME NOT NULL,
+	[LastModified] DATETIME NOT NULL,
+	[Page] INT NOT NULL, 
+    [Pages] INT NOT NULL
+)
+GO
+CREATE CLUSTERED INDEX IX_ESICallResponse_ParameterGuid ON dbo.[ESICallResponse] (ParameterGuid)

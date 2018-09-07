@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Eve.ESI.Standard\Eve.ESI.Standard.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Gware.Standard">
+      <HintPath>..\..\GWareBase\GWareBase\Gware.Standard\bin\Debug\netstandard2.0\Gware.Standard.dll</HintPath>
+    </Reference>
+    <Reference Include="Gware.Standard.Web">
+      <HintPath>..\..\GWareBase\GWareBase\Gware.Standard.Web\bin\Debug\netstandard2.0\Gware.Standard.Web.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

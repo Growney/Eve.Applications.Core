@@ -1,0 +1,4 @@
+﻿CREATE TABLE [dbo].[ESIItemParent]
+(
+	[CallID] UNIQUEIDENTIFIER NOT NULL
+)

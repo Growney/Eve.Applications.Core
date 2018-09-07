@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.4" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Eve.ESI.Standard\Eve.ESI.Standard.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Gware.Standard">
+      <HintPath>..\..\GWareBase\GWareBase\Gware.Standard\bin\Debug\netstandard2.0\Gware.Standard.dll</HintPath>
+    </Reference>
+    <Reference Include="Gware.Standard.Web">
+      <HintPath>..\..\GWareBase\GWareBase\Gware.Standard.Web\bin\Debug\netstandard2.0\Gware.Standard.Web.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

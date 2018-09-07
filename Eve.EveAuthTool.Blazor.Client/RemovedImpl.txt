@@ -1,0 +1,28 @@
+public static class MSSQLControllerProviderExtensions
+    {
+        public static ICommandController CreateController(this IConfiguration configuration,string key)
+        {
+            bool isTrusted = configuration[$"Controllers:{key}:Trusted"]?.ToLower().ToString() == "true";
+            if (isTrusted)
+            {
+                return new MSSQLCommandController(configuration[$"Controllers:{key}:Server"], configuration[$"Controllers:{key}:Databasename"]);
+            }
+            else
+            {
+                return new MSSQLCommandController(configuration[$"Controllers:{key}:Server"], configuration[$"Controllers:{key}:Databasename"], configuration[$"Controllers:{key}:Username"], configuration[$"Controllers:{key}:Password"]);
+            }
+        }
+    }
+	
+	
+	MSSQLCommandController controller = Controller as MSSQLCommandController;
+	if (controller != null)
+	{
+		string dbName = GetDBName(name);
+		MSSQLCommandController newController = controller.Clone() as MSSQLCommandController;
+		newController.SetName(dbName);
+		return await newController.DeploySchema(SchemaFile, dbName, CreateComposite);
+
+	}
+	
+	(tenant.Controller as MSSQLCommandController)?.DeploySchema(SchemaFile, GetDBName(tenant.Name), CreateComposite)

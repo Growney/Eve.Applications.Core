@@ -1,0 +1,6 @@
+﻿CREATE TABLE [dbo].[UserAccountToken]
+(
+	[Id] BIGINT NOT NULL PRIMARY KEY IDENTITY(1,1),
+	[UserAccountID] BIGINT NOT NULL,
+	[TokenID] BIGINT NOT NULL
+)
