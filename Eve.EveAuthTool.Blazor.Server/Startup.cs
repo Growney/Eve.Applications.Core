@@ -24,6 +24,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Linq;
 using System.Net.Mime;
@@ -104,7 +105,10 @@ namespace Eve.EveAuthTool.Blazor.Server
                 config.Filters.Add(new TenantResolverFilter());
                 config.Filters.Add(new TenantVersionCheckingFilter());
                 config.Filters.Add(new AllowedCharactersResolverFilter());
-            });
+            }).AddJsonOptions(options =>
+            {
+                options.SerializerSettings.ContractResolver = new DefaultContractResolver();
+            }); 
 
             services.AddResponseCompression(options =>
             {
@@ -130,24 +134,24 @@ namespace Eve.EveAuthTool.Blazor.Server
             {
                 app.UseExceptionHandler("/Home/Error");
             }
-
-            app.UseStaticFiles();
+            
             app.UseMvc(routes =>
             {
                 routes.MapDomainRoutes(
                     domains: configuration.Domains,
-                    routeTemplate: "{controller}/{action}/{id?}",
+                    routeTemplate: "api/{controller}/{action}/{id?}",
                     defaults: new Microsoft.AspNetCore.Routing.RouteValueDictionary { { "controller", "Character" }, { "action", "Index" } },
                     ignorePorts: configuration.IgnorePorts
                     );
 
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Character}/{action=Index}/{id?}"
+                    template: "api/{controller}/{action}/{id?}"
                     );
             });
-
             app.UseBlazor<Client.Program>();
+
+      
         }
     }
 }

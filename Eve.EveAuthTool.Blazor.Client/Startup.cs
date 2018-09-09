@@ -9,11 +9,12 @@ namespace Eve.EveAuthTool.Blazor.Client
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<AppState>();
+            services.AddScoped<SessionState>();
         }
 
         public void Configure(IBlazorApplicationBuilder app)
         {
-            app.AddComponent<App>("app");
+            app.AddComponent<Client.App>("app");
         }
     }
 }

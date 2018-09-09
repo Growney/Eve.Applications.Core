@@ -1,9 +1,5 @@
 ﻿@inject Services.AppState state
-
 @page "/"
-
-
 <div>
-    <h2>test</h2>
-    <button onclick="@(() => { state.TriggerDisplayRegistration(); })"> Display Registration </button>
+    <button onclick="@(() => state.TriggerDisplayRegistration())"> Display Registration </button>
 </div>

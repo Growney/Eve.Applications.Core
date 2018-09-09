@@ -20,7 +20,6 @@ namespace Eve.EveAuthTool.Blazor.Server
                 .UseStartup<Startup>()
                 .ConfigureAppConfiguration(config =>
                 {
-                    config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
                     config.AddJsonFile("appsettings.{ctx.HostingEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: true);
                 })
                 .Build();

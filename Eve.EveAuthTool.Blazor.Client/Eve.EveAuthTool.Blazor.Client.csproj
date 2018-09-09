@@ -7,6 +7,7 @@
 	<BlazorLinkOnBuild>false</BlazorLinkOnBuild>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Blazor.Browser" Version="0.5.1" />
     <PackageReference Include="Microsoft.AspNetCore.Blazor.Build" Version="0.5.1" />
   </ItemGroup>
@@ -20,6 +21,10 @@
     <Reference Include="Gware.Standard">
       <HintPath>..\..\GWareBase\GWareBase\Gware.Standard\bin\Debug\netstandard2.0\Gware.Standard.dll</HintPath>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\images\" />
   </ItemGroup>
 
 </Project>
