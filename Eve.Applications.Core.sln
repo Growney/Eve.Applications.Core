@@ -3,10 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2016
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eve.EveAuthTool.Blazor.Server", "Eve.EveAuthTool.Blazor.Server\Eve.EveAuthTool.Blazor.Server.csproj", "{9222E4E4-8187-417F-9865-1EA920ED1874}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eve.EveAuthTool.Blazor.Client", "Eve.EveAuthTool.Blazor.Client\Eve.EveAuthTool.Blazor.Client.csproj", "{0F2AAEBC-34D7-40F7-B581-A1D52ED67B68}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eve.ESI.Standard", "Eve.ESI.Standard\Eve.ESI.Standard.csproj", "{715E4973-DBA3-4E86-8D63-035CED818262}"
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Eve.ESI.Database", "Eve.ESI.Database\Eve.ESI.Database.sqlproj", "{0CBAD90B-B422-4BC2-B863-C147022DB412}"
@@ -19,9 +15,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eve.ESIClassMaker", "Eve.ES
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eve.EveAuthTool.Standard", "Eve.EveAuthTool.Standard\Eve.EveAuthTool.Standard.csproj", "{F5C11B52-8324-48B3-8980-B41DA4CCAC64}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eve.EveAuthTool.Core", "Eve.EveAuthTool.Core\Eve.EveAuthTool.Core.csproj", "{138D56DD-81D8-4743-ACC0-938D59CAB8DD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eve.EveAuthTool.Core", "Eve.EveAuthTool.Core\Eve.EveAuthTool.Core.csproj", "{138D56DD-81D8-4743-ACC0-938D59CAB8DD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eve.ESI.Core", "Eve.ESI.Core\Eve.ESI.Core.csproj", "{1F531962-7398-4836-8157-B4977FD484CF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eve.ESI.Core", "Eve.ESI.Core\Eve.ESI.Core.csproj", "{1F531962-7398-4836-8157-B4977FD484CF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eve.EveAuthTool.GUI.Web", "Eve.EveAuthTool.GUI.Web\Eve.EveAuthTool.GUI.Web.csproj", "{D489A825-B741-4977-941C-7F141D0496ED}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,14 +27,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{9222E4E4-8187-417F-9865-1EA920ED1874}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9222E4E4-8187-417F-9865-1EA920ED1874}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9222E4E4-8187-417F-9865-1EA920ED1874}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9222E4E4-8187-417F-9865-1EA920ED1874}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0F2AAEBC-34D7-40F7-B581-A1D52ED67B68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0F2AAEBC-34D7-40F7-B581-A1D52ED67B68}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0F2AAEBC-34D7-40F7-B581-A1D52ED67B68}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0F2AAEBC-34D7-40F7-B581-A1D52ED67B68}.Release|Any CPU.Build.0 = Release|Any CPU
 		{715E4973-DBA3-4E86-8D63-035CED818262}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{715E4973-DBA3-4E86-8D63-035CED818262}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{715E4973-DBA3-4E86-8D63-035CED818262}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -73,6 +63,10 @@ Global
 		{1F531962-7398-4836-8157-B4977FD484CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1F531962-7398-4836-8157-B4977FD484CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1F531962-7398-4836-8157-B4977FD484CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D489A825-B741-4977-941C-7F141D0496ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D489A825-B741-4977-941C-7F141D0496ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D489A825-B741-4977-941C-7F141D0496ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D489A825-B741-4977-941C-7F141D0496ED}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

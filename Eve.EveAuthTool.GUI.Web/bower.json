@@ -1,0 +1,20 @@
+{
+  "name": "EveSwaggerAuth",
+  "description": "Auth Tool For Eve Online",
+  "main": "**/*.js",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "3.3.1",
+    "Microsoft.jQuery.Unobtrusive.Ajax": "*",
+    "font-awesome-5": "5.2.0"
+
+  },
+  "private": true
+}

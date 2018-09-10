@@ -1,0 +1,123 @@
+﻿@inject Eve.ESI.Standard.Authentication.Account.IScopeGroupProvider scopes
+@inject Eve.EveAuthTool.Core.Security.Middleware.IViewParameterProvider parameters
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Eve Swagger Auth</title>
+
+    <link rel="stylesheet" href="~/lib/font-awesome-5/web-fonts-with-css/css/fontawesome-all.min.css" />
+    <link rel="stylesheet" href="~/css/dialog.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <button onclick="showDialog('registrationDialog')">Show Dialog</button>
+    <div>
+        @RenderBody()
+    </div>
+
+    <div id="registrationDialog" class="dialog-container">
+        <div class="dialog">
+            @if (parameters.Package.IsAuthenticated)
+            {
+                <h3>Your Account</h3>
+                <button class="button-list-button registration-button" onclick="showDialog('addCharacterRegistrationDialog')">Add Character</button>
+            }
+            else
+            {
+                <a class="button-list-button registration-button hover-image-button">Login<img src="~/images/eve-sso-login-black-large.png" /></a>
+
+            }
+
+            <button class="button-list-button registration-button" onclick="showDialog('characterRegistrationDialog')">Register</button>
+            <hr />
+            <div>Create</div>
+            <button class="button-list-button registration-button" onclick="showDialog('corporationRegistrationDialog')">Corporation</button>
+            <button class="button-list-button registration-button" onclick="showDialog('allianceRegistrationDialog')">Alliance</button>
+
+        </div>
+    </div>
+
+    <div id="addCharacterRegistrationDialog" class="dialog-container">
+        <div class="dialog-close">
+            <i class="fas fa-times"></i>
+        </div>
+        <div class="dialog">
+            @{
+                var addCharacterOptions = new Eve.EveAuthTool.GUI.Web.Models.Registration.RegistrationFormOptions()
+                {
+                    Action = "AddCharacter",
+                    Controller = "Registration",
+                    Title = "Add a character to your account",
+                    Description = "Register to use the application as a single user allowing you to view and multiple characters information",
+                    Groups = scopes.GetCharacterScopes()
+                };
+            }
+            <partial name="RegistrationForm" model="addCharacterOptions" />
+        </div>
+    </div>
+    <div id="characterRegistrationDialog" class="dialog-container">
+        <div class="dialog-close">
+            <i class="fas fa-times"></i>
+        </div>
+        <div class="dialog">
+            @{
+                var characterOptions = new Eve.EveAuthTool.GUI.Web.Models.Registration.RegistrationFormOptions()
+                {
+                    Action = "Character",
+                    Controller = "Registration",
+                    Title = "Register new Character Account",
+                    Description = "Register to use the application as a single user allowing you to view and multiple characters information",
+                    Groups = scopes.GetCharacterScopes()
+                };
+            }
+            <partial name="RegistrationForm" model="characterOptions" />
+        </div>
+    </div>
+    <div id="corporationRegistrationDialog" class="dialog-container">
+        <div class="dialog-close">
+            <i class="fas fa-times"></i>
+        </div>
+        <div class="dialog">
+            @{
+                var corporationOptions = new Eve.EveAuthTool.GUI.Web.Models.Registration.RegistrationFormOptions()
+                {
+                    Action = "Corporation",
+                    Controller = "Registration",
+                    Title = "Register as a Corporation",
+                    Description = "Register as a corporation to view members stats and use authentication services",
+                    Groups = scopes.GetCorporationScopes()
+                };
+            }
+            <partial name="RegistrationForm" model="corporationOptions" />
+        </div>
+    </div>
+    <div id="allianceRegistrationDialog" class="dialog-container">
+        <div class="dialog-close">
+            <i class="fas fa-times"></i>
+        </div>
+        <div class="dialog">
+            @{
+                var allianceOptions = new Eve.EveAuthTool.GUI.Web.Models.Registration.RegistrationFormOptions()
+                {
+                    Action = "Alliance",
+                    Controller = "Registration",
+                    Title = "Register as an Alliance",
+                    Description = "Register as a alliance to view members stats and use authentication services",
+                    Groups = scopes.GetCorporationScopes()
+                };
+            }
+            <partial name="RegistrationForm" model="allianceOptions" />
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/Microsoft.jQuery.Unobtrusive.Ajax/jquery.unobtrusive-ajax.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/dialog.js" asp-append-version="true"></script>
+    @RenderSection("Scripts", required: false)
+
+</body>
+</html>

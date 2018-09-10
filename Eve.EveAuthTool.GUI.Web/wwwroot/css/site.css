@@ -1,0 +1,83 @@
+﻿:root {
+    --theme-primary-back-colour: rgb(0, 0, 0,1);
+    --theme-secondary-back-colour: #630202;
+    --theme-fore-colour: #ffffff;
+}
+* {
+    font-family: 'Jura', Verdana;
+}
+
+html, body {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
+    margin: 0px;
+    background: var(--theme-primary-back-colour); /* fallback for old browsers */
+    background: -webkit-linear-gradient(to bottom, var(--theme-primary-back-colour),var(--theme-secondary-back-colour)); /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to bottom, var(--theme-primary-back-colour), var(--theme-secondary-back-colour)); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    color: var(--theme-fore-colour);
+}
+
+.button-hidden-under {
+    padding: 0px;
+    border-width: 0px
+}
+
+.login-image {
+    width: 270px;
+    height: 45px;
+}
+
+.button-list-button {
+    display: block;
+    margin: 5px 0px;
+}
+.registration-button {
+    width: 270px;
+    height: 45px;
+    /*align text in the middle*/
+    text-align: center;
+    line-height: 45px;
+
+    color: var(--theme-fore-colour);
+    background-color: transparent;
+    transition: border-color 0.2s ease-in-out;
+    font-size: 0.75em;
+    letter-spacing: 0.3em;
+    border: solid;
+    border-color: var(--theme-fore-colour);
+    border-width: 1px;
+    border-radius: 4px;
+}
+
+    .registration-button:hover {
+        border-color: var(--theme-secondary-back-colour);
+    }
+.hover-image-button {
+    position: relative;
+}
+
+    .hover-image-button:hover {
+        border-color: rgba(255, 255, 255, 0.0);
+    }
+
+    .hover-image-button img {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        transition: opacity 0.2s ease-in-out;
+        opacity: 0.0;
+    }
+
+        .hover-image-button img:hover{
+            opacity: 1.0;
+        }
+
+
+
+
+
+   
+

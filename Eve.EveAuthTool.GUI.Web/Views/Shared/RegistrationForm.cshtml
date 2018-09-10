@@ -1,0 +1,36 @@
+﻿@model Eve.EveAuthTool.GUI.Web.Models.Registration.RegistrationFormOptions
+
+<form asp-action="@Model.Action" asp-controller="@Model.Controller">
+    <h2>@Model.Title</h2>
+    <p>@Model.Description</p>
+
+    @{
+        bool includesRequired = false;
+        var scopes = Model.Groups;
+        if (scopes != null)
+        {
+            <ul>
+                @for (int i = 0; i < scopes.Length; i++)
+                {
+                    var group = scopes[i];
+                    if (group.Required)
+                    {
+                        includesRequired = true;
+                        <li><input type="checkbox" name="selectedScopes" value="@group.Value" checked disabled>@group.Name* - @group.Description</li>
+                    }
+                    else
+                    {
+                        <li><input type="checkbox" name="selectedScopes" value="@group.Value" checked>@group.Name - @group.Description</li>
+                    }
+
+                }
+            </ul>
+            if (includesRequired)
+            {
+                <p>* Required </p>
+            }
+        }
+    }
+
+    <div><button class="button-hidden-under login-image" submit"><img src="~/images/eve-sso-login-black-large.png" /></button></div>
+</form>

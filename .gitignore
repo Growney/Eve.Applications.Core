@@ -331,3 +331,9 @@ ASALocalRun/
 /Eve.EveAuthTool.Blazor.Server/appsettings.Testing.json
 /Eve.EveAuthTool.Blazor.Server/appsettings.live.json
 /Eve.EveAuthTool.Blazor.Server/appsettings.Development.json
+Eve.EveAuthTool.Web.GUI/appsettings.Development.json
+Eve.EveAuthTool.Web.GUI/appsettings.live.json
+Eve.EveAuthTool.Web.GUI/appsettings.Testing.json
+Eve.EveAuthTool.GUI.Web/appsettings.Development.json
+Eve.EveAuthTool.GUI.Web/appsettings.live.json
+Eve.EveAuthTool.GUI.Web/appsettings.Testing.json
