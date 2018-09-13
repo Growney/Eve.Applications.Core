@@ -5,7 +5,8 @@
 	@CreatedDate DATETIME = NULL,
 	@TokenIds LongIDList READONLY,
 	@EntityID BIGINT = NULL,
-	@EntityType TINYINT = NULL
+	@EntityType TINYINT = NULL,
+	@Main BIT = NULL
 AS
 IF @Result = 'Single'
 BEGIN
@@ -34,7 +35,7 @@ BEGIN
 	SELECT @@IDENTITY AS [Value]
 
 	INSERT INTO UserAccountToken (UserAccountID,TokenID)
-	SELECT @@IDENTITY,Id
+	SELECT @@IDENTITY,ID
 	FROM @TokenIds
 
 END
@@ -72,6 +73,18 @@ BEGIN
 		WHEN @EntityType = 2 THEN AllianceID END
 	)  = @EntityID 
 	AND CT.EntityType = @EntityType
+
+END
+
+IF @Result = 'MainCharacterID'
+BEGIN
+
+	
+	SELECT TOP 1 CharacterID AS [Value]
+	FROM ESIToken ET
+	INNER JOIN UserAccountToken UAT ON ET.Id = UAT.TokenID
+	WHERE (UAT.Main = 1 OR (SELECT COUNT(*) FROM UserAccountToken MT WHERE MT.Main = 1 AND MT.UserAccountID = @Id) = 0)
+	AND UAT.UserAccountID = @Id
 
 END
 

@@ -11,32 +11,50 @@
     <link rel="stylesheet" href="~/lib/font-awesome-5/web-fonts-with-css/css/fontawesome-all.min.css" />
     <link rel="stylesheet" href="~/css/dialog.css" />
     <link rel="stylesheet" href="~/css/site.css" />
+
+    @RenderSection("Styles", required: false)
 </head>
 <body>
-    <button onclick="showDialog('registrationDialog')">Show Dialog</button>
-    <div>
-        @RenderBody()
-    </div>
+    <div class="site">
+        <div class="site-logo">
+            <img src="@(parameters.Package.IsTenant ? parameters.Package.ESIConfiguration.GetImageSource((Eve.ESI.Standard.eESIEntityType)parameters.Package.CurrentTenant.EntityType,parameters.Package.CurrentTenant.EntityId,128) : "/images/logo.png")"/>
+        </div>
+        <div class="site-title">
+            @(parameters.Package.IsTenant ? parameters.Package.CurrentTenant.DisplayName : "")
+        </div>
+        <div class="site-info">
 
+        </div>
+        <div class="site-content">
+            @RenderBody()
+        </div>
+        <div class="site-sidebar-left">
+            <button onclick="showDialog('registrationDialog')">Account</button>
+            <a asp-controller="Home" asp-action="Features">About ESA</a>
+            <a asp-controller="Home" asp-action="About">About Me</a>
+        </div>
+    </div> 
+   
     <div id="registrationDialog" class="dialog-container">
         <div class="dialog">
-            @if (parameters.Package.IsAuthenticated)
+            @if (parameters.Package.IsTenant)
             {
-                <h3>Your Account</h3>
-                <button class="button-list-button registration-button" onclick="showDialog('addCharacterRegistrationDialog')">Add Character</button>
+                @if (parameters.Package.IsAuthenticated)
+                {
+                    <h3>Your Account</h3>
+                    <button class="button-list-button registration-button" onclick="showDialog('addCharacterRegistrationDialog')">Add Character</button>
+                    <a class="button-list-button registration-button" asp-action="Logout" asp-controller="Registration">Log Out</a>
+                }
+                else
+                {
+                    <a asp-action="EveLogin" asp-controller="Registration" class="button-list-button registration-button hover-image-button">Login<img src="~/images/eve-sso-login-black-large.png" /></a>
+                    <button class="button-list-button registration-button" onclick="showDialog('characterRegistrationDialog')">Register</button>
+                }
             }
             else
             {
-                <a class="button-list-button registration-button hover-image-button">Login<img src="~/images/eve-sso-login-black-large.png" /></a>
-
+                <a asp-action="Group" asp-controller="Registration" class="button-list-button registration-button">Create Group</a>
             }
-
-            <button class="button-list-button registration-button" onclick="showDialog('characterRegistrationDialog')">Register</button>
-            <hr />
-            <div>Create</div>
-            <button class="button-list-button registration-button" onclick="showDialog('corporationRegistrationDialog')">Corporation</button>
-            <button class="button-list-button registration-button" onclick="showDialog('allianceRegistrationDialog')">Alliance</button>
-
         </div>
     </div>
 
@@ -52,7 +70,7 @@
                     Controller = "Registration",
                     Title = "Add a character to your account",
                     Description = "Register to use the application as a single user allowing you to view and multiple characters information",
-                    Groups = scopes.GetCharacterScopes()
+                    Groups = scopes.GetCharacterScopeGroups()
                 };
             }
             <partial name="RegistrationForm" model="addCharacterOptions" />
@@ -70,46 +88,10 @@
                     Controller = "Registration",
                     Title = "Register new Character Account",
                     Description = "Register to use the application as a single user allowing you to view and multiple characters information",
-                    Groups = scopes.GetCharacterScopes()
+                    Groups = scopes.GetCharacterScopeGroups()
                 };
             }
             <partial name="RegistrationForm" model="characterOptions" />
-        </div>
-    </div>
-    <div id="corporationRegistrationDialog" class="dialog-container">
-        <div class="dialog-close">
-            <i class="fas fa-times"></i>
-        </div>
-        <div class="dialog">
-            @{
-                var corporationOptions = new Eve.EveAuthTool.GUI.Web.Models.Registration.RegistrationFormOptions()
-                {
-                    Action = "Corporation",
-                    Controller = "Registration",
-                    Title = "Register as a Corporation",
-                    Description = "Register as a corporation to view members stats and use authentication services",
-                    Groups = scopes.GetCorporationScopes()
-                };
-            }
-            <partial name="RegistrationForm" model="corporationOptions" />
-        </div>
-    </div>
-    <div id="allianceRegistrationDialog" class="dialog-container">
-        <div class="dialog-close">
-            <i class="fas fa-times"></i>
-        </div>
-        <div class="dialog">
-            @{
-                var allianceOptions = new Eve.EveAuthTool.GUI.Web.Models.Registration.RegistrationFormOptions()
-                {
-                    Action = "Alliance",
-                    Controller = "Registration",
-                    Title = "Register as an Alliance",
-                    Description = "Register as a alliance to view members stats and use authentication services",
-                    Groups = scopes.GetCorporationScopes()
-                };
-            }
-            <partial name="RegistrationForm" model="allianceOptions" />
         </div>
     </div>
 

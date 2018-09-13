@@ -1,4 +1,5 @@
 ﻿using Eve.ESI.Standard.Account;
+using Eve.ESI.Standard.Authentication.Client;
 using Eve.ESI.Standard.Authentication.Configuration;
 using Eve.EveAuthTool.Core.Security.Middleware;
 using Eve.EveAuthTool.Standard;
@@ -28,13 +29,25 @@ namespace Eve.EveAuthTool.Core.Helpers
                 return TenantProvider.GetController();
             }
         }
+        public ICommandController PublicDataController
+        {
+            get
+            {
+                return TenantProvider.GetDefaultDataController();
+            }
+        }
+        public ITenantConfiguration TenantConfiguration { get; }
 
-        public ControllerParameters(ITenantControllerProvider tenantControllerProvider, IESIAuthenticatedConfig esiConfig, IAllowedCharactersProvider characters, IStaticDataCache cache)
+        public PublicDataProvider PublicData { get; }
+
+        public ControllerParameters(ITenantConfiguration tenantConfiguration,ITenantControllerProvider tenantControllerProvider, IESIAuthenticatedConfig esiConfig, IAllowedCharactersProvider characters, IStaticDataCache cache)
         {
             TenantProvider = tenantControllerProvider;
             ESIConfiguration = esiConfig;
             Characters = characters;
             Cache = cache;
+            TenantConfiguration = tenantConfiguration;
+            PublicData = new PublicDataProvider(esiConfig.Client, TenantProvider.GetDefaultDataController(),Cache);
         }
 
         public ViewParameterPackage CreateViewParameters(HttpContext context)
@@ -44,7 +57,7 @@ namespace Eve.EveAuthTool.Core.Helpers
             {
                 account = UserAccount.ForGuid(TenantController,context.User.Identity.Name);
             }
-            return new ViewParameterPackage(Cache, ESIConfiguration, context.Features.Get<Tenant>(), TenantController, Characters,account);
+            return new ViewParameterPackage(Cache, ESIConfiguration, context.Features.Get<Tenant>(), TenantController,PublicData, Characters,account, TenantConfiguration);
         }
     }
 }

@@ -10,7 +10,7 @@ using Eve.ESI.Standard.DataItem.Corporation;
 using Eve.ESI.Standard.DataItem.Fleet;
 using Eve.ESI.Standard.DataItem.Skills;
 using Eve.ESI.Standard.Relationships;
-using Eve.ESI.Standard.Token;
+using Eve.ESI.Standard.Authentication.Token;
 using Eve.Static.Standard;
 using Eve.Static.Standard.chr;
 using Gware.Standard.Collections.Generic;
@@ -24,27 +24,29 @@ namespace Eve.ESI.Standard.AuthenticatedData
 {
     public class AuthenticatedEntity
     {
-        private readonly IEnumerable<Token.ESIToken> m_accountTokens;
+        private readonly IEnumerable<ESIToken> m_accountTokens;
         public IESIAuthenticatedConfig Config { get; }
-        public ICommandController Controller { get; }
+        public ICommandController TenantController { get; }
         public IStaticDataCache Cache { get; }
         public eESIEntityType EntityType { get; }
+        public PublicDataProvider PublicData { get; }
         public long EntityID { get; }
 
-        private AuthenticatedEntity(IESIAuthenticatedConfig config, ICommandController controller, IStaticDataCache cache, IEnumerable<Token.ESIToken> tokens, long entityID, eESIEntityType entityType)
+        private AuthenticatedEntity(IESIAuthenticatedConfig config, ICommandController tenantController, IStaticDataCache cache, IEnumerable<ESIToken> tokens, PublicDataProvider publicData, long entityID, eESIEntityType entityType)
         {
             m_accountTokens = tokens;
             Config = config;
-            Controller = controller;
+            TenantController = tenantController;
             Cache = cache;
             EntityType = entityType;
             EntityID = entityID;
+            PublicData = publicData;
         }
 
         private Func<Task<ESITokenRefreshResponse>> GetAuthenticationToken(eESIScope scope)
         {
             return () => {
-                List<ESIToken> tokens = Token.ESIToken.FindWithScope(m_accountTokens, scope);
+                List<ESIToken> tokens = ESIToken.FindWithScope(m_accountTokens, scope);
                 if (tokens.Count > 0)
                 {
                     Task<ESITokenRefreshResponse> returnToken = null;
@@ -52,7 +54,7 @@ namespace Eve.ESI.Standard.AuthenticatedData
                     {
                         if (!token.RequiresRefresh)
                         {
-                            returnToken = token.GetAuthenticationToken(Config, Controller);
+                            returnToken = token.GetAuthenticationToken(Config, TenantController);
                             break;
                         }
                     }
@@ -63,7 +65,7 @@ namespace Eve.ESI.Standard.AuthenticatedData
                             ESITokenRefreshResponse tokenResponse = new ESITokenRefreshResponse(eESITokenRefreshResponseStatus.NoTokenAvaliable);
                             foreach (ESIToken token in tokens)
                             {
-                                Task<ESITokenRefreshResponse> tokenRefresher = token.GetAuthenticationToken(Config, Controller);
+                                Task<ESITokenRefreshResponse> tokenRefresher = token.GetAuthenticationToken(Config, TenantController);
                                 tokenRefresher.Wait();
                                 if (tokenRefresher.IsCompleted)
                                 {
@@ -93,114 +95,100 @@ namespace Eve.ESI.Standard.AuthenticatedData
             };
 
         }
-        public Task<ESICallResponse<CharacterInfo>> GetCharacterInfo(bool oldData = false)
-        {
-            return CharacterInfo.GetCharacterInfo(Config.Client, Controller, EntityID, oldData);
-        }
-
         public bool HasScope(eESIScope scope)
         {
-            return Token.ESIToken.FindWithScope(m_accountTokens, scope) != null;
+            return ESIToken.FindWithScope(m_accountTokens, scope) != null;
         }
 
         public Task<ESICallResponse<CharacterSkillSheet>> GetSkillSheet(bool oldData)
         {
-            return CharacterSkillSheet.GetCharacterSkillSheet(Config.Client, Controller, EntityID, GetAuthenticationToken(eESIScope.esi_skills_read_skills_v1), oldData);
+            return CharacterSkillSheet.GetCharacterSkillSheet(Config.Client, TenantController, EntityID, GetAuthenticationToken(eESIScope.esi_skills_read_skills_v1), oldData);
         }
         public Task<ESICallResponse<CharacterAttributes>> GetAttributes()
         {
-            return CharacterAttributes.GetAttributes(Config.Client, Controller, EntityID, GetAuthenticationToken(eESIScope.esi_skills_read_skills_v1));
+            return CharacterAttributes.GetAttributes(Config.Client, TenantController, EntityID, GetAuthenticationToken(eESIScope.esi_skills_read_skills_v1));
         }
         public Task<ESICollectionCallResponse<SkillQueueItem>> GetSkillQueue(bool oldData)
         {
-            return SkillQueueItem.GetSkillQueue(Config.Client, Controller, EntityID, GetAuthenticationToken(eESIScope.esi_skills_read_skillqueue_v1), oldData);
+            return SkillQueueItem.GetSkillQueue(Config.Client, TenantController, EntityID, GetAuthenticationToken(eESIScope.esi_skills_read_skillqueue_v1), oldData);
         }
         public Task<ESIIntegerCollectionCallResponse<ActiveImplants>> GetActiveImplants()
         {
-            return ActiveImplants.GetActiveImplants(Config.Client, Controller, EntityID, GetAuthenticationToken(eESIScope.esi_clones_read_implants_v1));
+            return ActiveImplants.GetActiveImplants(Config.Client, TenantController, EntityID, GetAuthenticationToken(eESIScope.esi_clones_read_implants_v1));
         }
         public Task<ESICallResponse<CharacterRoles>> GetRoles()
         {
-            return CharacterRoles.GetCharacterRoles(Config.Client, Controller, EntityID, GetAuthenticationToken(eESIScope.esi_characters_read_corporation_roles_v1));
+            return CharacterRoles.GetCharacterRoles(Config.Client, TenantController, EntityID, GetAuthenticationToken(eESIScope.esi_characters_read_corporation_roles_v1));
         }
         public Task<ESICallResponse<CharacterFleet>> GetCharacterFleet(bool oldData = false)
         {
-            return CharacterFleet.GetCharacterFleet(Config.Client, Controller, EntityID, GetAuthenticationToken(eESIScope.esi_fleets_read_fleet_v1), oldData);
+            return CharacterFleet.GetCharacterFleet(Config.Client, TenantController, EntityID, GetAuthenticationToken(eESIScope.esi_fleets_read_fleet_v1), oldData);
         }
         public Task<ESICollectionCallResponse<FleetMember>> GetFleetMembers(long fleetID, bool oldData = false)
         {
-            return FleetMember.GetFleetMembers(Config.Client, Controller, fleetID, GetAuthenticationToken(eESIScope.esi_fleets_read_fleet_v1), oldData);
+            return FleetMember.GetFleetMembers(Config.Client, TenantController, fleetID, GetAuthenticationToken(eESIScope.esi_fleets_read_fleet_v1), oldData);
         }
 
         public Task<ESICollectionCallResponse<CharacterContact>> GetCharacterContacts(bool oldData = false)
         {
-            return CharacterContact.GetCharacterContacts(Config.Client, Controller, EntityID, GetAuthenticationToken(eESIScope.esi_characters_read_contacts_v1), oldData);
+            return CharacterContact.GetCharacterContacts(Config.Client, TenantController, EntityID, GetAuthenticationToken(eESIScope.esi_characters_read_contacts_v1), oldData);
         }
         public Task<ESICollectionCallResponse<CorporationContact>> GetCorporationContacts(bool oldData = false)
         {
-            return CorporationContact.GetCorporationContacts(Config.Client, Controller, (int)EntityID, GetAuthenticationToken(eESIScope.esi_corporations_read_contacts_v1), oldData);
+            return CorporationContact.GetCorporationContacts(Config.Client, TenantController, (int)EntityID, GetAuthenticationToken(eESIScope.esi_corporations_read_contacts_v1), oldData);
         }
         public Task<ESICollectionCallResponse<AllianceContact>> GetAllianceContacts(bool oldData = false)
         {
-            return AllianceContact.GetAllianceContacts(Config.Client, Controller, (int)EntityID, GetAuthenticationToken(eESIScope.esi_alliances_read_contacts_v1), oldData);
-        }
-
-        public string GetImageSource(string type, long id, int size, string fileType = "png")
-        {
-            return Config.GetImageSource(type, id, size, fileType);
-        }
-        public string GetEntityImageSource(int size)
-        {
-            return Config.GetImageSource(EntityType, EntityID, size);
+            return AllianceContact.GetAllianceContacts(Config.Client, TenantController, (int)EntityID, GetAuthenticationToken(eESIScope.esi_alliances_read_contacts_v1), oldData);
         }
 
         public async Task<IEnumerable<EntityRelationship>> CalculateRelevantRelationships(bool oldData = false)
         {
             List<EntityRelationship> retVal = new List<EntityRelationship>();
-            retVal.AddRange(EntityRelationship.SelectForTo(Controller, EntityID, EntityType));
+            retVal.AddRange(EntityRelationship.SelectForTo(TenantController, EntityID, EntityType));
             switch (EntityType)
             {
                 case eESIEntityType.character:
                     {
-                        ESICallResponse<CharacterInfo> characterResponse = await GetCharacterInfo(oldData);
+                        ESICallResponse<CharacterInfo> characterResponse = await PublicData.GetCharacterInfo((int)EntityID,oldData);
                         if (characterResponse.HasData)
                         {
-                            retVal.AddRange(EntityRelationship.SelectForTo(Controller, characterResponse.Data.CorporationId,eESIEntityType.corporation));
+                            retVal.AddRange(EntityRelationship.SelectForTo(TenantController, characterResponse.Data.CorporationId,eESIEntityType.corporation));
                             if (characterResponse.Data.AllianceId > 0)
                             {
-                                retVal.AddRange(EntityRelationship.SelectForTo(Controller, characterResponse.Data.AllianceId, eESIEntityType.alliance));
+                                retVal.AddRange(EntityRelationship.SelectForTo(TenantController, characterResponse.Data.AllianceId, eESIEntityType.alliance));
                             }
                             if (characterResponse.Data.FactionId > 0)
                             {
-                                retVal.AddRange(EntityRelationship.SelectForTo(Controller, characterResponse.Data.FactionId, eESIEntityType.faction));
+                                retVal.AddRange(EntityRelationship.SelectForTo(TenantController, characterResponse.Data.FactionId, eESIEntityType.faction));
                             }
                         }
                     }
                     break;
                 case eESIEntityType.corporation:
                     {
-                        ESICallResponse<CorporationInfo> corporationResponse = await CorporationInfo.GetCorporationInfo(Config.Client, Controller, (int)EntityID, oldData);
+                        ESICallResponse<CorporationInfo> corporationResponse = await PublicData.GetCorporationInfo((int)EntityID,oldData);
                         if (corporationResponse.HasData)
                         {
                             if (corporationResponse.Data.AllianceId > 0)
                             {
-                                retVal.AddRange(EntityRelationship.SelectForTo(Controller, corporationResponse.Data.AllianceId, eESIEntityType.alliance));
+                                retVal.AddRange(EntityRelationship.SelectForTo(TenantController, corporationResponse.Data.AllianceId, eESIEntityType.alliance));
                             }
                             if (corporationResponse.Data.FactionId > 0)
                             {
-                                retVal.AddRange(EntityRelationship.SelectForTo(Controller, corporationResponse.Data.FactionId, eESIEntityType.faction));
+                                retVal.AddRange(EntityRelationship.SelectForTo(TenantController, corporationResponse.Data.FactionId, eESIEntityType.faction));
                             }
                         }
                     }
                     break;
                 case eESIEntityType.alliance:
                     {
-                        ESICallResponse<AllianceInfo> allianceReponse = await AllianceInfo.GetAllianceInfo(Config.Client, Controller, (int)EntityID, oldData);
+                        ESICallResponse<AllianceInfo> allianceReponse = await PublicData.GetAllianceInfo((int)EntityID, oldData);
                         if (allianceReponse.Data.FactionId > 0)
                         {
                             if (allianceReponse.Data.FactionId > 0)
                             {
-                                retVal.AddRange(EntityRelationship.SelectForTo(Controller, allianceReponse.Data.FactionId, eESIEntityType.faction));
+                                retVal.AddRange(EntityRelationship.SelectForTo(TenantController, allianceReponse.Data.FactionId, eESIEntityType.faction));
                             }
                         }
                     }
@@ -321,7 +309,7 @@ namespace Eve.ESI.Standard.AuthenticatedData
             {
                 case eESIEntityType.character:
                     {
-                        ESICallResponse<CharacterInfo> characterResponse = await GetCharacterInfo(oldData);
+                        ESICallResponse<CharacterInfo> characterResponse = await PublicData.GetCharacterInfo(EntityID,oldData);
                         if (characterResponse.HasData)
                         {
                             retVal.Add(new EntityRelationship(EntityID, EntityType, EntityID, EntityType, eESIEntityRelationship.Character));
@@ -339,7 +327,7 @@ namespace Eve.ESI.Standard.AuthenticatedData
                     break;
                 case eESIEntityType.corporation:
                     {
-                        ESICallResponse<CorporationInfo> corporationResponse = await CorporationInfo.GetCorporationInfo(Config.Client,Controller, (int)EntityID,oldData);
+                        ESICallResponse<CorporationInfo> corporationResponse = await PublicData.GetCorporationInfo((int)EntityID,oldData);
                         if (corporationResponse.HasData)
                         {
                             if (corporationResponse.Data.AllianceId > 0)
@@ -355,7 +343,7 @@ namespace Eve.ESI.Standard.AuthenticatedData
                     break;
                 case eESIEntityType.alliance:
                     {
-                        ESICallResponse<AllianceInfo> allianceReponse = await AllianceInfo.GetAllianceInfo(Config.Client, Controller, (int)EntityID, oldData);
+                        ESICallResponse<AllianceInfo> allianceReponse = await PublicData.GetAllianceInfo((int)EntityID, oldData);
                         if (allianceReponse.Data.FactionId > 0)
                         {
                             retVal.Add(new EntityRelationship(EntityID, EntityType, allianceReponse.Data.FactionId, eESIEntityType.faction, eESIEntityRelationship.Faction));
@@ -398,29 +386,29 @@ namespace Eve.ESI.Standard.AuthenticatedData
             return retVal;
         }
 
-        public static List<AuthenticatedEntity> GetForAccounts(IESIAuthenticatedConfig config,ICommandController controller,IStaticDataCache cache,IEnumerable<UserAccount> accounts)
+        public static List<AuthenticatedEntity> GetForAccounts(IESIAuthenticatedConfig config,ICommandController tenantcontroller,IStaticDataCache cache, PublicDataProvider publicData,IEnumerable<UserAccount> accounts)
         {
             List<AuthenticatedEntity> retVal = new List<AuthenticatedEntity>();
             foreach(UserAccount account in accounts)
             {
-                retVal.AddRange(GetForAccount(config, controller, cache, account));
+                retVal.AddRange(GetForAccount(config, tenantcontroller, cache, publicData, account));
             }
             return retVal;
         }
-        public static List<AuthenticatedEntity> GetForAccount(IESIAuthenticatedConfig config,ICommandController controller,IStaticDataCache cache,UserAccount account)
+        public static List<AuthenticatedEntity> GetForAccount(IESIAuthenticatedConfig config, ICommandController tenantController, IStaticDataCache cache, PublicDataProvider publicData, UserAccount account)
         {
-            return FromTokens(config, controller, cache, account?.GetTokens(controller));
+            return FromTokens(config,tenantController, cache, publicData, account?.GetTokens(tenantController));
         }
-        public static AuthenticatedEntity FromToken(IESIAuthenticatedConfig config,ICommandController controller,IStaticDataCache cache,ESIToken token)
+        public static AuthenticatedEntity FromToken(IESIAuthenticatedConfig config,ICommandController tenantController,IStaticDataCache cache, PublicDataProvider publicData, ESIToken token)
         {
-            return new AuthenticatedEntity(config,controller,cache,new List<ESIToken>() { token },token.EntityID,token.EntityType);
+            return new AuthenticatedEntity(config,tenantController,cache,new List<ESIToken>() { token },publicData,token.EntityID,token.EntityType);
         }
-        public static List<AuthenticatedEntity> FromTokens(IESIAuthenticatedConfig config, ICommandController controller, IStaticDataCache cache,IEnumerable<ESIToken> tokens)
+        public static List<AuthenticatedEntity> FromTokens(IESIAuthenticatedConfig config, ICommandController tenantController, IStaticDataCache cache, PublicDataProvider publicData, IEnumerable<ESIToken> tokens)
         {
             List<AuthenticatedEntity> retVal = new List<AuthenticatedEntity>();
             if(tokens != null)
             {
-                Dictionary<(long entityID, eESIEntityType entityType), List<Token.ESIToken>> groupedTokens = new Dictionary<(long, eESIEntityType), List<Token.ESIToken>>();
+                Dictionary<(long entityID, eESIEntityType entityType), List<ESIToken>> groupedTokens = new Dictionary<(long, eESIEntityType), List<ESIToken>>();
                 foreach (ESIToken token in tokens)
                 {
                     (long entityID, eESIEntityType entityType) key = (token.EntityID, token.EntityType);
@@ -434,32 +422,32 @@ namespace Eve.ESI.Standard.AuthenticatedData
 
                 foreach ((long entityID, eESIEntityType entityType) key in groupedTokens.Keys)
                 {
-                    retVal.Add(new AuthenticatedEntity(config, controller, cache, groupedTokens[key], key.entityID, key.entityType));
+                    retVal.Add(new AuthenticatedEntity(config,tenantController, cache, groupedTokens[key],publicData, key.entityID, key.entityType));
                 }
             }
             return retVal;
         }
-        public static List<AuthenticatedEntity> GetForAccount(IESIAuthenticatedConfig config, ICommandController controller,IStaticDataCache cache,string accountGuid)
+        public static List<AuthenticatedEntity> GetForAccount(IESIAuthenticatedConfig config, ICommandController tenantcontroller, IStaticDataCache cache, PublicDataProvider publicData, string accountGuid)
         {
-            return GetForAccount(config, controller, cache, UserAccount.ForGuid(controller,accountGuid));
+            return GetForAccount(config, tenantcontroller, cache, publicData, UserAccount.ForGuid(tenantcontroller, accountGuid));
         }
-        public static AuthenticatedEntity GetForTenant(IESIAuthenticatedConfig config,ICommandController controller,IStaticDataCache cache,Tenant tenant)
+        public static AuthenticatedEntity GetForTenant(IESIAuthenticatedConfig config,ICommandController tenantcontroller, ICommandController controller,IStaticDataCache cache, PublicDataProvider publicData, Tenant tenant)
         {
-            return GetForEntity(config, controller, cache, tenant.EntityId, (eESIEntityType)tenant.EntityType);
+            return GetForEntity(config, tenantcontroller, cache, publicData, tenant.EntityId, (eESIEntityType)tenant.EntityType);
         }
-        public static AuthenticatedEntity GetForEntity(IESIAuthenticatedConfig config, ICommandController controller, IStaticDataCache cache,long entityID,eESIEntityType entityType)
+        public static AuthenticatedEntity GetForEntity(IESIAuthenticatedConfig config, ICommandController tenantcontroller, IStaticDataCache cache, PublicDataProvider publicData, long entityID,eESIEntityType entityType)
         {
             AuthenticatedEntity retVal = null;
-            List<AuthenticatedEntity> authEntities = FromTokens(config, controller, cache, ESIToken.ForEntityTypeAndID(controller, entityID, entityType));
+            List<AuthenticatedEntity> authEntities = FromTokens(config, tenantcontroller, cache,publicData, ESIToken.ForEntityTypeAndID(tenantcontroller, entityID, entityType));
             if(authEntities.Count > 0)
             {
                 retVal = authEntities[0];
             }
             return retVal;
         }
-        public static async Task<List<AuthenticatedEntity>> GetRelevantForEntityType(IESIAuthenticatedConfig config, ICommandController controller, IStaticDataCache cache, string accountGuid,eESIEntityType type,long entityID)
+        public static async Task<List<AuthenticatedEntity>> GetRelevantForEntityType(IESIAuthenticatedConfig config, ICommandController tenantcontroller, IStaticDataCache cache, PublicDataProvider publicData, string accountGuid,eESIEntityType type,long entityID)
         {
-            List<AuthenticatedEntity> all = GetForAccount(config, controller, cache, accountGuid);
+            List<AuthenticatedEntity> all = GetForAccount(config, tenantcontroller, cache,publicData, accountGuid);
             List<AuthenticatedEntity> retval = new List<AuthenticatedEntity>();
             foreach (AuthenticatedEntity character in all)
             {
@@ -474,7 +462,7 @@ namespace Eve.ESI.Standard.AuthenticatedData
                     case eESIEntityType.alliance:
                     case eESIEntityType.corporation:
                         {
-                            ESICallResponse<CharacterInfo> info = await character.GetCharacterInfo();
+                            ESICallResponse<CharacterInfo> info = await publicData.GetCharacterInfo(character.EntityID);
                             if (info.HasData)
                             {
                                 if(type== eESIEntityType.alliance)
@@ -500,59 +488,7 @@ namespace Eve.ESI.Standard.AuthenticatedData
             }
             return retval;
         }
-        public static async Task<string> GetEntityName(IESIAuthenticationClient client, ICommandController controller,IStaticDataCache cache, eESIEntityType entityType,long entityID)
-        {
-            string retVal = string.Empty;
-
-            switch (entityType)
-            {
-                case eESIEntityType.character:
-                    {
-                        ESICallResponse<CharacterInfo> info = await CharacterInfo.GetCharacterInfo(client, controller, entityID, true);
-                        if (info.HasData)
-                        {
-                            retVal = info.Data.Name;
-                        }
-                    }
-                    break;
-                case eESIEntityType.corporation:
-                    {
-                        ESICallResponse<CorporationInfo> info = await CorporationInfo.GetCorporationInfo(client, controller, (int)entityID, true);
-                        if (info.HasData)
-                        {
-                            retVal = info.Data.Name;
-                        }
-                    }
-                    break;
-                case eESIEntityType.alliance:
-                    {
-                        ESICallResponse<AllianceInfo> info = await AllianceInfo.GetAllianceInfo(client, controller, (int)entityID, true);
-                        if (info.HasData)
-                        {
-                            retVal = info.Data.Name;
-                        }
-                    }
-                    break;
-                case eESIEntityType.faction:
-                    {
-                        ChrFactions faction = cache.GetItem<ChrFactions>((int)entityID);
-                        if(faction != null)
-                        {
-                            retVal = faction.FactionName;
-                        }
-                    }
-                    break;
-                case eESIEntityType.role:
-                    {
-                        retVal = ((eESIRole)entityID).ToDelimitedString();
-                    }
-                    break;
-                default:
-                    break;
-            }
-
-            return retVal;
-        }
+        
         
     }
 }

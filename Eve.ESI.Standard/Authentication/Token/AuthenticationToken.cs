@@ -1,4 +1,4 @@
-﻿namespace Eve.ESI.Standard.Token
+﻿namespace Eve.ESI.Standard.Authentication.Token
 {
 
     public class AuthenticationToken 

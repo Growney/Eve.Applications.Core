@@ -1,0 +1,33 @@
+﻿@inject Eve.EveAuthTool.Core.Security.Middleware.IViewParameterProvider parameters
+@{
+    ViewData["Title"] = "About Me";
+}
+
+@section Styles{
+    <link rel="stylesheet" href="~/css/about.css" />
+}
+<h3>Who are "we" ?</h3>
+<p>We are :</p>
+<div class="we-are-image-list">
+    <div class="we-are-image">
+        <img src="@parameters.Package.ESIConfiguration.GetImageSource(Eve.ESI.Standard.eESIEntityType.character,90755433,128)" />
+        <div>Growney Tsutola</div>
+    </div>
+    <div class="we-are-image">
+        <img src="@parameters.Package.ESIConfiguration.GetImageSource(Eve.ESI.Standard.eESIEntityType.character,90476435,128)" />
+        <div>Graeme Rowney</div>
+    </div>
+    <div class="we-are-image">
+        <img src="@parameters.Package.ESIConfiguration.GetImageSource(Eve.ESI.Standard.eESIEntityType.character,90751598,128)" />
+        <div>Kaabuki Oramara</div>
+    </div>
+</div>
+
+<p>"We" are not really "we" these are my characters. Feel free to look them up while Growney is in B0T I personally am not assoiated with any major group. I don't even login that much. I am a @((DateTime.Now - new DateTime(1990, 04, 19)).Days / 365) year old software developer from Scotland. My real name is Graeme incase you can't guess from my characters that makes my second name Rowney.</p>
+<p>I have played EVE on and off since the start of 2011 but I am one of these people that is in it more for the community than the gameplay. I spend most of my spare time writing apps and playing other games with my small group of friends who used to but no longer play Eve.</p>
+
+<h3>Do you have any other applications ?</h3>
+<p>I have been developing applications for EVE since about 2013 and infact playing around with the EVE XML api gave me the knowledge that I used to go out and get my first job as a software developer. Despite developing for that length of time I have never completed an application.
+    I am much more backend related in what I do and enjoy so for the most part I have built the framework for the applications then never completed a UI got bored and moved on.</p>
+<h3>Where can I questions ?</h3>
+<p>I have created a Discord server for the site so feel free to <a href="https://discord.gg/BnkN9qd">jump on</a> and have a chat. Remember I am UK timezone and replying in the middle of the night is not something I will be doing.</p>

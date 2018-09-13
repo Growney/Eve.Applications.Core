@@ -1,4 +1,4 @@
-﻿using Eve.ESI.Standard.Token;
+﻿using Eve.ESI.Standard.Authentication.Token;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -82,6 +82,34 @@ namespace Eve.ESI.Standard.Authentication
                 "esi-wallet.read_corporation_wallets.v1"
         };
         
+        public static eESIScope[] Merge(IEnumerable<eESIScope> sourceA, IEnumerable<eESIScope> sourceB)
+        {
+            HashSet<eESIScope> retVal = new HashSet<eESIScope>();
+            if(sourceA != null)
+            {
+                foreach (eESIScope scope in sourceA)
+                {
+                    if (!retVal.Contains(scope))
+                    {
+                        retVal.Add(scope);
+                    }
+                }
+            }
+            
+            if(sourceB != null)
+            {
+                foreach (eESIScope scope in sourceB)
+                {
+                    if (!retVal.Contains(scope))
+                    {
+                        retVal.Add(scope);
+                    }
+                }
+            }
+            
+
+            return retVal.ToArray();
+        }
 
         public static string GetScopeString(params eESIScope[] scopes)
         {

@@ -1,0 +1,73 @@
+﻿@model Eve.EveAuthTool.GUI.Web.Models.Registration.TenantProposal
+@inject Eve.EveAuthTool.Core.Security.Middleware.IViewParameterProvider parameters
+@{
+    ViewData["Title"] = "Propose";
+}
+
+@section Styles{ 
+    <link rel="stylesheet" href="~/css/spinner.css" />
+    <link rel="stylesheet" href="~/css/propose.css" />
+}
+@section Scripts{ 
+    <script src="~/js/propose.js"></script>
+}
+<div class="width-100">
+    <div class="center theme-border width-50 content-box">
+        <form id="mainForm" method="post" asp-action="AcceptTenant" asp-controller="Registration" data-ajax="true" data-ajax-method="POST"
+              data-ajax-complete="onComplete"
+              data-ajax-failure="onFailed" data-ajax-success="onSuccess">
+            <div>
+                @Html.HiddenFor(m => m.EntityID)
+                @Html.HiddenFor(m => m.EntityType)
+                @Html.HiddenFor(m => m.TokenGuid)
+
+                @switch (Model.EntityType)
+                {
+                    case Eve.ESI.Standard.eESIEntityType.corporation:
+                        <h2> Corporation Registration</h2>
+                        break;
+                    case Eve.ESI.Standard.eESIEntityType.alliance:
+                        <h2>Alliance Registration</h2>
+                        break;
+                    default:
+                        break;
+                }
+                <h1 class="center">@Model.DisplayName</h1>
+                <div class="center">
+                    <img src="@parameters.Package.ESIConfiguration.GetImageSource(Model.EntityType,Model.EntityID,128)" />
+                </div>
+
+                <p>
+                <p>
+                    <div>Name - this will form your url and thus must contain only characters valid in a url.</div>
+                    <div class="center width-50">@Html.TextBoxFor(m => m.Name, new { style = "width:100%; text-align:center;", maxlength = "100" })</div>
+                </p>
+                <p>
+                    <div>Display Name - this will form the title of your page and can be anything you like.</div>
+                    <div class="center width-50">@Html.TextBoxFor(m => m.DisplayName, new { style = "width:100%; text-align:center;", maxlength = "100" })</div>
+                </p>
+                </p>
+                <div id="pleaseWait" class="hidden">
+                    <div>
+                        <p>
+                            Please wait while we create your tenant
+                            (this may take quite some time)
+                        </p>
+                    </div>
+                    <div class="line-spinner">
+                        <div class="rect1"></div>
+                        <div class="rect2"></div>
+                        <div class="rect3"></div>
+                        <div class="rect4"></div>
+                        <div class="rect5"></div>
+                    </div>
+                </div>
+
+                <div id="errors"></div>
+
+            </div>
+        </form>
+        <button class="theme-border theme-text login-image" id="submit" onclick="validateName('@Url.Action("ValidateTenant", "Registration")');">Accept</button>
+    </div>
+</div>
+

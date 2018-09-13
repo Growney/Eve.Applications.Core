@@ -2,6 +2,8 @@
 using Eve.ESI.Standard;
 using Eve.ESI.Standard.AuthenticatedData;
 using Eve.ESI.Standard.Authentication.Configuration;
+using Eve.EveAuthTool.Core.Helpers;
+using Eve.EveAuthTool.Core.Security.Middleware;
 using Eve.EveAuthTool.Standard.Security;
 using Eve.Static.Standard;
 using Gware.Standard.Storage.Controller;
@@ -21,16 +23,13 @@ namespace Eve.EveAuthTool.Core.Security.Routing
         }
         private class AllowedCharactersResolverFilterImpl : IActionFilter
         {
-            private readonly IESIAuthenticatedConfig m_esiConfig;
-            private readonly IStaticDataCache m_cache;
-            private readonly ITenantControllerProvider m_provider;
+            private readonly IControllerParameters m_parameters;
 
-            public AllowedCharactersResolverFilterImpl(IESIAuthenticatedConfig esiConfig,IStaticDataCache cache, ITenantControllerProvider provider)
+            public AllowedCharactersResolverFilterImpl(IControllerParameters controllerParameters)
             {
-                m_esiConfig = esiConfig;
-                m_cache = cache;
-                m_provider = provider;
-                
+                m_parameters = controllerParameters;
+
+
             }
 
             public void OnActionExecuted(ActionExecutedContext context)
@@ -45,7 +44,7 @@ namespace Eve.EveAuthTool.Core.Security.Routing
 
             private void CalculateCharacters(HttpContext context)
             {
-                ICommandController tenantController = m_provider.GetController(context);
+                ViewParameterPackage viewParameters = m_parameters.CreateViewParameters(context);
                 Dictionary<long, AuthenticatedEntity> characters = new Dictionary<long, AuthenticatedEntity>();
                 HashSet<long> hashedAccountCharacters = new HashSet<long>();
 
@@ -53,7 +52,7 @@ namespace Eve.EveAuthTool.Core.Security.Routing
 
                 if (context.User.Identity.IsAuthenticated)
                 {
-                    List<AuthenticatedEntity> accountCharacters = AuthenticatedEntity.GetForAccount(m_esiConfig, tenantController, m_cache, accountGuid: context.User.Identity.Name);
+                    List<AuthenticatedEntity> accountCharacters = AuthenticatedEntity.GetForAccount(viewParameters.ESIConfiguration,viewParameters.TenantController,viewParameters.Cache,viewParameters.PublicDataProvider,accountGuid: context.User.Identity.Name);
                     avaliableCharacters.AddRange(accountCharacters);
                     for (int i = 0; i < accountCharacters.Count; i++)
                     {

@@ -1,0 +1,9 @@
+﻿.we-are-image-list{
+    margin:auto;
+    width:400px;
+}
+.we-are-image{
+    display:inline-block;
+    font-size:0.75em;
+    text-align:center;
+}

@@ -1,0 +1,14 @@
+﻿CREATE TABLE [dbo].[Token]
+(
+	[Id] BIGINT NOT NULL PRIMARY KEY IDENTITY(1,1),
+	[EntityType] TINYINT NOT NULL,
+	[AccessToken] VARCHAR(MAX) NOT NULL,
+	[TokenType] VARCHAR(50) NOT NULL,
+	[ExpiresIn] INT NOT NULL,
+	[RefreshToken] VARCHAR(MAX) NOT NULL,
+	[EntityID] BIGINT NOT NULL,
+	[EntityName] VARCHAR(150) NOT NULL,
+	[ExpiresOn] DATETIME NOT NULL,
+	[Scopes] VARCHAR(MAX) NOT NULL,
+	[CharacterOwnerHash] VARCHAR(200) NOT NULL
+)

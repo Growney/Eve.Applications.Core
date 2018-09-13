@@ -22,12 +22,12 @@
 .dialog {
     grid-area: dialog;
     background: var(--theme-primary-back-colour); /* fallback for old browsers */
-   
+    color: var(--theme-fore-colour);
     padding: 15px;
     border-radius: 5px;
     border-style: solid;
-    border-width: 1px;
-    border-color: var(--theme-fore-colour);
+    border-width: 2px;
+    border-color: var(--theme-secondary-back-colour);
     max-width: 0px;
     max-height: 0px;
     overflow: hidden;

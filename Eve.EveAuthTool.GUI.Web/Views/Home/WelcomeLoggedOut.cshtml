@@ -1,0 +1,9 @@
+﻿@inject Eve.EveAuthTool.Core.Security.Middleware.IViewParameterProvider parameters
+@{
+    ViewData["Title"] = "WelcomeLoggedOut";
+}
+
+<h2>Welcome to the ESA page for @parameters.Package.CurrentTenant.DisplayName</h2>
+
+<p>Please click on the account menu to login or register a new account with this tenant</p>
+

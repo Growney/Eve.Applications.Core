@@ -2,7 +2,7 @@
 using Eve.ESI.Standard.Authentication.Client;
 using Eve.ESI.Standard.Authentication.Configuration;
 using Eve.ESI.Standard.DataItem;
-using Eve.ESI.Standard.Token;
+using Eve.ESI.Standard.Authentication.Token;
 using Gware.Standard.Storage;
 using System;
 using System.Collections.Generic;

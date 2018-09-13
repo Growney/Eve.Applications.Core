@@ -8,7 +8,7 @@ using Gware.Standard.Storage.Adapter;
 using Gware.Standard.Storage.Command;
 using Gware.Standard.Storage.Controller;
 
-namespace Eve.ESI.Standard.Token
+namespace Eve.ESI.Standard.Authentication.Token
 {
     public class ESIToken : StoredObjectBase
     {
@@ -61,6 +61,12 @@ namespace Eve.ESI.Standard.Token
         public ESIToken()
         {
 
+        }
+
+        private ESIToken(TokenCharacterInfo character, AuthenticationToken token)
+        {
+            m_token = token;
+            m_character = character;
         }
 
         public override IDataCommand CreateDeleteCommand()
@@ -117,6 +123,34 @@ namespace Eve.ESI.Standard.Token
             CorporationID = adapter.GetValue("CorporationID", 0);
             AllianceID = adapter.GetValue("AllianceID", 0);
             m_scopes = GetScopesSet(m_character.Scopes);
+        }
+
+        public ESIToken Copy(eESIEntityType newEntityType)
+        {
+            eESIScope[] newScopeSet = new eESIScope[m_scopes.Count];
+            m_scopes.CopyTo(newScopeSet);
+
+            return new ESIToken(
+                new TokenCharacterInfo()
+                {
+                    CharacterID = m_character.CharacterID,
+                    ExpiresOn = m_character.ExpiresOn,
+                    Scopes = m_character.Scopes,
+                    CharacterOwnerHash = m_character.CharacterOwnerHash
+                },
+                new AuthenticationToken()
+                {
+                    Access_Token = m_token.Access_Token,
+                    Token_Type = m_token.Token_Type,
+                    Expires_In = m_token.Expires_In,
+                    Refresh_Token = m_token.Refresh_Token
+                })
+            {
+                EntityType = newEntityType,
+                CorporationID = this.CorporationID,
+                AllianceID = this.AllianceID,
+                m_scopes = new HashSet<eESIScope>(newScopeSet)
+            };
         }
 
         public async Task<ESITokenRefreshResponse> GetAuthenticationToken(IESIAuthenticatedConfig config, ICommandController controller)

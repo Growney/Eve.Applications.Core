@@ -26,7 +26,8 @@ namespace Eve.EveAuthTool.Core.Security.Middleware
             new ScopeGroup(0x02, "Standings", "Access your corporation standings to allow allies permissions to be set automatically", eESIScope.esi_corporations_read_contacts_v1)
             );
         public static readonly ScopeGroupCollection AllianceScopes = new ScopeGroupCollection(
-            new ScopeGroup(0x01, "Roles/Members", "View the roles assigned in your corporation to allow permissions to be set automatically", eESIScope.esi_corporations_read_corporation_membership_v1, eESIScope.esi_corporations_read_titles_v1, eESIScope.esi_characters_read_corporation_roles_v1)
+            new ScopeGroup(0x01, "Roles/Members", "View the roles assigned in your corporation to allow permissions to be set automatically", eESIScope.esi_corporations_read_corporation_membership_v1, eESIScope.esi_corporations_read_titles_v1, eESIScope.esi_characters_read_corporation_roles_v1),
+            new ScopeGroup(0x02, "Standings", "Access your corporation standings to allow allies permissions to be set automatically", eESIScope.esi_corporations_read_contacts_v1)
             );
 
         private readonly IViewParameterProvider m_parameters;
@@ -51,19 +52,49 @@ namespace Eve.EveAuthTool.Core.Security.Middleware
             return AllianceScopes.GetValue("Roles/Members");
         }
 
-        public ScopeGroup[] GetAllianceScopes()
+        public ScopeGroup[] GetAllianceScopesGroups()
         {
             return AllianceScopes.GetScopeGroups(GetAllianceRequired());
         }
 
-        public ScopeGroup[] GetCharacterScopes()
+        public ScopeGroup[] GetCharacterScopeGroups()
         {
             return CharacterScopes.GetScopeGroups(GetCharacterRequired());
         }
 
-        public ScopeGroup[] GetCorporationScopes()
+        public ScopeGroup[] GetCorporationScopesGroups()
         {
             return CorporationScopes.GetScopeGroups(GetCorporationRequired());
+        }
+
+        public eESIScope[] GetAllianceScopes(uint[] selected)
+        {
+            return AllianceScopes.GetScopes(selected, GetAllianceRequired());
+        }
+
+        public eESIScope[] GetCharacterScopes(uint[] selected)
+        {
+            return CharacterScopes.GetScopes(selected,GetCharacterRequired());
+        }
+
+        public eESIScope[] GetCorporationScopes(uint[] selected)
+        {
+            return CorporationScopes.GetScopes(selected,GetCorporationRequired());
+        }
+
+        public eESIScope[] GetAllianceScopes()
+        {
+            return AllianceScopes.GetScopes(uint.MaxValue, GetAllianceRequired());
+        }
+
+        public eESIScope[] GetCharacterScopes()
+        {
+            return CharacterScopes.GetScopes(uint.MaxValue, GetCharacterRequired());
+        }
+
+        public eESIScope[] GetCorporationScopes()
+        {
+            return CorporationScopes.GetScopes(uint.MaxValue, GetCorporationRequired());
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Eve.ESI.Standard.Account;
+using Eve.ESI.Standard.Authentication.Client;
 using Eve.ESI.Standard.Authentication.Configuration;
 using Eve.EveAuthTool.Core.Security.Middleware;
 using Eve.EveAuthTool.Standard;
@@ -11,11 +12,12 @@ using Eve.Static.Standard;
 using Gware.Standard.Collections.Generic;
 using Gware.Standard.Storage.Controller;
 using Gware.Standard.Web.Tenancy;
+using Gware.Standard.Web.Tenancy.Configuration;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Eve.EveAuthTool.GUI.Web.Controllers.Helpers
 {
-    public class BaseController : Controller
+    public class EveAuthBaseController : Controller
     {
         private IViewParameterProvider m_viewParameters;
 
@@ -26,16 +28,18 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers.Helpers
                 return m_viewParameters.Package;
             }
         }
-        private ICommandController m_tenantController;
         protected ICommandController TenantController
         {
             get
             {
-                if (m_tenantController == null)
-                {
-                    m_tenantController = ViewParameters.TenantController;
-                }
-                return m_tenantController;
+                return ViewParameters.TenantController;
+            }
+        }
+        protected PublicDataProvider PublicDataProvider
+        {
+            get
+            {
+                return ViewParameters.PublicDataProvider;
             }
         }
         protected IAllowedCharactersProvider Characters
@@ -83,7 +87,15 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers.Helpers
             }
         }
 
-        public BaseController(IViewParameterProvider parameters)
+
+        protected ITenantConfiguration TenantConfiguration
+        {
+            get
+            {
+                return ViewParameters.TenantConfiguration;
+            }
+        }
+        public EveAuthBaseController(IViewParameterProvider parameters)
         {
             m_viewParameters = parameters;
         }

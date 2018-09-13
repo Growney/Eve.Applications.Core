@@ -95,6 +95,17 @@
     <Build Include="Tables\FleetMember.sql" />
     <Build Include="StoredProcedures\pCharacterFleet.sql" />
     <Build Include="Tables\CharacterFleet.sql" />
+    <Build Include="StoredProcedures\pAccountLink.sql" />
+    <Build Include="StoredProcedures\pESIToken.sql" />
+    <Build Include="StoredProcedures\pUserAccount.sql" />
+    <Build Include="Tables\CharacterTitles.sql" />
+    <Build Include="Tables\ESIToken.sql" />
+    <Build Include="Tables\UserAccount.sql" />
+    <Build Include="Tables\UserAccountToken.sql" />
+    <Build Include="Tables\AccountLink.sql" />
+    <Build Include="StoredProcedures\pCharacterTitles.sql" />
+    <Build Include="DataTypes\IDList.sql" />
+    <Build Include="DataTypes\LongIDList.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="Eve.ESI.Database.refactorlog" />

@@ -1,10 +1,12 @@
 ﻿using Eve.ESI.Standard;
 using Eve.ESI.Standard.Account;
+using Eve.ESI.Standard.Authentication.Client;
 using Eve.ESI.Standard.Authentication.Configuration;
 using Eve.EveAuthTool.Standard.Security;
 using Eve.Static.Standard;
 using Gware.Standard.Storage.Controller;
 using Gware.Standard.Web.Tenancy;
+using Gware.Standard.Web.Tenancy.Configuration;
 
 namespace Eve.EveAuthTool.Core.Security.Middleware
 {
@@ -29,9 +31,18 @@ namespace Eve.EveAuthTool.Core.Security.Middleware
                 return User != null;
             }
         }
+        public long? MainCharacterID
+        {
+            get
+            {
+                return User?.GetMainCharacterID(TenantController);
+            }
+        }
         public UserAccount User { get; }
+        public ITenantConfiguration TenantConfiguration { get; }
+        public PublicDataProvider PublicDataProvider { get; }
 
-        public ViewParameterPackage(IStaticDataCache cache, IESIAuthenticatedConfig esiConfig, Tenant tenant, ICommandController tenantController, IAllowedCharactersProvider characters,UserAccount account)
+        public ViewParameterPackage(IStaticDataCache cache, IESIAuthenticatedConfig esiConfig, Tenant tenant, ICommandController tenantController,PublicDataProvider publicDataProvider, IAllowedCharactersProvider characters,UserAccount account,ITenantConfiguration tenantConfiguration)
         {
             TenantController = tenantController;
             CurrentTenant = tenant;
@@ -39,6 +50,8 @@ namespace Eve.EveAuthTool.Core.Security.Middleware
             Cache = cache;
             Characters = characters;
             User =  account;
+            TenantConfiguration = tenantConfiguration;
+            PublicDataProvider = publicDataProvider;
         }
     }
 }

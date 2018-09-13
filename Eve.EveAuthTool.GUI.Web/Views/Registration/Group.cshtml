@@ -1,0 +1,114 @@
+﻿@inject Eve.ESI.Standard.Authentication.Account.IScopeGroupProvider scopes
+@{
+    ViewData["Title"] = "Group Registration";
+    var corporationScopes = scopes.GetCorporationScopesGroups();
+    var allianceScopes = scopes.GetAllianceScopesGroups();
+}
+
+@section Styles{
+    <link rel="stylesheet" href="~/css/registration.css" />
+}
+
+<h2 class="group-registration-title">Create Group</h2>
+<hr />
+<p>Creating an ESA site for your group is easy, simply select an option from below to begin the process. Creating a group will give you your own custom url for your group and in the future the ability to customise your page. </p>
+<p>Each group is kept completely seperate from each other we even create your own database in the back end. In the future you will be able to tell us where to put this database so you can be sure your data is safe but for now you are just going to have to trust us! If you aren't sure you should trust us or just want to known more check out the <a asp-action="About" asp-controller="Home">about me</a> page</p>
+<p>More information about ESA can be found on the <a asp-controller="Home" asp-action="Features">about ESA</a> page.</p>
+<p>Optional scopes can be added later if you decide you trust us more.</p>
+<div class="group-registration-grid">
+
+    <div class="group-registration-corporation">
+        <form asp-action="Corporation" asp-controller="Registration">
+            <div class="group-registration-title theme-colored theme-bottom-border">Corporation</div>
+            <p>Create a Eve Swagger site for you corporation. Manage your corporation using ESA's awesome features</p>
+            <p>What do I required to create a corporation site ?</p>
+            <ul>
+                <li>Be a director in the corporation.</li>
+            </ul>
+            <p>Required Scopes:</p>
+            @{
+                if (scopes != null)
+                {
+                    <ul>
+                        @for (int i = 0; i < corporationScopes.Length; i++)
+                        {
+                            var group = corporationScopes[i];
+                            if (group.Required)
+                            {
+                                <li>@group.Name - @group.Description</li>
+                            }
+
+                        }
+                    </ul>
+                }
+            }
+            <p>Optional Scopes:</p>
+            @{
+                <ul>
+                    @for (int i = 0; i < corporationScopes.Length; i++)
+                    {
+                        var group = corporationScopes[i];
+                        if (!group.Required)
+                        {
+                            <li><input type="checkbox" name="selectedScopes" value="@group.Value" checked>@group.Name - @group.Description</li>
+                        }
+
+                    }
+                </ul>
+            }
+            
+            <input type="checkbox" value="true" name="RegisterCharacter" checked/>Register Character Automatically. This will add your character and sign you in once the Corporation has been created. This will use all the scopes avaliable so if you want more control untick this and register yourself later.
+            <p><div class="width-100"><button class="center hover-image-button theme-text login-image theme-border" submit">Create Corporation<img src="~/images/eve-sso-login-white-large.png" /></button></div></p>
+            
+        </form>
+    </div>
+
+    <div class="group-registration-alliance">
+        <form asp-action="Alliance" asp-controller="Registration">
+            <div class="group-registration-title theme-colored theme-bottom-border">Alliance</div>
+            <p>Create a Eve Swagger site for you alliance. Manage your alliance using ESA's awesome features</p>
+            <p>What do I required to create a alliance site ?</p>
+            <ul>
+                <li>Be a director in the alliance executor corporation.</li>
+            </ul>
+            <p>Required Scopes:</p>
+            @{
+                if (scopes != null)
+                {
+                    <ul>
+                        @for (int i = 0; i < allianceScopes.Length; i++)
+                        {
+                            var group = allianceScopes[i];
+                            if (group.Required)
+                            {
+                                <li>@group.Name - @group.Description</li>
+                            }
+
+                        }
+                    </ul>
+                }
+            }
+            <p>Optional Scopes:</p>
+            @{
+                <ul>
+                    @for (int i = 0; i < allianceScopes.Length; i++)
+                    {
+                        var group = allianceScopes[i];
+                        if (!group.Required)
+                        {
+                            <li><input type="checkbox" name="selectedScopes" value="@group.Value" checked>@group.Name - @group.Description</li>
+                        }
+                    }
+                </ul>
+                var model = new Eve.EveAuthTool.GUI.Web.Models.Registration.GroupRegistrationOptions();
+            }
+            <input type="checkbox" value="true" name="RegisterCharacter" checked/>Register Character Automatically. This will add your character and sign you in once the Alliance has been created. This will use all the scopes avaliable so if you want more control untick this and register yourself later.
+            <br />
+            <p><div class="width-100"><button class="center hover-image-button theme-text login-image theme-border" submit">Create Alliance<img src="~/images/eve-sso-login-white-large.png" /></button></div></p>
+        </form>
+
+    </div>
+
+</div>
+
+

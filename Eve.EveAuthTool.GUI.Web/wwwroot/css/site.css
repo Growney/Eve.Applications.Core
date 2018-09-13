@@ -1,6 +1,6 @@
 ﻿:root {
     --theme-primary-back-colour: rgb(0, 0, 0,1);
-    --theme-secondary-back-colour: #630202;
+    --theme-secondary-back-colour: #e47500;
     --theme-fore-colour: #ffffff;
 }
 * {
@@ -11,27 +11,149 @@ html, body {
     position: absolute;
     top: 0;
     left: 0;
-    height: 100vh;
-    width: 100vw;
+    min-height: 100vh;
+    min-width: 100%;
     margin: 0px;
+}
+
+
+.site {
+    display: grid;
+    grid-template-columns: 270px 1fr 270px;
+    grid-template-rows: 128px 1fr;
+    grid-template-areas: "logo title info" "sidebarleft content content";
+
+    height:100vh;
+}
+
+.site-title, .site-logo,.site-info {
+    background: var(--theme-primary-back-colour); /* fallback for old browsers */
+    
+}
+.site-title{
+    grid-area:title;
+    color:var(--theme-fore-colour);
+    line-height:128px;
+    text-align:center;
+    font-size:3em;
+}
+
+.site-logo{
+    grid-area:logo;
+}
+
+.site-info{
+    grid-area:info;
+}
+
+
+.site-content {
+    grid-area: content;
+    padding: 0px 20px;
+    margin-bottom: 0px;
+    font-size: 0.75em
+}
+
+.site-sidebar-left {
+    padding-top:15px;
+    grid-area: sidebarleft;
+
+    color: var(--theme-fore-colour);
     background: var(--theme-primary-back-colour); /* fallback for old browsers */
     background: -webkit-linear-gradient(to bottom, var(--theme-primary-back-colour),var(--theme-secondary-back-colour)); /* Chrome 10-25, Safari 5.1-6 */
     background: linear-gradient(to bottom, var(--theme-primary-back-colour), var(--theme-secondary-back-colour)); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+}
+    .site-sidebar-left a {
+        line-height: 3.5em;
+        text-decoration: none;
+        text-align: center;
+        display:block;
+    }
+    .site-sidebar-left button, .site-sidebar-left a {
+        width: 100%;
+        
+        height: 3.5em;
+        border-style: none;
+
+        background-color: transparent;
+
+        color: var(--theme-fore-colour);
+
+        font-size:1.0em;
+
+        transition: border-color 0.2s ease-in-out;
+    }
+
+        .site-sidebar-left button:hover, .site-sidebar-left a:hover {
+            border-bottom-color: var(--theme-fore-colour);
+        }
+            .site-sidebar-left button:active, .site-sidebar-left a:active{
+                text-decoration:underline;
+            }
+            .site-sidebar-left button:focus {
+                outline: 0;
+            }
+
+
+            .button-hidden-under {
+                padding: 0px;
+                border-width: 0px
+            }
+
+.theme-colored {
     color: var(--theme-fore-colour);
+    background: var(--theme-primary-back-colour);
 }
 
-.button-hidden-under {
-    padding: 0px;
-    border-width: 0px
+.theme-border {
+    border-color: var(--theme-secondary-back-colour);
+    border-style: solid;
+    border-width: 3px;
+    border-radius: 4px;
+}
+
+    .theme-border button:hover {
+        border-color: var(--theme-fore-colour);
+    }
+
+.theme-top-border, .site-content {
+    border-top-color: var(--theme-secondary-back-colour);
+    border-top-style: solid;
+    border-top-width: 3px;
+}
+
+.theme-bottom-border, .site-sidebar-left button, .site-sidebar-left a {
+    border-bottom-color: var(--theme-secondary-back-colour);
+    border-bottom-style: solid;
+    border-bottom-width: 3px;
+}
+
+.theme-left-border, .site-content {
+    border-left-color: var(--theme-secondary-back-colour);
+    border-left-style: solid;
+    border-left-width: 3px;
+}
+
+.theme-right-border {
+    border-right-color: var(--theme-secondary-back-colour);
+    border-right-style: solid;
+    border-right-width: 3px;
+}
+
+.theme-text {
+    color: var(--theme-fore-colour);
+    background-color: var(--theme-primary-back-colour);
 }
 
 .login-image {
     width: 270px;
     height: 45px;
+    box-sizing: content-box;
 }
 
 .button-list-button {
     display: block;
+    box-sizing:border-box;
     margin: 5px 0px;
 }
 .registration-button {
@@ -47,9 +169,12 @@ html, body {
     font-size: 0.75em;
     letter-spacing: 0.3em;
     border: solid;
+
     border-color: var(--theme-fore-colour);
     border-width: 1px;
     border-radius: 4px;
+
+    text-decoration:none;
 }
 
     .registration-button:hover {
@@ -57,10 +182,14 @@ html, body {
     }
 .hover-image-button {
     position: relative;
+    padding: 0px;
+    transition: border-color 0.2s ease-in-out;
+    transition: background-color 0.2s ease-in-out;
 }
 
     .hover-image-button:hover {
-        border-color: rgba(255, 255, 255, 0.0);
+        border-color: transparent;
+        background-color:transparent;
     }
 
     .hover-image-button img {
@@ -75,9 +204,50 @@ html, body {
             opacity: 1.0;
         }
 
+.center {
+    display:block;
+    margin-left:auto;
+    margin-right:auto;
+    text-align:center;
+}
+.width-100{
+    width:100%;
+}
 
+.width-50{
+    width:50%;
+}
 
+.content-box {
+    padding: 10px;
+    margin-top:10px;
+    margin-bottom:10px;
 
+    background-color:var(--theme-primary-back-colour);
+    color:var(--theme-fore-colour);
+}
+
+.hidden {
+    display: none;
+}
+
+.blink {
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0% {
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
 
    
 

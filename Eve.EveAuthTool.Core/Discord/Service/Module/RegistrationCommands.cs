@@ -15,6 +15,8 @@ using Eve.ESI.Standard.DataItem.Corporation;
 using Gware.Standard.Collections.Generic;
 using Eve.ESI.Standard.Authentication.Configuration;
 using Eve.EveAuthTool.Standard;
+using Gware.Standard.Storage.Controller;
+using Eve.ESI.Standard.Authentication.Client;
 
 namespace Eve.EveAuthTool.Core.Discord.Service.Module
 {
@@ -38,7 +40,7 @@ namespace Eve.EveAuthTool.Core.Discord.Service.Module
                         await Context.Channel.SendMessageAsync($"Link to {tenant.DisplayName} updating guild settings");
                         await UpdateDiscordGuild(CurrentTenant, ESIConfig, Context.Guild);
                         await Context.Channel.SendMessageAsync($"Linking users");
-                        await UpdateDiscordGuildUsers(CurrentTenant, ESIConfig, Cache, Context.Guild, await BotGuildHighestRole);
+                        await UpdateDiscordGuildUsers(ControllerParameters.PublicData,TenantController,CurrentTenant.EntityId,CurrentTenant.EntityType,ESIConfig, Cache, Context.Guild, await BotGuildHighestRole);
                         await Context.Channel.SendMessageAsync($"Link complete");
                     }
                     else
@@ -59,11 +61,11 @@ namespace Eve.EveAuthTool.Core.Discord.Service.Module
             
         }
 
-        public static async Task UpdateDiscordGuildUsers(Tenant tenant, IESIAuthenticatedConfig esiConfig, IStaticDataCache cache,IGuild guild, int highestRole)
+        public static async Task UpdateDiscordGuildUsers(PublicDataProvider publicData,ICommandController tenantController, long tenantEntityID, int tenantEntityType, IESIAuthenticatedConfig esiConfig, IStaticDataCache cache,IGuild guild, int highestRole)
         {
-            foreach (LinkedUserAccount account in LinkedUserAccount.AllLinked(tenant.Controller, (byte)eTenantLinkType.Discord))
+            foreach (LinkedUserAccount account in LinkedUserAccount.AllLinked(tenantController, (byte)eTenantLinkType.Discord))
             {
-                await UpdateLinkedAccount(esiConfig, tenant, cache, guild, highestRole, account);
+                await UpdateLinkedAccount(esiConfig, publicData,tenantController, tenantEntityID,tenantEntityType, cache, guild, highestRole, account);
             }
         }
 
@@ -85,7 +87,7 @@ namespace Eve.EveAuthTool.Core.Discord.Service.Module
             });
         }
 
-        public static async Task<bool> UpdateLinkedAccount(IESIAuthenticatedConfig esiconfig,Tenant currentTenant,IStaticDataCache cache,IGuild guild,int modifyingHighestRole,LinkedUserAccount account)
+        public static async Task<bool> UpdateLinkedAccount(IESIAuthenticatedConfig esiconfig,PublicDataProvider publicDataProvider,ICommandController tenantController,long tenantEntityID,int tenantEntityType,IStaticDataCache cache,IGuild guild,int modifyingHighestRole,LinkedUserAccount account)
         {
             bool retVal = false;
             if(ulong.TryParse(account.Link,out ulong userID))
@@ -95,21 +97,21 @@ namespace Eve.EveAuthTool.Core.Discord.Service.Module
                 {
                     if (GetUserHighestRole(user) <= modifyingHighestRole)
                     {
-                        List<AuthenticatedEntity> accountCharacters = AuthenticatedEntity.GetForAccount(esiconfig, currentTenant.Controller, cache, account);
+                        List<AuthenticatedEntity> accountCharacters = AuthenticatedEntity.GetForAccount(esiconfig, tenantController, cache,publicDataProvider, account);
                         if (accountCharacters.Count > 0)
                         {
                             AuthenticatedEntity firstCharacter = accountCharacters[0];
-                            ESICallResponse<CharacterInfo> character = await firstCharacter.GetCharacterInfo(true);
+                            ESICallResponse<CharacterInfo> character = await publicDataProvider.GetCharacterInfo(firstCharacter.EntityID,true);
                             if (character.HasData)
                             {
                                 bool containsPrefix = false;
                                 StringBuilder nickname = new StringBuilder();
                                 if (character.Data.AllianceId > 0)
                                 {
-                                    if (currentTenant.EntityType == (int)eESIEntityType.alliance && currentTenant.EntityId != character.Data.AllianceId
-                                        || currentTenant.EntityType == (int)eESIEntityType.corporation && currentTenant.EntityId != character.Data.CorporationId)
+                                    if (tenantEntityType == (int)eESIEntityType.alliance && tenantEntityID != character.Data.AllianceId
+                                        || tenantEntityType == (int)eESIEntityType.corporation && tenantEntityID != character.Data.CorporationId)
                                     {
-                                        ESICallResponse<AllianceInfo> allianceInfo = await AllianceInfo.GetAllianceInfo(esiconfig.Client, currentTenant.Controller, character.Data.AllianceId, true);
+                                        ESICallResponse<AllianceInfo> allianceInfo = await publicDataProvider.GetAllianceInfo(character.Data.AllianceId, true);
                                         if (allianceInfo.HasData)
                                         {
                                             nickname.Append($"[{allianceInfo.Data.Ticker}]");
@@ -117,10 +119,10 @@ namespace Eve.EveAuthTool.Core.Discord.Service.Module
                                         }
                                     }
                                 }
-                                if (currentTenant.EntityType == (int)eESIEntityType.alliance
-                                    || currentTenant.EntityType == (int)eESIEntityType.corporation && currentTenant.EntityId != character.Data.CorporationId)
+                                if (tenantEntityType == (int)eESIEntityType.alliance
+                                    || tenantEntityType == (int)eESIEntityType.corporation && tenantEntityID != character.Data.CorporationId)
                                 {
-                                    ESICallResponse<CorporationInfo> corporationInfo = await CorporationInfo.GetCorporationInfo(esiconfig.Client, currentTenant.Controller, character.Data.CorporationId, true);
+                                    ESICallResponse<CorporationInfo> corporationInfo = await publicDataProvider.GetCorporationInfo(character.Data.CorporationId, true);
                                     if (corporationInfo.HasData)
                                     {
                                         nickname.Append($"[{corporationInfo.Data.Ticker}]");
@@ -145,14 +147,14 @@ namespace Eve.EveAuthTool.Core.Discord.Service.Module
                     else
                     {
                         var privateChat = await user.GetOrCreateDMChannelAsync();
-                        await privateChat.SendMessageAsync($"We are sorry can't automatically update you on {currentTenant.DisplayName} because you have higher roles than we do. You are still linked to the site but you will have to do your own details.");
+                        await privateChat.SendMessageAsync($"We are sorry can't automatically update you on {guild.Name} because you have higher roles than we do. You are still linked to the site but you will have to do your own details.");
                     }
                     
                 }
                 else
                 {
                     var privateChat = await user.GetOrCreateDMChannelAsync();
-                    await privateChat.SendMessageAsync($"We are sorry can't automatically update you on {currentTenant.DisplayName} because you are the owner of the guild and discord doesn't let us. You are still linked to the site but you will have to do your own details.");
+                    await privateChat.SendMessageAsync($"We are sorry can't automatically update you on {guild.Name} because you are the owner of the guild and discord doesn't let us. You are still linked to the site but you will have to do your own details.");
                 }
             }
             return retVal;
@@ -192,7 +194,7 @@ namespace Eve.EveAuthTool.Core.Discord.Service.Module
             {
                 if(CurrentAccount != null)
                 {
-                    List<AuthenticatedEntity> characters = AuthenticatedEntity.GetForAccount(ESIConfig, CurrentTenant.Controller, Cache, CurrentAccount.AccountGuid.ToString());
+                    List<AuthenticatedEntity> characters = AuthenticatedEntity.GetForAccount(ESIConfig,TenantController, Cache, ControllerParameters.PublicData,CurrentAccount.AccountGuid.ToString());
                     StringBuilder message = new StringBuilder();
                     foreach (var character in characters)
                     {

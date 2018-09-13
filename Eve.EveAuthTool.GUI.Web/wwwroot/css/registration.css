@@ -1,0 +1,37 @@
+﻿.group-registration-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(270px,1fr));
+    grid-gap:25px;
+}
+
+.group-registration-title{
+    width:100%;
+    height:30px;
+}
+.group-registration-alliance, .group-registration-corporation {
+    border-color: var(--theme-primary-back-colour);
+    border-style:solid;
+    border-width:1px;
+    border-radius:5px;
+ 
+    margin-bottom: 15px;
+
+    min-height:400px;
+}
+
+    .group-registration-alliance p, .group-registration-corporation p
+    {
+        padding-left:10px;
+        font-weight:bold
+    }
+
+    .group-registration-alliance .group-registration-title, .group-registration-corporation .group-registration-title {
+        box-sizing: border-box;
+        width: 100%;
+        font-size: 25px;
+        height: 1.5em;
+        line-height: 1.5em;
+        padding: 0px;
+        padding-left: 10px;
+        margin: 0px;
+    }

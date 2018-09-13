@@ -1,0 +1,61 @@
+﻿
+@{
+    ViewData["Title"] = "About ESA";
+}
+
+<h3>
+    What is ESA (Eve Swagger Auth)?
+</h3>
+<p>
+    ESA is a SaaS (software as a service) application for Eve online. ESA is designed to make the managing of in game groups easy for both the individual member and the leader of the groups.
+    Upon registration users will be able to create their own subdomain within the ESA site, this will then allow users to configure the site the way they want it.
+</p>
+<h3>What are the Features of ESA?</h3>
+<p>
+    Upon launch ESA will focus on the configuration of Discord servers based on in game relationships but based on demand and requests I am hoping to expand this to lots of different features including the management of alt accounts and one 
+    day an online fitting tool. For a full list of planned features please visit the sites <a href="https://trello.com/b/mJ44Tdy0/eve-swagger-auth" target="_blank">Trello page</a>.
+</p>
+
+<h3>What sort of configuration can I do?</h3>
+<p>The relationships that will be configurable on launch will be:</p>
+<ul>
+    <li>Static Groups - assign permissions to static entities such as characters/corporations/alliances and factions</li>
+    <li>Standings - standings from one entity to another, most useful for your own groups standings but in theory could be setup to let all of Joe Bloggs blues into a given channel.</li>
+    <li>In Game Roles/Titles - based on the roles given to a character in game</li>
+    
+</ul>
+<p>Relationships that need some work, like all the good ones:</p>
+<ul>
+    <li>Fleet - this one is my favourite, allow people to say I am going to be a fleet commander link the fleet in the third party tool and you can automatically give permissions to channels and move the characters into fleet.</li>
+    <li>War Based - this one is on the back burner because it didn't seem that useful but still interesting. Assign based on if they are a war ally or if they are at war with you. As I said not the most useful.</li>
+    <li>Ship class ownership - so many people have a capital channel and a super capital channel, make this easy by allowing access based on the ships that the member owns. Currently supercaps and capitals implemented but no reason that 
+    it couldn't be expanded to other class types</li>
+</ul>
+
+
+<h3>Can I see the code?</h3>
+<p>
+    Sure, ESA is open source using the MIT License. While this means you can do pretty much whatever you like with the code including self host it. I will not be providing support to those who do this and due to the nature of the application 
+    its designed to have multiple groups using the same instance of the app so I don't encourage its doing it either. The source is available on <a href="https://github.com/Growney/Eve.Applications.Core" target="_blank">GIT Hub</a> should 
+    you wish to build this yourself however you will need my base class libraries as well which are just common function libraries that I use for all applications I write and are thus not open source and at the moment these are hosted in a 
+    private repository but jump on the discord and ask and I will get you a copy of the binaries.
+</p>
+
+<h3>Can I contribute?</h3>
+<p>
+    Sure, just make a pull request on GitHub but I do have code OCD so if it doesn’t meet my standards then I reserve the right to take the idea and do it myself. 
+    If you can’t code but want to encourage me to do it feel free to drop my character some isk. While I don’t plan on charging a ISK subscription and I am unable to charge RL money the site is hosted on Azure 
+    and isn’t free to run so I am not going to turn down any donations to any of my characters and will get round to making a more informative<a href="https://www.patreon.com/eveswaggerauth">patreon</a> at some point if anyone is interested in that. ESA was never intended to make me space rich it is 
+    simply a hobby and a place for me to learn.
+</p>
+
+<h3>Where is my data stored?</h3>
+<p>
+    ESA uses several MS SQL databases we have one static data database that is restored from the static data dump, one tenant data database that holds information about each tenant, basically just their name and some other info about what links 
+    to third parties they have setup. For individual tenants we create the same database schema for each that contains a the configuration and any SSO keys as well as any data that is pulled from the API. To speed up load times any public data is 
+    stored in the public version of the tenant database. This means that only one person has to wait around for the public data to be pulled the first time then everyone gets to use the cache after that. If you want me to provide a backup of your 
+    database just ask I will also delete it upon request however I will need in game confirmation from the person who created the group. Eventually this will be an automated process.
+</p>
+
+<h3>You convinced me, how do i get started?</h3>
+<p>Great ! Click the account button then click create the create group option and follow the steps from there !</p>

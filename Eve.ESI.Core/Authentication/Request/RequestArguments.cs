@@ -11,6 +11,7 @@ namespace Eve.ESI.Core.Authentication.Request
     public class ESIAuthRequestArguments : OAuthRequestArguments
     {
         public eESIScope[] Scopes { get; set; }
+        public List<eESIEntityType> CreateFromResponse { get; set; }
 
         public ESIAuthRequestArguments()
         {

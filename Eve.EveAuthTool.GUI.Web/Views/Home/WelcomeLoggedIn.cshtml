@@ -1,0 +1,15 @@
+﻿@inject Eve.EveAuthTool.Core.Security.Middleware.IViewParameterProvider parameters
+@{
+    ViewData["Title"] = "Welcome";
+
+    long? mainCharacterID = parameters.Package.MainCharacterID;
+    string characterName = "Could not find character name";
+    if (mainCharacterID.HasValue)
+    {
+        characterName = await parameters.Package.PublicDataProvider.GetEntityName(Eve.ESI.Standard.eESIEntityType.character, mainCharacterID.Value);
+    }
+}
+
+<h2>Welcome @characterName</h2>
+
+<p>Thank you for creating an account with ESA we have successfully created your database and it is now time for you to begin your setup. To begin configuring your system please click the management menu.</p>

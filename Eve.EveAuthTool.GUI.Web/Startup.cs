@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Eve.ESI.Core;
 using Eve.ESI.Standard.Authentication.Account;
 using Eve.ESI.Standard.Authentication.Configuration;
-using Eve.ESI.Standard.Token;
+using Eve.ESI.Standard.Authentication.Token;
 using Eve.EveAuthTool.Core.Helpers;
 using Eve.EveAuthTool.Core.Security.Middleware;
 using Eve.EveAuthTool.Core.Security.Routing;
@@ -31,6 +32,8 @@ namespace Eve.EveAuthTool.GUI.Web
 {
     public class Startup
     {
+        public const string c_defaultController = "Home";
+        public const string c_defaultAction = "AboutESA";
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -70,11 +73,12 @@ namespace Eve.EveAuthTool.GUI.Web
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<IControllerProvider>(new DelegatedControllerProvider(CreateController));
             services.AddSingleton<IStaticDataCache, StaticDataCache>();
+            string[] domains = Configuration.GetSection("TenantConfig:Domains").Get<string[]>();
             services.AddSingleton<ITenantConfiguration>(new TenantConfiguration()
             {
-                TenantHome = new RedirectToActionResult("Index", "Character", null),
-                CreateNewResult = new RedirectToActionResult("CreateTenant", "Home", null),
-                NotFoundResult = new RedirectToActionResult("NoTenantFound", "Home", null),
+                TenantHome = new RedirectToActionResult("Welcome", "Home", null),
+                CreateNewResult = new RedirectResult($"{domains[0]}/Home/CreateNewTenant/",false,false),
+                NotFoundResult = new RedirectToActionResult("TenantNotFound", "Home", null),
                 Controller = CreateController("TenantDB"),
                 SchemaFile = Configuration["TenantConfig:SchemaFile"],
                 DBNameFormat = Configuration["TenantConfig:DBNameFormat"],
@@ -92,10 +96,11 @@ namespace Eve.EveAuthTool.GUI.Web
                     }
 
                     return retVal;
-                }
+                },
+                SearchIn = new Assembly[]{ typeof(MSSQLCommandController).Assembly }
             });
             services.AddSingleton<IArgumentsStore<OAuthRequestArguments>, ArgumentsStore<OAuthRequestArguments>>();
-            services.AddSingleton<IArgumentsStore<ESIToken>, ArgumentsStore<ESIToken>>();
+            services.AddSingleton<IArgumentsStore<ESITokenRequestParameters>, ArgumentsStore<ESITokenRequestParameters>>();
             services.AddSingleton<IESIAuthenticatedConfig, ESIAuthenticatedConfig>();
 
             services.AddScoped<ITenantControllerProvider, TenantControllerProvider>();
@@ -108,6 +113,7 @@ namespace Eve.EveAuthTool.GUI.Web
             {
                 config.Filters.Add(new TenantResolverFilter());
                 config.Filters.Add(new TenantVersionCheckingFilter());
+#warning TODO Resolve Tenant required if provided redirect issue
                 config.Filters.Add(new AllowedCharactersResolverFilter());
                 config.Filters.Add(new ViewParameterResolverFilter());
 
@@ -115,7 +121,7 @@ namespace Eve.EveAuthTool.GUI.Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, ITenantConfiguration configuration, IHostingEnvironment env)
         {
             app.UseAuthentication();
             if (env.IsDevelopment())
@@ -132,11 +138,21 @@ namespace Eve.EveAuthTool.GUI.Web
             app.UseStaticFiles();
             app.UseCookiePolicy();
 
+            Microsoft.AspNetCore.Routing.RouteValueDictionary defaults = new Microsoft.AspNetCore.Routing.RouteValueDictionary { { "controller", c_defaultController }, { "action", c_defaultAction } };
+
             app.UseMvc(routes =>
             {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                routes.MapDomainRoutes(
+                    domains: configuration.Domains,
+                    routeTemplate: "{controller}/{action}/{id?}",
+                    defaults: defaults,
+                    ignorePorts: configuration.IgnorePorts
+                    );
+
+            routes.MapRoute(
+                name: "default",
+                defaults: defaults,
+                template: "{controller}/{action}/{id?}");
             });
         }
     }

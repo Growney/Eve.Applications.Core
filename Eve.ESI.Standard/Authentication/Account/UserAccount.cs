@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Eve.ESI.Standard.Token;
+using Eve.ESI.Standard.Authentication.Token;
 using Gware.Standard.Storage;
 using Gware.Standard.Storage.Adapter;
 using Gware.Standard.Storage.Command;
@@ -21,7 +21,7 @@ namespace Eve.ESI.Standard.Account
             TokenIds = new List<long>();
         }
 
-        public void AddToken(ICommandController controller, Token.ESIToken token)
+        public void AddToken(ICommandController controller, ESIToken token)
         {
             if(token != null && controller != null)
             {
@@ -49,6 +49,12 @@ namespace Eve.ESI.Standard.Account
         {
             return ESIToken.GetForID(controller, TokenIds);
         }
+        public long GetMainCharacterID(ICommandController controller)
+        {
+            DataCommand command = new DataCommand("UserAccount", "MainCharacterID");
+            command.AddParameter("Id", System.Data.DbType.Int64).Value = Id;
+            return LoadSingle<LoadedFromAdapterValue<long>>(controller.ExecuteCollectionCommand(command)).Value;
+        }
 
         public string GetLink(ICommandController controller, byte type)
         {
@@ -59,7 +65,6 @@ namespace Eve.ESI.Standard.Account
 
             return LoadSingle<LoadedFromAdapterValue<string>>(controller.ExecuteCollectionCommand(command))?.Value;
         }
-
         public override IDataCommand CreateDeleteCommand()
         {
             throw new NotImplementedException();
