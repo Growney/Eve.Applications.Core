@@ -1,0 +1,18 @@
+﻿@model Eve.EveAuthTool.GUI.Web.Models.Management.IndexAuthRuleRelationship
+
+@inject Eve.EveAuthTool.Core.Security.Middleware.IViewParameterProvider parameters
+
+<div data-relationship-index="@Model.Index" class="rule-edit-relationship width-75 center">
+
+    <input id="@($"Relationships_{Model.Index}__EntityID") " name="@($"Relationships.Index")" type="hidden" value="@Model.Index">
+    <input id="@($"Relationships_{Model.Index}__EntityID") " name="@($"Relationships[{Model.Index}].EntityID")" type="hidden" value="@Model.EntityID">
+    <input id="@($"Relationships_{Model.Index}__Relationship") " name="@($"Relationships[{Model.Index}].Relationship")" type="hidden" value="@Model.Relationship">
+    <input id="@($"Relationships_{Model.Index}__EntityType") " name="@($"Relationships[{Model.Index}].EntityType")" type="hidden" value="@Model.EntityType">
+    <input id="@($"Relationships_{Model.Index}__RuleID") " name="@($"Relationships[{Model.Index}].RuleID")" type="hidden" value="@Model.RuleID">
+
+    <img class="rule-relationship-image" src="@parameters.Package.ESIConfiguration.GetImageSource(Model.EntityType,Model.EntityID,32)">
+    <div class="rule-relationship-type">@Model.Relationship</div>
+    <div class="rule-relationship-entity-name">@await parameters.Package.PublicDataProvider.GetEntityName(Model.EntityType, Model.EntityID)</div>
+    <div onclick="$(this).parent().remove();" class="rule-relationship-edit"><i class="fas fa-times"></i></div>
+</div>
+

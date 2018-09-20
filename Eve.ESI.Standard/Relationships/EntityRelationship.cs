@@ -1,4 +1,5 @@
-﻿using Gware.Standard.Storage;
+﻿using Eve.ESI.Standard.DataItem;
+using Gware.Standard.Storage;
 using Gware.Standard.Storage.Adapter;
 using Gware.Standard.Storage.Command;
 using Gware.Standard.Storage.Controller;
@@ -114,5 +115,24 @@ namespace Eve.ESI.Standard.Relationships
             return Load<EntityRelationship>(controller.ExecuteCollectionCommand(command));
         }
 
+        public static bool MeetsMask(eESIEntityRelationship relationship, eESIEntityRelationshipOperatorMask mask)
+        {
+            return ((int)relationship / (int)mask) == 1;
+        }
+
+        public static IEnumerable<EntityRelationship> ForRoleFlag(long entityID,eESIEntityRelationship relationship,eESIRole selected)
+        {
+            List<EntityRelationship> retVal = new List<EntityRelationship>();
+
+            foreach(eESIRole role in Enum.GetValues(typeof(eESIRole)))
+            {
+                if (selected.HasFlag(role))
+                {
+                    retVal.Add(new EntityRelationship(entityID, eESIEntityType.character, (long)role, eESIEntityType.role, relationship));
+                }
+            }
+
+            return retVal;
+        }
     }
 }

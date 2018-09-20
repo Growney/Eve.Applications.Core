@@ -14,11 +14,19 @@ namespace Eve.ESI.Standard.Account
         public override long Id { get; set; }
         public Guid AccountGuid { get; set; }
         public DateTime CreatedDate { get; set; }
-        public List<long> TokenIds { get; set; }
+        public List<long> TokenIds { get; }
 
         public UserAccount()
         {
             TokenIds = new List<long>();
+        }
+
+        public UserAccount(List<long> tokenIds)
+            :this()
+        {
+            long[] tokenArray = new long[tokenIds.Count];
+            tokenIds.CopyTo(tokenArray);
+            TokenIds.AddRange(tokenArray);
         }
 
         public void AddToken(ICommandController controller, ESIToken token)
@@ -39,6 +47,8 @@ namespace Eve.ESI.Standard.Account
                 command.AddParameter("Id", System.Data.DbType.UInt64).Value = Id;
                 command.AddParameter("TokenIds", "LongIDList").Value = ids.CreateIDList();
                 controller.ExecuteQuery(command);
+
+                TokenIds.Add(token.Id);
             }
         }
         public List<ESIToken> GetTokenForScope(ICommandController controller, long entityID,eESIEntityType type, eESIScope scope)
@@ -89,7 +99,12 @@ namespace Eve.ESI.Standard.Account
             Id = adapter.GetValue("Id", 0L);
             AccountGuid = new Guid(adapter.GetValue("AccountGuid", string.Empty));
             CreatedDate = adapter.GetValue("CreatedDate", DateTime.MinValue);
-            TokenIds = Load<LoadedFromAdapterValue<long>>(adapter.Controller.ExecuteCollectionCommand(GetTokenIDSelectCommand())).ToList();
+            LoadTokenIDs(adapter.Controller);
+        }
+
+        private void LoadTokenIDs(ICommandController controller)
+        {
+            TokenIds.AddRange(Load<LoadedFromAdapterValue<long>>(controller.ExecuteCollectionCommand(GetTokenIDSelectCommand())).ToList());
         }
         private DataCommand GetTokenIDSelectCommand()
         {

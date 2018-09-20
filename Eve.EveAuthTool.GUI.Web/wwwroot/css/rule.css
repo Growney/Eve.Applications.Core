@@ -1,0 +1,122 @@
+﻿.rule {
+    padding: 10px;
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    grid-template-rows: 30px 1fr;
+    grid-template-areas: "name relationship-header" "info relationships";
+    margin-bottom: 10px;
+}
+
+.rule-list {
+    padding-top: 10px;
+}
+
+
+.rule-name, .rule-relationship-header {
+    font-weight: bold;
+}
+.rule-name {
+    grid-area: name;
+}
+
+.rule-info {
+    grid-area: info;
+}
+
+.rule-relationship-header {
+    grid-area: relationship-header;
+}
+
+.rule-relationships {
+    grid-area: relationships;
+    overflow-y: auto;
+}
+
+.rule-relationship, .rule-edit-relationship {
+    display: grid;
+    grid-gap: 5px;
+    grid-template-rows: 32px;
+}
+
+.rule-edit-relationship {
+    grid-template-columns: 150px 32px 1fr 20px;
+    grid-template-areas: "relationship-type image entity-name edit";
+}
+
+.rule-relationship {
+    grid-template-columns: 150px 32px 1fr;
+    grid-template-areas: "relationship-type image entity-name ";
+}
+
+.rule-relationship-image {
+    grid-area: image;
+}
+
+.rule-relationship-type {
+    grid-area: relationship-type;
+}
+
+.rule-relationship-entity-name {
+    grid-area: entity-name;
+    overflow-y: hidden;
+}
+
+.rule-relationship-entity-name, .rule-relationship-type,.rule-relationship-edit {
+    line-height: 32px;
+}
+
+.rule-relationship-edit {
+    grid-area:edit
+}
+
+.esi-role {
+    padding: 5px;
+    height: 32px;
+    display: grid;
+    position: relative;
+    border-radius: 3px;
+    line-height:32px;
+}
+
+    .esi-role div {
+        grid-area: name;
+        line-height: 32px;
+    }
+
+.entitySearchResult:hover, .esi-role:hover {
+    background-color: var(--theme-secondary-back-colour);
+}
+.entitySearchResult:after, .esi-role:after {
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    content: '\f067';
+    position: absolute;
+    right: 5px;
+    top: 0px;
+    line-height: 42px;
+}
+#entitySearchResults{
+    width:100%;
+    height:calc(100% - 30px);
+}
+
+#entityForm {
+    width: 100%;
+    height: calc(100% - 30px);
+}
+#relationshipDialog {
+    width: 700px;
+    height: 400px;
+    
+    overflow-y:auto;
+    
+}
+#relationshipTab {
+    width:100%;
+    height:100%;
+}
+
+#entitySearchForm {
+    padding:10px;
+}
+

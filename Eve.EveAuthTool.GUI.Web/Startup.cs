@@ -55,11 +55,14 @@ namespace Eve.EveAuthTool.GUI.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("MjQ0NzdAMzEzNjJlMzIyZTMwbHlBbEdMYTczR3NTcCtDeHVnRkl5cTROTlZSUEdMdkRxZUh0andYWFNYST0=");
+
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                     .AddCookie(options =>
                     {
                         options.ExpireTimeSpan = TimeSpan.FromDays(30);
                         options.LoginPath = "/Registration/Index/";
+                        options.AccessDeniedPath = "/Registration/Denied/";
 
                     });
 
@@ -73,19 +76,18 @@ namespace Eve.EveAuthTool.GUI.Web
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<IControllerProvider>(new DelegatedControllerProvider(CreateController));
             services.AddSingleton<IStaticDataCache, StaticDataCache>();
-            string[] domains = Configuration.GetSection("TenantConfig:Domains").Get<string[]>();
+            RouteTemplateDomain[] domains = Configuration.GetSection("TenantConfig:Domains").Get<RouteTemplateDomain[]>();
             services.AddSingleton<ITenantConfiguration>(new TenantConfiguration()
             {
                 TenantHome = new RedirectToActionResult("Welcome", "Home", null),
-                CreateNewResult = new RedirectResult($"{domains[0]}/Home/CreateNewTenant/",false,false),
+                CreateNewResult = new RedirectResult($"{domains[0].GetAddress()}/Home/CreateNewTenant",false,false),
                 NotFoundResult = new RedirectToActionResult("TenantNotFound", "Home", null),
                 Controller = CreateController("TenantDB"),
                 SchemaFile = Configuration["TenantConfig:SchemaFile"],
                 DBNameFormat = Configuration["TenantConfig:DBNameFormat"],
-                Domains = Configuration.GetSection("TenantConfig:Domains").Get<string[]>(),
+                Domains = domains,
                 CreateComposite = true,
                 Upgrading = new RedirectToActionResult("Upgrading", "Tenant", null),
-                IgnorePorts = Configuration["TenantConfig:IgnorePorts"]?.ToLower().Equals("true") ?? false,
                 OnDeployTenantSchema = async (ICommandController controller) =>
                 {
                     bool retVal = false;
@@ -113,7 +115,7 @@ namespace Eve.EveAuthTool.GUI.Web
             {
                 config.Filters.Add(new TenantResolverFilter());
                 config.Filters.Add(new TenantVersionCheckingFilter());
-#warning TODO Resolve Tenant required if provided redirect issue
+                config.Filters.Add(new TenantRequiredIfProvidedAttribute());
                 config.Filters.Add(new AllowedCharactersResolverFilter());
                 config.Filters.Add(new ViewParameterResolverFilter());
 
@@ -145,8 +147,7 @@ namespace Eve.EveAuthTool.GUI.Web
                 routes.MapDomainRoutes(
                     domains: configuration.Domains,
                     routeTemplate: "{controller}/{action}/{id?}",
-                    defaults: defaults,
-                    ignorePorts: configuration.IgnorePorts
+                    defaults: defaults
                     );
 
             routes.MapRoute(

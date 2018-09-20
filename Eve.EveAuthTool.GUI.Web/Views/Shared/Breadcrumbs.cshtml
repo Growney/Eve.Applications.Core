@@ -1,0 +1,8 @@
+﻿@model IEnumerable<Eve.EveAuthTool.GUI.Web.Models.Shared.Breadcrumb>
+
+<div class="breadcrumbs">
+    @foreach(var crumb in Model)
+    {
+        <a asp-controller="@crumb.Controller" asp-action="@crumb.Action">@crumb.Text</a>
+    }
+</div>

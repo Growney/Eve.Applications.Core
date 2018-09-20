@@ -3,5 +3,6 @@
 	[Id] BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
 	[Name] VARCHAR(200) NOT NULL,
 	[RoleID] BIGINT NOT NULL, 
-    [Ordinal] INT NOT NULL 
+    [Ordinal] INT NOT NULL ,
+    [MatchAll] BIT NOT NULL CONSTRAINT [DF_AuthRule_MatchAll] DEFAULT(1)
 )

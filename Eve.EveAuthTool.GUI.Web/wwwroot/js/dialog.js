@@ -14,8 +14,12 @@
                 }
             );
             if (count == 0) {
-                jqueryEl.click(function () {
-                    jqueryEl.removeClass('show');
+                jqueryEl.click(function (clicked) {
+                    var clickedJquery = $(clicked.target);
+                    if ($(clickedJquery).is(jqueryEl))
+                    {
+                        jqueryEl.removeClass('show');
+                    }
                 });
             }
         }

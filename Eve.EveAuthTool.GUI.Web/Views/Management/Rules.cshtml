@@ -1,0 +1,53 @@
+﻿@inject Eve.EveAuthTool.Core.Security.Middleware.IViewParameterProvider parameters
+@using Gware.Standard.Data;
+@model IEnumerable<Eve.EveAuthTool.Standard.Security.Rules.AuthRule>
+@{
+    ViewData["Title"] = "Rules";
+    var breadcrumbs = new List<Breadcrumb>()
+    {
+        new Breadcrumb(){ Controller="Management",Action="Index",Text="Management"  }
+    };
+}
+@section Breadcrumbs{
+    <partial name="breadcrumbs" model="breadcrumbs">
+}
+@section Styles{
+    <link rel="stylesheet" href="~/css/rule.css" />
+}
+@section Scripts{ 
+        <script src="~/js/management.js"></script>
+}
+<a asp-action="EditRule" asp-controller="Management" asp-route-ruleID="-1">Add</a>
+<div class="rule-list">
+    @foreach (var rule in Model)
+    {
+        var role = Eve.EveAuthTool.Standard.Security.Rules.Role.Get<Eve.EveAuthTool.Standard.Security.Rules.Role>(parameters.Package.TenantController, rule.RoleId);
+        <div data-rule-id="@rule.Id" class="theme-border theme-text rule">
+            <div class="rule-info">
+
+                <div>Role - @role.Name</div>
+
+                <div>Priority - @rule.Ordinal</div>
+                <div>Match All - @rule.MatchAll</div>
+                <a asp-action="EditRule" asp-controller="Management" asp-route-ruleID="@rule.Id"><i class="fas fa-edit"></i></a>
+                <a onclick="DeleteAuthRule(this,@rule.Id)"><i class="fas fa-times"></i></a>
+            </div>
+            <div class="rule-name">@rule.Name</div>
+            <div class="rule-relationship-header">Relationships</div>
+            <div class="rule-relationships">
+
+                @foreach (var relationship in rule.Relationships)
+                {
+                    <div class="rule-relationship">
+                        <img class="rule-relationship-image" src="@parameters.Package.ESIConfiguration.GetImageSource(relationship.EntityType,relationship.EntityID,32)">
+                        <div class="rule-relationship-type">@(Gware.Standard.Data.EnumDisplayAttribute.GetEnumString(relationship.Relationship))</div>
+                        <div class="rule-relationship-entity-name">@await parameters.Package.PublicDataProvider.GetEntityName(relationship.EntityType, relationship.EntityID)</div>
+                    </div>
+                }
+            </div>
+
+
+        </div>
+
+    }
+</div>

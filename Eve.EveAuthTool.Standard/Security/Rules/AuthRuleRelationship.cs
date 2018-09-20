@@ -31,6 +31,14 @@ namespace Eve.EveAuthTool.Standard.Security.Rules
             Relationship = (eESIEntityRelationship)adapter.GetValue("Relationship", 0);
         }
 
+        public static void DeleteForRule(ICommandController controller,long ruleID)
+        {
+            DataCommand command = new DataCommand("AuthRuleRelationship", "DeleteForRule");
+            command.AddParameter("RuleID", System.Data.DbType.Int64).Value = ruleID;
+
+            controller.ExecuteQuery(command);
+        }
+
         public static List<AuthRuleRelationship> ForRule(ICommandController controller,long ruleID)
         {
             DataCommand command = new DataCommand("AuthRuleRelationship", "ForRule");
@@ -38,9 +46,13 @@ namespace Eve.EveAuthTool.Standard.Security.Rules
 
             return Load<AuthRuleRelationship>(controller.ExecuteCollectionCommand(command));
         }
+        public static AuthRuleRelationship GetRelationshipRule(long entityID, eESIEntityType entityType, eESIEntityRelationship relationship)
+        {
+            return new AuthRuleRelationship() { EntityID = entityID, EntityType = entityType, Relationship = relationship };
+        }
         public static AuthRuleRelationship GetStaticRelationship(long entityID,eESIEntityType entityType)
         {
-            return new AuthRuleRelationship() { EntityID = entityID, EntityType = entityType, Relationship = GetStaticRelationship(entityType) };
+            return GetRelationshipRule(entityID, entityType, GetStaticRelationship(entityType));
         }
         private static eESIEntityRelationship GetStaticRelationship(eESIEntityType entityType)
         {

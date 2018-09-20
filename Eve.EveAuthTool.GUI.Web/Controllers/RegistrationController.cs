@@ -93,7 +93,7 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
                 List<AuthenticatedEntity> characters = AuthenticatedEntity.GetForAccount(ESIConfiguration, TenantController, Cache, PublicDataProvider, account);
                 foreach(AuthenticatedEntity character in characters)
                 {
-                    Role role = await AuthRule.GetEntityRole(TenantController, character);
+                    Role role = await AuthRule.GetEntityRole(ESIConfiguration,TenantController,Cache,PublicDataProvider, character);
                     if (role != null)
                     {
                         activePermissions |= role.Permissions;
@@ -135,6 +135,10 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
             return RedirectToAction(Startup.c_defaultAction, Startup.c_defaultController);
         }
 
+        public IActionResult Denied()
+        {
+            return View();
+        }
         public IActionResult EveLogin()
         {
             ESIAuthRequestArguments args = HttpContext.GetLocalArguments<ESIAuthRequestArguments>(
@@ -161,7 +165,7 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
                     {
                         allowedByTenant = false;
                         AuthenticatedEntity entity = AuthenticatedEntity.FromToken(ESIConfiguration, TenantController, Cache,PublicDataProvider, token);
-                        Role role = await AuthRule.GetEntityRole(TenantController, entity);
+                        Role role = await AuthRule.GetEntityRole(ESIConfiguration,TenantController,Cache,PublicDataProvider, entity);
                         if (role != null)
                         {
                             if (role.Permissions.HasFlag(eRulePermission.Register))
@@ -525,7 +529,12 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
             {
                 TokenStore.DiscardArguments(tokenGuid);
                 token.Save(TenantController);
-                if(parameters.CreateFrom != null)
+
+                AuthRule.CreateAdminRule(TenantController, token.CorporationID);
+                AuthRule.CreateMemberRule(TenantController, token.EntityID, token.EntityType);
+                AuthRule.CreateStandingRule(TenantController, token.EntityID, token.EntityType);
+
+                if (parameters.CreateFrom != null)
                 {
                     foreach(eESIEntityType entityType in parameters.CreateFrom)
                     {
@@ -543,7 +552,6 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
                         }
                     }
                 }
-                AuthRule.CreateDefaultRole(TenantController, CurrentTenant.EntityId, (eESIEntityType)CurrentTenant.EntityType);
                 return RedirectToAction("Welcome", "Home");
                 
             }

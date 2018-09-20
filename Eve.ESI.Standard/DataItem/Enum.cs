@@ -2,6 +2,27 @@
 
 namespace Eve.ESI.Standard.DataItem
 {
+    public enum eRoleLocation
+    {
+        General,
+        Base,
+        HQ,
+        Other
+    }
+    public enum eESIRoleGroup : long
+    {
+        Accountant = eESIRole.Account_Take_1 | eESIRole.Account_Take_2 | eESIRole.Account_Take_3 | eESIRole.Account_Take_4 | eESIRole.Account_Take_5 | 
+            eESIRole.Account_Take_6 | eESIRole.Account_Take_7 | eESIRole.Accountant | eESIRole.Junior_Accountant,
+        Containers = eESIRole.Container_Take_1 | eESIRole.Container_Take_2 | eESIRole.Container_Take_3 | eESIRole.Container_Take_4 | eESIRole.Container_Take_5 |
+            eESIRole.Container_Take_6 | eESIRole.Container_Take_7,
+        Hangers = eESIRole.Hangar_Query_1 | eESIRole.Hangar_Query_2 | eESIRole.Hangar_Query_3 | eESIRole.Hangar_Query_4 | eESIRole.Hangar_Query_5 | eESIRole.Hangar_Query_6 | eESIRole.Hangar_Query_7 |
+        eESIRole.Hangar_Take_1 | eESIRole.Hangar_Take_2 | eESIRole.Hangar_Take_3 | eESIRole.Hangar_Take_4 | eESIRole.Hangar_Take_5 | eESIRole.Hangar_Take_6 | eESIRole.Hangar_Take_7,
+        Structures = eESIRole.Config_Equipment | eESIRole.Config_Starbase_Equipment | eESIRole.Starbase_Defense_Operator | eESIRole.Starbase_Fuel_Technician | eESIRole.Station_Manager,
+
+        Misc = 0x7FFF_FFFF_FFFF_FFFF & ~Accountant & ~Containers & ~Hangers & ~Structures
+
+    }
+
     [Flags]
     public enum eESIRole : long
     {

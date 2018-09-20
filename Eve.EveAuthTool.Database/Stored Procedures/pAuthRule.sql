@@ -3,17 +3,18 @@
 	@Id BIGINT = NULL,
 	@Name VARCHAR(200) = NULL,
 	@RoleID BIGINT = NULL,
-	@Ordinal INT = NULL
+	@Ordinal INT = NULL,
+	@MatchAll BIT = NULL
 AS
 
 IF @Result = 'Save'
 BEGIN
 
-	IF NOT EXISTS (SELECT* FROM Role WHERE Id = @Id)
+	IF NOT EXISTS (SELECT* FROM [AuthRule] WHERE Id = @Id)
 	BEGIN
 
-		INSERT INTO [AuthRule] ([Name],[RoleID],Ordinal)
-		VALUES(@Name,@RoleID,@Ordinal)
+		INSERT INTO [AuthRule] ([Name],[RoleID],Ordinal,MatchAll)
+		VALUES(@Name,@RoleID,@Ordinal,@MatchAll)
 
 		SELECT @@IDENTITY AS [Value]
 
@@ -24,7 +25,8 @@ BEGIN
 		UPDATE [AuthRule]
 		SET [Name] = @Name,
 		RoleID = @RoleID,
-		Ordinal = @Ordinal
+		Ordinal = @Ordinal,
+		MatchAll = @MatchAll
 		WHERE Id = @Id
 
 		SELECT @Id AS [Value]

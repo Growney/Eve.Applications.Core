@@ -1,0 +1,21 @@
+﻿.search-result {
+
+    padding:5px;
+    height: 32px;
+    display:grid;
+    grid-template-rows: 32px;
+    grid-template-columns: 32px 1fr;
+    grid-template-areas: "image name";
+    grid-column-gap:5px;
+    position:relative;
+    border-radius:3px;
+}
+
+.search-result image{
+    grid-area:image;
+}
+
+.search-result div {
+    grid-area:name;
+    line-height:32px;
+}

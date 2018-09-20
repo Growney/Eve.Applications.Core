@@ -1,0 +1,96 @@
+﻿@model Eve.EveAuthTool.GUI.Web.Models.Search.SearchResult
+
+@inject Eve.EveAuthTool.Core.Security.Middleware.IViewParameterProvider parameters
+<div>
+    <ejs-accordion id="searchResultsAccordion">
+        <e-accordion-accordionitems>
+            @if (Model.Characters.Count > 0)
+            {
+                <e-accordion-accordionitem header="Characters" content="#characters" expanded=true></e-accordion-accordionitem>
+            }
+            @if (Model.Corporations.Count > 0)
+            {
+                <e-accordion-accordionitem header="Corporations" content="#corporations"></e-accordion-accordionitem>
+            }
+            @if (Model.Alliances.Count > 0)
+            {
+                <e-accordion-accordionitem header="Alliances" content="#alliances"></e-accordion-accordionitem>
+            }
+            @if (Model.Factions.Count > 0)
+            {
+                <e-accordion-accordionitem header="Factions" content="#factions"></e-accordion-accordionitem>
+            }
+        </e-accordion-accordionitems>
+    </ejs-accordion>
+    @if (Model.Characters.Count > 0)
+    {
+        <div id="characters" style="display:none">
+            @for (int i = 0; i < Model.Characters.Count && i < 5; i++)
+            {
+                var characterID = Model.Characters.GetID(i);
+                var character = await Model.Characters.GetItem(i);
+                if (character.HasData)
+                {
+                    <div class="search-result @Model.ResultID" searchResultId="@Model.ResultID" data-entityname="@character.Data.Name" data-entitytype="@((int)Eve.ESI.Standard.DataItem.Search.eSearchEntity.character)" data-entityid="@characterID">
+                        <img src="@parameters.Package.ESIConfiguration.GetImageSource(Eve.ESI.Standard.DataItem.Search.eSearchEntity.character,characterID,32)" />
+                        <div>@character.Data.Name</div>
+                    </div>
+                }
+            }
+        </div>
+    }
+
+    @if (Model.Corporations.Count > 0)
+    {
+        <div id="corporations" style="display:none">
+            @for (int i = 0; i < Model.Corporations.Count && i < 5; i++)
+            {
+                var corporationID = Model.Corporations.GetID(i);
+                var corporation = await Model.Corporations.GetItem(i);
+                if (corporation.HasData)
+                {
+                    <div class="search-result @Model.ResultID" searchResultId="@Model.ResultID" data-entityname="@corporation.Data.Name" data-entitytype="@((int)Eve.ESI.Standard.DataItem.Search.eSearchEntity.corporation)" data-entityid="@corporationID">
+                        <img src="@parameters.Package.ESIConfiguration.GetImageSource(Eve.ESI.Standard.DataItem.Search.eSearchEntity.corporation,corporationID,32)" />
+                        <div>@corporation.Data.Name</div>
+                    </div>
+                }
+            }
+        </div>
+    }
+    @if (Model.Alliances.Count > 0)
+    {
+        <div id="alliances" style="display:none">
+            @for (int i = 0; i < Model.Alliances.Count && i < 5; i++)
+            {
+                var allianceID = Model.Alliances.GetID(i);
+                var alliance = await Model.Alliances.GetItem(i);
+                if (alliance.HasData)
+                {
+                    <div class="search-result @Model.ResultID" searchResultId="@Model.ResultID" data-entityname="@alliance.Data.Name" data-entitytype="@((int)Eve.ESI.Standard.DataItem.Search.eSearchEntity.alliance)" data-entityid="@allianceID">
+                        <img src="@parameters.Package.ESIConfiguration.GetImageSource(Eve.ESI.Standard.DataItem.Search.eSearchEntity.alliance,allianceID,32)" />
+                        <div>@alliance.Data.Name</div>
+                    </div>
+                }
+            }
+        </div>
+    }
+    @if (Model.Factions.Count > 0)
+    {
+        <div id="factions" style="display:none">
+            @for (int i = 0; i < Model.Factions.Count && i < 5; i++)
+            {
+                var factionID = Model.Factions.GetID(i);
+                var faction = await Model.Factions.GetItem(i);
+                if (faction != null)
+                {
+                    <div class="search-result @Model.ResultID" searchResultId="@Model.ResultID" data-entityname="@faction.FactionName" data-entitytype="@((int)Eve.ESI.Standard.DataItem.Search.eSearchEntity.faction)" data-entityid="@factionID">
+                        <img src="@parameters.Package.ESIConfiguration.GetImageSource(Eve.ESI.Standard.DataItem.Search.eSearchEntity.faction,factionID,32)" />
+                        <div>@faction.FactionName </div>
+                    </div>
+                }
+            }
+        </div>
+    }
+
+</div>
+<ejs-scripts></ejs-scripts>

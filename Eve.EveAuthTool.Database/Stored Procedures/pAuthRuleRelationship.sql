@@ -55,3 +55,10 @@ BEGIN
 	SELECT* FROM [AuthRuleRelationship] WHERE RuleID = @RuleID
 
 END
+
+IF @Result = 'DeleteForRule'
+BEGIN
+
+	DELETE FROM [AuthRuleRelationship] WHERE RuleID = @RuleID
+
+END

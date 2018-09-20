@@ -2,6 +2,7 @@
 using Gware.Standard.Collections.Generic;
 using Gware.Standard.Storage;
 using Gware.Standard.Storage.Controller;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -61,6 +62,23 @@ namespace Eve.ESI.Standard.DataItem.Search
         public static Task<ESICallResponse<SearchResults>> Search(IESIAuthenticationClient client, ICommandController controller, string query, eSearchEntity entities, bool strict = false)
         {
             return GetItem<SearchResults>(client, controller, queryParameters: new Dictionary<string, string>() { { "search", query }, { "categories", entities.ToDelimitedString<eSearchEntity>() }, { "strict", strict.ToString() } });
+        }
+
+        public static eESIEntityType SearchTypeToEntityType(eSearchEntity type)
+        {
+            switch (type)
+            {
+                case eSearchEntity.alliance:
+                    return eESIEntityType.alliance;
+                case eSearchEntity.character:
+                    return eESIEntityType.character;
+                case eSearchEntity.corporation:
+                    return eESIEntityType.corporation;
+                case eSearchEntity.faction:
+                    return eESIEntityType.faction;
+                default:
+                    throw new ArgumentException("Not an entity");
+            }
         }
     }
 }

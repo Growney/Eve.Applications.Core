@@ -1,0 +1,128 @@
+﻿@model Eve.EveAuthTool.Standard.Security.Rules.AuthRule
+@inject Eve.EveAuthTool.Core.Security.Middleware.IViewParameterProvider parameters
+@{
+    ViewData["Title"] = "EditRule";
+    var roleObjectList = new List<Object>();
+    foreach (var role in Eve.EveAuthTool.Standard.Security.Rules.Role.All(parameters.Package.TenantController))
+    {
+        roleObjectList.Add(new { id = role.Id, text = role.Name });
+    }
+    var roleSelectList = new SelectList(roleObjectList, "id", "text", Model.RoleId);
+
+
+    var roleLocationList = new List<Object>();
+    foreach (Eve.ESI.Standard.DataItem.eRoleLocation location in Enum.GetValues(typeof(Eve.ESI.Standard.DataItem.eRoleLocation)))
+    {
+        roleLocationList.Add(new { id = (int)location, text = Gware.Standard.Data.EnumDisplayAttribute.GetEnumString(location) });
+    }
+    ViewBag.roleLocationSelectList = roleLocationList;
+
+    var breadcrumbs = new List<Breadcrumb>()
+    {
+        new Breadcrumb() {Controller="Management",Action="Index", Text="Management"},
+        new Breadcrumb() {Controller="Management",Action="Rules", Text="Rules"}
+    };
+}
+    @section Breadcrumbs{
+    <partial name="breadcrumbs" model="breadcrumbs">
+}
+@section Styles{
+    <link rel="stylesheet" href="~/css/rule.css" />
+    <link rel="stylesheet" href="~/css/search.css" />
+    <link rel="stylesheet" href="~/css/spinner.css" />
+
+}
+
+@section Scripts{
+    <script src="~/js/management.js"></script>
+    <script src="~/js/search.js"></script>
+}
+
+<form class="content-box theme-border width-50 center" asp-action="EditRule" asp-controller="Management">
+    <div>
+        Name - @Html.TextBoxFor(x => Model.Name)
+        Role - @Html.DropDownListFor(x => x.RoleId, roleSelectList)
+        Priority - @Html.EditorFor(x => Model.Ordinal, new { htmlAttributes = new { @type = "number", @min = "0", @step = "1", @value = "0" } })
+        Match All - @Html.CheckBoxFor(x => Model.MatchAll)
+    </div>
+    @Html.HiddenFor(x => Model.Id)
+    <div class="standard-padding-top">
+        <div class="inline-block">Relationships</div> <div onclick="showDialog('addRelationshipDialogContainer')" class="inline-block"><i class="fas fa-plus"></i></div>
+    </div>
+    <hr />
+    <div id="relationships">
+        @for (int i = 0; i < Model.Relationships.Count; i++)
+        {
+            var relationship = Model.Relationships[i];
+
+            <partial name="IndexedAuthRuleRelationship" model="new Eve.EveAuthTool.GUI.Web.Models.Management.IndexAuthRuleRelationship(i, relationship)" />
+        }
+    </div>
+
+
+    <button type="submit">Save</button>
+</form>
+<div id="addRelationshipDialogContainer" class="dialog-container">
+    <div id="relationshipDialog" class="dialog">
+        <div class="header">
+            Add relationship
+            <hr />
+        </div>
+        <ejs-tab id="relationshipTab">
+            <e-tab-tabitems>
+                <e-tab-tabitem header="@(new Syncfusion.EJ2.Navigations.TabHeader { Text = "Entity" })" content="#entitySearch"></e-tab-tabitem>
+                <e-tab-tabitem header="@(new Syncfusion.EJ2.Navigations.TabHeader { Text = "Roles" })" content="#role"></e-tab-tabitem>
+                <e-tab-tabitem header="@(new Syncfusion.EJ2.Navigations.TabHeader { Text = "Standings" })" content="#standing"></e-tab-tabitem>
+            </e-tab-tabitems>
+        </ejs-tab>
+        <div id="entitySearch" class="entity-search" style="display:none">
+            <form id="entitySearchForm" asp-controller="Search" asp-action="SearchEntities"
+                  data-ajax-begin="onEntitySearchBegin" data-ajax-complete="onEntitySearchComplete"
+                  data-ajax-failure="onEntitySearchFailed" data-ajax-success="onEntitySearchSuccess"
+                  data-ajax="true" data-ajax-method="POST"
+                  asp-route-resultID="entitySearchResult" asp-route-oldData="true">
+                Search: <input type="text" name="query" />
+                <button type="submit">Submit</button>
+            </form>
+            <div id="entitySearchWait" class="line-spinner hidden">
+                <div class="rect1"></div>
+                <div class="rect2"></div>
+                <div class="rect3"></div>
+                <div class="rect4"></div>
+                <div class="rect5"></div>
+            </div>
+            <div id="entitySearchResults"></div>
+        </div>
+
+        <div id="role" class="entity-role" style="display:none">
+            <div>
+                <ejs-dropdownlist id="roleLocations" dataSource="ViewBag.roleLocationSelectList" placeholder="Select a location" index="0" popupHeight="220px">
+                    <e-dropdownlist-fields text="text" value="id"></e-dropdownlist-fields>
+                </ejs-dropdownlist>
+            </div>
+            <div>
+                <ejs-accordion id="searchResultsAccordion">
+                    <e-accordion-accordionitems>
+                        @foreach (Eve.ESI.Standard.DataItem.eESIRoleGroup group in Eve.ESI.Standard.DataItem.Helper.GroupedRoles.Keys)
+                        {
+                            <e-accordion-accordionitem header="@(Gware.Standard.Data.EnumDisplayAttribute.GetEnumString(group))" content="#@group"></e-accordion-accordionitem>
+                        }
+                    </e-accordion-accordionitems>
+                </ejs-accordion>
+
+                @foreach (Eve.ESI.Standard.DataItem.eESIRoleGroup group in Eve.ESI.Standard.DataItem.Helper.GroupedRoles.Keys)
+                {
+                    <div id="@group" style="display:none">
+                        @foreach (Eve.ESI.Standard.DataItem.eESIRole role in Eve.ESI.Standard.DataItem.Helper.GroupedRoles[group])
+                        {
+                            <div onclick="AddRole(@((long)role))" class="esi-role">@(Gware.Standard.Data.EnumDisplayAttribute.GetEnumString(role))</div>
+                        }
+                    </div>
+                }
+            </div>
+            
+        </div>
+        <div id="standing" class="entity-standing" style="display:none">
+        </div>
+    </div>
+</div>

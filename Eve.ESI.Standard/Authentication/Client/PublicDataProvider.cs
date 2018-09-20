@@ -2,6 +2,7 @@
 using Eve.ESI.Standard.DataItem.Alliance;
 using Eve.ESI.Standard.DataItem.Character;
 using Eve.ESI.Standard.DataItem.Corporation;
+using Eve.ESI.Standard.DataItem.Search;
 using Eve.Static.Standard;
 using Eve.Static.Standard.chr;
 using Gware.Standard.Collections.Generic;
@@ -18,22 +19,22 @@ namespace Eve.ESI.Standard.Authentication.Client
         public IStaticDataCache Cache { get; }
         public IESIAuthenticationClient Client { get; }
         public ICommandController Controller { get; }
-        public PublicDataProvider(IESIAuthenticationClient client,ICommandController publicDataController,IStaticDataCache cache)
+        public PublicDataProvider(IESIAuthenticationClient client, ICommandController publicDataController, IStaticDataCache cache)
         {
             Client = client;
             Controller = publicDataController;
             Cache = cache;
         }
 
-        public Task<ESICallResponse<CharacterInfo>> GetCharacterInfo(long characterID,bool oldData = false)
+        public Task<ESICallResponse<CharacterInfo>> GetCharacterInfo(long characterID, bool oldData = false)
         {
             return CharacterInfo.GetCharacterInfo(Client, Controller, characterID, oldData);
         }
-        public Task<ESICallResponse<AllianceInfo>> GetAllianceInfo(int allianceID,bool oldData = false)
+        public Task<ESICallResponse<AllianceInfo>> GetAllianceInfo(int allianceID, bool oldData = false)
         {
             return AllianceInfo.GetAllianceInfo(Client, Controller, allianceID, oldData);
         }
-        public Task<ESICallResponse<CorporationInfo>> GetCorporationInfo(int corporationID,bool oldData = false)
+        public Task<ESICallResponse<CorporationInfo>> GetCorporationInfo(int corporationID, bool oldData = false)
         {
             return CorporationInfo.GetCorporationInfo(Client, Controller, corporationID, oldData);
         }
@@ -82,7 +83,7 @@ namespace Eve.ESI.Standard.Authentication.Client
                     break;
                 case eESIEntityType.role:
                     {
-                        retVal = ((eESIRole)entityID).ToDelimitedString();
+                        retVal = ((eESIRole)entityID).ToDelimitedString(suppressZero: true);
                     }
                     break;
                 default:
@@ -91,5 +92,11 @@ namespace Eve.ESI.Standard.Authentication.Client
 
             return retVal;
         }
+
+        public Task<ESICallResponse<SearchResults>> Search(string query,eSearchEntity entities)
+        {
+            return SearchResults.Search(Client, Controller, query, entities);
+        }
+        
     }
 }

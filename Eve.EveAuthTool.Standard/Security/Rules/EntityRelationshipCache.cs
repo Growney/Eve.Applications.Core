@@ -11,25 +11,17 @@ namespace Eve.EveAuthTool.Standard.Security.Rules
         {
             foreach(EntityRelationship relationship in relationships)
             {
-                if(MeetsMask(relationship.Relationship,eESIEntityRelationshipOperatorMask.In))
-                {
-                    m_cache.Add((relationship.FromEntityID, relationship.FromEntityType, relationship.Relationship), relationship);
-                }
-                else if(MeetsMask(relationship.Relationship,eESIEntityRelationshipOperatorMask.Has) 
-                    || MeetsMask(relationship.Relationship, eESIEntityRelationshipOperatorMask.Is))
-                {
-                    m_cache.Add((relationship.ToEntityID, relationship.ToEntityType, relationship.Relationship), relationship);
-                }
+                m_cache.Add((relationship.ToEntityID, relationship.ToEntityType, relationship.Relationship), relationship);
             }
         }
-        private static bool MeetsMask(eESIEntityRelationship relationship,eESIEntityRelationshipOperatorMask mask)
+        
+        public bool TryGet(long entityID,eESIEntityType entityType,eESIEntityRelationship relationshipType,out EntityRelationship relationship)
         {
-            return ((int)relationship / (int)mask) == 1;
+            return m_cache.TryGetValue((entityID, entityType, relationshipType), out relationship);
         }
-
         public bool TryGet(AuthRuleRelationship rule,out EntityRelationship relationship)
         {
-            return m_cache.TryGetValue((rule.EntityID, rule.EntityType, rule.Relationship), out relationship);
+            return TryGet(rule.EntityID, rule.EntityType, rule.Relationship, out relationship);
         }
     }
 }

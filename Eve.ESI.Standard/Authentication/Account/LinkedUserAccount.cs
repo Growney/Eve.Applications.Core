@@ -13,6 +13,17 @@ namespace Eve.ESI.Standard.Account
         public string Link { get; set; }
         public byte TypeID { get; set; }
 
+        public LinkedUserAccount()
+        {
+           
+        }
+
+        public LinkedUserAccount(List<long> tokenIds)
+            :base(tokenIds)
+        {
+
+        }
+
         protected override void OnLoad(IDataAdapter adapter)
         {
             base.OnLoad(adapter);
@@ -59,12 +70,11 @@ namespace Eve.ESI.Standard.Account
 
         public static LinkedUserAccount CreateObject(string link,byte typeID,UserAccount account)
         {
-            return new LinkedUserAccount()
+            return new LinkedUserAccount(account.TokenIds)
             {
                 Id = account.Id,
                 AccountGuid = account.AccountGuid,
                 CreatedDate = account.CreatedDate,
-                TokenIds = new List<long>(account.TokenIds),
                 Link = link,
                 TypeID = typeID
             };

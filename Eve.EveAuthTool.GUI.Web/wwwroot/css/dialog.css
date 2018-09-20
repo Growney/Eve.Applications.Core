@@ -30,7 +30,7 @@
     border-color: var(--theme-secondary-back-colour);
     max-width: 0px;
     max-height: 0px;
-    overflow: hidden;
+    overflow:no-content;
 }
 
 .dialog-container.show .dialog {

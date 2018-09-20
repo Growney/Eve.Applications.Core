@@ -210,6 +210,34 @@ namespace Eve.ESI.Standard.AuthenticatedData
 
             return retVal;
         }
+
+        public async Task<IEnumerable<EntityRelationship>> CalculateInRelationships(eESIEntityRelationship relationship,bool oldData = false)
+        {
+            List<EntityRelationship> retVal = new List<EntityRelationship>();
+
+            switch (relationship)
+            {
+                case eESIEntityRelationship.Fleet:
+                    retVal.AddRange(await CalculateFleetRelationships(oldData));
+                    break;
+                case eESIEntityRelationship.NeutralStanding:
+                case eESIEntityRelationship.TerribleStanding:
+                case eESIEntityRelationship.BadStanding:
+                case eESIEntityRelationship.GoodStanding:
+                case eESIEntityRelationship.ExcellentStanding:
+                    retVal.AddRange(await CalculateStandingRelationships(oldData));
+                    break;
+                case eESIEntityRelationship.WarEnemy:
+                    break;
+                case eESIEntityRelationship.WarAlly:
+                    break;
+                default:
+                    break;
+            }
+
+            return retVal;
+        }
+
         public async Task<IEnumerable<EntityRelationship>> CalculateHasIsRelationships(bool oldData = false)
         {
             List<EntityRelationship> retVal = new List<EntityRelationship>();
@@ -365,26 +393,27 @@ namespace Eve.ESI.Standard.AuthenticatedData
             {
                 if(rolesResponse.Data.RolesEnum != eESIRole.None)
                 {
-                    retVal.Add(new EntityRelationship(EntityID, EntityType, (long)rolesResponse.Data.RolesEnum, eESIEntityType.role, eESIEntityRelationship.Roles));
+                    retVal.AddRange(EntityRelationship.ForRoleFlag(EntityID,eESIEntityRelationship.Roles,rolesResponse.Data.RolesEnum));
                 }
 
                 if (rolesResponse.Data.RolesAtBaseEnum != eESIRole.None)
                 {
-                    retVal.Add(new EntityRelationship(EntityID, EntityType, (long)rolesResponse.Data.RolesAtBaseEnum, eESIEntityType.role, eESIEntityRelationship.RolesAtBase));
+                    retVal.AddRange(EntityRelationship.ForRoleFlag(EntityID, eESIEntityRelationship.RolesAtBase, rolesResponse.Data.RolesAtBaseEnum));
                 }
 
                 if (rolesResponse.Data.RolesAtHqEnum != eESIRole.None)
                 {
-                    retVal.Add(new EntityRelationship(EntityID, EntityType, (long)rolesResponse.Data.RolesAtHqEnum, eESIEntityType.role, eESIEntityRelationship.RolesAtHQ));
+                    retVal.AddRange(EntityRelationship.ForRoleFlag(EntityID, eESIEntityRelationship.RolesAtHQ, rolesResponse.Data.RolesAtHqEnum));
                 }
 
                 if (rolesResponse.Data.RolesAtOtherEnum != eESIRole.None)
                 {
-                    retVal.Add(new EntityRelationship(EntityID, EntityType, (long)rolesResponse.Data.RolesAtOtherEnum, eESIEntityType.role, eESIEntityRelationship.RolesAtOther));
+                    retVal.AddRange(EntityRelationship.ForRoleFlag(EntityID, eESIEntityRelationship.RolesAtOther, rolesResponse.Data.RolesAtOtherEnum));
                 }
             }
             return retVal;
         }
+        
 
         public static List<AuthenticatedEntity> GetForAccounts(IESIAuthenticatedConfig config,ICommandController tenantcontroller,IStaticDataCache cache, PublicDataProvider publicData,IEnumerable<UserAccount> accounts)
         {

@@ -1,4 +1,6 @@
-﻿namespace Eve.ESI.Standard
+﻿using Gware.Standard.Data;
+
+namespace Eve.ESI.Standard
 {
     public enum eESIEntityType : int
     {
@@ -16,19 +18,28 @@
         None = 0,
 
         //Things that entities are in
+        
         Fleet = 101,
+        [EnumDisplayAttribute("Neutral Standing")]
         NeutralStanding = 102,
+        [EnumDisplayAttribute("Terrible Standing")]
         TerribleStanding = 103,
+        [EnumDisplayAttribute("Bad Standing")]
         BadStanding = 104,
+        [EnumDisplayAttribute("Good Standing")]
         GoodStanding = 105,
+        [EnumDisplayAttribute("Excellent Standing")]
         ExcellentStanding = 107,
         WarEnemy = 108,
         WarAlly = 109,
 
         //Things that entities have
         Roles = 201,
+        [EnumDisplayAttribute("Roles At Base")]
         RolesAtBase = 202,
+        [EnumDisplayAttribute("Roles At HQ")]
         RolesAtHQ = 203,
+        [EnumDisplayAttribute("Roles At Other")]
         RolesAtOther =  204,
         Title = 205,
         Capital = 206,
@@ -45,11 +56,11 @@
     public enum eESIEntityRelationshipOperatorMask : int
     {
         //Calculated from the point of view from the query entity
-       In = 100,
+       HasFrom = 100,
        //Calculated from the point of view of the character
        Has = 200,
        //Match on properties
-       Is = 300,
+       In = 300,
     }
 
     public enum eESIRelationshipDynamicEntity

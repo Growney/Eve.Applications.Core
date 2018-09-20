@@ -11,13 +11,24 @@
     <link rel="stylesheet" href="~/lib/font-awesome-5/web-fonts-with-css/css/fontawesome-all.min.css" />
     <link rel="stylesheet" href="~/css/dialog.css" />
     <link rel="stylesheet" href="~/css/site.css" />
-
+    <link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/material.css" />
     @RenderSection("Styles", required: false)
+
+    @{
+        ViewBag.menus = new List<object>()
+    {
+        new {text= "Account" },
+        new {text= "About ESA", path = "/Home/AboutESA/" },
+        new {text= "About Me", path = "/Home/AboutMe/" },
+        new {text= "Management", path = "/Management/Index" }
+    };
+    }
+
 </head>
 <body>
     <div class="site">
         <div class="site-logo">
-            <img src="@(parameters.Package.IsTenant ? parameters.Package.ESIConfiguration.GetImageSource((Eve.ESI.Standard.eESIEntityType)parameters.Package.CurrentTenant.EntityType,parameters.Package.CurrentTenant.EntityId,128) : "/images/logo.png")"/>
+            <img class="center" src="@(parameters.Package.IsTenant ? parameters.Package.ESIConfiguration.GetImageSource((Eve.ESI.Standard.eESIEntityType)parameters.Package.CurrentTenant.EntityType,parameters.Package.CurrentTenant.EntityId,128) : "/images/logo.png")" />
         </div>
         <div class="site-title">
             @(parameters.Package.IsTenant ? parameters.Package.CurrentTenant.DisplayName : "")
@@ -25,16 +36,24 @@
         <div class="site-info">
 
         </div>
+        <div class="site-breadcrumbs">
+            @RenderSection("Breadcrumbs", false)
+        </div>
         <div class="site-content">
             @RenderBody()
         </div>
         <div class="site-sidebar-left">
+            @if (parameters.Package.IsTenant)
+            {
+                <a asp-controller="Management" asp-action="Index">Management</a>
+            }
             <button onclick="showDialog('registrationDialog')">Account</button>
-            <a asp-controller="Home" asp-action="Features">About ESA</a>
-            <a asp-controller="Home" asp-action="About">About Me</a>
+            <a asp-controller="Home" asp-action="AboutESA">About ESA</a>
+            <a asp-controller="Home" asp-action="AboutMe">About Me</a>
+
         </div>
-    </div> 
-   
+    </div>
+
     <div id="registrationDialog" class="dialog-container">
         <div class="dialog">
             @if (parameters.Package.IsTenant)
@@ -95,11 +114,18 @@
         </div>
     </div>
 
+
+
+
+
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/Microsoft.jQuery.Unobtrusive.Ajax/jquery.unobtrusive-ajax.min.js"></script>
+    <script src="https://cdn.syncfusion.com/ej2/dist/ej2.min.js"></script>
+
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/dialog.js" asp-append-version="true"></script>
     @RenderSection("Scripts", required: false)
-
+    <ejs-scripts></ejs-scripts>
 </body>
 </html>

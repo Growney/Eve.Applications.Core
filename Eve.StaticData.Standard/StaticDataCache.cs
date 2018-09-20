@@ -2,7 +2,7 @@
 using Gware.Standard.Storage.Controller;
 using System;
 using System.Collections.Generic;
-
+using System.Threading.Tasks;
 
 namespace Eve.Static.Standard
 {
@@ -15,6 +15,21 @@ namespace Eve.Static.Standard
         public StaticDataCache(IControllerProvider provider)
         {
             m_controller = provider.CreateController("StaticData");
+        }
+
+        public async Task<T> GetItemAsync<T>(int primaryKey) where T : LoadedFromAdapterBase, new()
+        {
+            Type tType = typeof(T);
+
+            if (!CacheContains<T>(primaryKey, out T retVal, tType))
+            {
+                if (retVal == null)
+                {
+                    retVal = await GetStoredItemAsync<T>(primaryKey, tType);
+                }
+            }
+
+            return retVal;
         }
 
         public T GetItem<T>(int primaryKey) where T : LoadedFromAdapterBase, new()
@@ -31,12 +46,25 @@ namespace Eve.Static.Standard
             
             return retVal;
         }
-
+        private async Task<T>GetStoredItemAsync<T>(int primaryKey, Type typeOfT = null) where T : LoadedFromAdapterBase, new()
+        {
+            Type tType = typeOfT ?? typeof(T);
+            T retVal = await StaticDataLoader.GetDataAsync<T>(m_controller, primaryKey);
+            CheckAndAdd(primaryKey, retVal);
+            return retVal;
+        }
         private T GetStoredItem<T>(int primaryKey, Type typeOfT = null) where T : LoadedFromAdapterBase, new()
         {
             Type tType = typeOfT ?? typeof(T);
             T retVal = StaticDataLoader.GetData<T>(m_controller, primaryKey);
-            if (retVal != null)
+            CheckAndAdd(primaryKey,retVal);
+            return retVal;
+        }
+
+        private void CheckAndAdd<T>(int primaryKey,T value, Type typeOfT = null) where T : LoadedFromAdapterBase, new()
+        {
+            Type tType = typeOfT ?? typeof(T);
+            if (value != null)
             {
                 lock (m_alterLock)
                 {
@@ -47,12 +75,11 @@ namespace Eve.Static.Standard
 
                     if (!m_cache[tType].ContainsKey(primaryKey))
                     {
-                        m_cache[tType].Add(primaryKey, retVal);
+                        m_cache[tType].Add(primaryKey, value);
                     }
-                    
+
                 }
             }
-            return retVal;
         }
 
         public bool CacheContains<T>(int primaryKey,out T item,Type typeOfT = null) where T : class
