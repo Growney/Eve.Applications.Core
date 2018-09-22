@@ -45,6 +45,15 @@ namespace Eve.ESI.Standard
         {
             return response == null || (response.ReRun && !alwaysReturnOldData);
         }
+
+        private static Guid GenerateGuid<T>(ICommandController controller, Dictionary<string, object> values = null, Dictionary<string, string> queryParameters = null)
+        {
+
+        }
+        protected static T GetStoredSingle<T>(ICommandController controller, Dictionary<string, object> values = null, Dictionary<string, string> queryParameters = null)
+        {
+
+        }
         protected static void ClearStoredData<T>(ICommandController controller,Dictionary<string,object> values = null, Dictionary<string, string> queryParameters = null) where T : ESIItemBase
         {
             ESICallParameters parameters = new ESICallParameters(template: ESIItemAttribute.GetRouteTemplate(typeof(T)), tokenValue: values, queryParameters: queryParameters);

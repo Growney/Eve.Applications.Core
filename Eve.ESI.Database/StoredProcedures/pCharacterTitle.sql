@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[pCharacterTitles]
+CREATE PROCEDURE [dbo].[pCharacterTitle]
 	@Result NCHAR(50),
 	@CallID UNIQUEIDENTIFIER,
 	@Name VARCHAR(MAX) = NULL,
@@ -8,18 +8,18 @@ BEGIN
 
 IF @Result = 'Save'
 BEGIN
-	INSERT INTO CharacterTitles (CallID,Name,TitleId)
+	INSERT INTO CharacterTitle (CallID,Name,TitleId)
 	VALUES (@CallID,@Name,@TitleId)
 
 SELECT 0 AS [Value]
 END
 IF @Result = 'All'
 BEGIN
-	SELECT* FROM CharacterTitles
+	SELECT* FROM CharacterTitle
 END
 IF @Result = 'ForRequest'
 BEGIN
-	SELECT* FROM CharacterTitles WHERE CallID = @CallID
+	SELECT* FROM CharacterTitle WHERE CallID = @CallID
 END
 
 END

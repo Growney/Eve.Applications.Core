@@ -209,6 +209,18 @@ namespace Eve.ESI.Standard.Authentication.Token
             }
             return retval;
         }
+
+        public static List<ESIToken> GetAll(ICommandController controller)
+        {
+            DataCommand command = new DataCommand("ESIToken", "All");
+            return Load<ESIToken>(controller.ExecuteCollectionCommand(command));
+        }
+        public static List<ESIToken> ForEntityType(ICommandController controller, eESIEntityType type)
+        {
+            DataCommand command = new DataCommand("ESIToken", "ForEntityType");
+            command.AddParameter("EntityType", System.Data.DbType.Byte).Value = (byte)type;
+            return Load<ESIToken>(controller.ExecuteCollectionCommand(command));
+        }
         public static List<ESIToken> ForEntityTypeAndID(ICommandController controller,long entityID,eESIEntityType type)
         {
             DataCommand command = new DataCommand("ESIToken", "ForEntityTypeAndID");

@@ -246,6 +246,7 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
             {
                 createFrom.Add(eESIEntityType.character);
             }
+            createFrom.Add(eESIEntityType.corporation);
             args.CreateFromResponse = createFrom;
 
             return Redirect(args.GetAuthenticationUrl(

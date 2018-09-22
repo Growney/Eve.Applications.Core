@@ -98,14 +98,16 @@
     <Build Include="StoredProcedures\pAccountLink.sql" />
     <Build Include="StoredProcedures\pESIToken.sql" />
     <Build Include="StoredProcedures\pUserAccount.sql" />
-    <Build Include="Tables\CharacterTitles.sql" />
+    <Build Include="Tables\CharacterTitle.sql" />
     <Build Include="Tables\ESIToken.sql" />
     <Build Include="Tables\UserAccount.sql" />
     <Build Include="Tables\UserAccountToken.sql" />
     <Build Include="Tables\AccountLink.sql" />
-    <Build Include="StoredProcedures\pCharacterTitles.sql" />
+    <Build Include="StoredProcedures\pCharacterTitle.sql" />
     <Build Include="DataTypes\IDList.sql" />
     <Build Include="DataTypes\LongIDList.sql" />
+    <Build Include="Tables\CorporationTitle.sql" />
+    <Build Include="StoredProcedures\pCorporationTitle.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="Eve.ESI.Database.refactorlog" />

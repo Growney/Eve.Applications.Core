@@ -96,3 +96,19 @@ BEGIN
 	) = @EntityID
 
 END
+
+IF @Result = 'All'
+BEGIN
+
+	SELECT* FROM ESIToken
+
+END
+
+IF @Result = 'ForEntityType'
+BEGIN
+
+	SELECT*
+	FROM ESIToken
+	WHERE EntityType = @EntityType
+
+END

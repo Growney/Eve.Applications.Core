@@ -52,5 +52,24 @@ namespace Eve.ESI.Standard.DataItem
                     throw new NotSupportedException();
             }
         }
+
+        public static eESIEntityRelationship StandingToRelationship(eESIStanding standing)
+        {
+            switch (standing)
+            {
+                case eESIStanding.NeutralStanding:
+                    return eESIEntityRelationship.NeutralStanding;
+                case eESIStanding.TerribleStanding:
+                    return eESIEntityRelationship.TerribleStanding;
+                case eESIStanding.BadStanding:
+                    return eESIEntityRelationship.BadStanding;
+                case eESIStanding.GoodStanding:
+                    return eESIEntityRelationship.GoodStanding;
+                case eESIStanding.ExcellentStanding:
+                    return eESIEntityRelationship.ExcellentStanding;
+                default:
+                    throw new NotSupportedException();
+            }
+        }
     }
 }

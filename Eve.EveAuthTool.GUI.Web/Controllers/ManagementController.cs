@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Eve.ESI.Standard;
+using Eve.ESI.Standard.AuthenticatedData;
+using Eve.ESI.Standard.DataItem.Corporation;
 using Eve.ESI.Standard.DataItem.Search;
 using Eve.EveAuthTool.Core.Security.Middleware;
 using Eve.EveAuthTool.GUI.Web.Models.Management;
@@ -81,5 +83,25 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
                 ESI.Standard.DataItem.Helper.RoleLocationToRelationship((ESI.Standard.DataItem.eRoleLocation)location))));
         }
 
+        [HttpPost]
+        public IActionResult FormStandingRule(long entityID, int entityType,int standingType, int index)
+        {
+            return PartialView("IndexedAuthRuleRelationship", new IndexAuthRuleRelationship(index,
+                AuthRuleRelationship.GetRelationshipRule(entityID, (eESIEntityType)entityType,
+                ESI.Standard.DataItem.Helper.StandingToRelationship((eESIStanding)standingType))));
+        }
+        [HttpGet]
+        [Authorize(Roles = "Manage")]
+        public async Task<IActionResult> CorporationTitles(int corporationID)
+        {
+            List<CorporationTitle> retVal = new List<CorporationTitle>();
+            AuthenticatedEntity entity = AuthenticatedEntity.GetForEntity(ESIConfiguration, TenantController, Cache, PublicDataProvider, corporationID, eESIEntityType.corporation);
+            if(entity != null)
+            {
+                ESICollectionCallResponse<CorporationTitle> titles = await entity.GetCorporationTitles();
+                retVal.AddRange(titles.Data);
+            }
+            return PartialView("CorporationTitles", retVal);
+        }
     }
 }

@@ -7,6 +7,7 @@
     {
         roleObjectList.Add(new { id = role.Id, text = role.Name });
     }
+
     var roleSelectList = new SelectList(roleObjectList, "id", "text", Model.RoleId);
 
 
@@ -15,21 +16,23 @@
     {
         roleLocationList.Add(new { id = (int)location, text = Gware.Standard.Data.EnumDisplayAttribute.GetEnumString(location) });
     }
-    ViewBag.roleLocationSelectList = roleLocationList;
+
+    var allEntities = Eve.ESI.Standard.AuthenticatedData.AuthenticatedEntity.GetAll(parameters.Package.ESIConfiguration, parameters.Package.TenantController, parameters.Package.Cache, parameters.Package.PublicDataProvider);
 
     var breadcrumbs = new List<Breadcrumb>()
-    {
-        new Breadcrumb() {Controller="Management",Action="Index", Text="Management"},
-        new Breadcrumb() {Controller="Management",Action="Rules", Text="Rules"}
-    };
+{
+new Breadcrumb() {Controller="Management",Action="Index", Text="Management"},
+new Breadcrumb() {Controller="Management",Action="Rules", Text="Rules"}
+};
 }
-    @section Breadcrumbs{
-    <partial name="breadcrumbs" model="breadcrumbs">
+@section Breadcrumbs{
+<partial name="breadcrumbs" model="breadcrumbs">
 }
 @section Styles{
-    <link rel="stylesheet" href="~/css/rule.css" />
+
     <link rel="stylesheet" href="~/css/search.css" />
     <link rel="stylesheet" href="~/css/spinner.css" />
+    <link rel="stylesheet" href="~/css/rule.css" />
 
 }
 
@@ -72,6 +75,7 @@
             <e-tab-tabitems>
                 <e-tab-tabitem header="@(new Syncfusion.EJ2.Navigations.TabHeader { Text = "Entity" })" content="#entitySearch"></e-tab-tabitem>
                 <e-tab-tabitem header="@(new Syncfusion.EJ2.Navigations.TabHeader { Text = "Roles" })" content="#role"></e-tab-tabitem>
+                <e-tab-tabitem header="@(new Syncfusion.EJ2.Navigations.TabHeader { Text = "Titles" })" content="#titles"></e-tab-tabitem>
                 <e-tab-tabitem header="@(new Syncfusion.EJ2.Navigations.TabHeader { Text = "Standings" })" content="#standing"></e-tab-tabitem>
             </e-tab-tabitems>
         </ejs-tab>
@@ -93,10 +97,9 @@
             </div>
             <div id="entitySearchResults"></div>
         </div>
-
         <div id="role" class="entity-role" style="display:none">
             <div>
-                <ejs-dropdownlist id="roleLocations" dataSource="ViewBag.roleLocationSelectList" placeholder="Select a location" index="0" popupHeight="220px">
+                <ejs-dropdownlist id="roleLocations" dataSource="roleLocationList" placeholder="Select a location" index="0" popupHeight="220px">
                     <e-dropdownlist-fields text="text" value="id"></e-dropdownlist-fields>
                 </ejs-dropdownlist>
             </div>
@@ -115,14 +118,68 @@
                     <div id="@group" style="display:none">
                         @foreach (Eve.ESI.Standard.DataItem.eESIRole role in Eve.ESI.Standard.DataItem.Helper.GroupedRoles[group])
                         {
-                            <div onclick="AddRole(@((long)role))" class="esi-role">@(Gware.Standard.Data.EnumDisplayAttribute.GetEnumString(role))</div>
+                            <div onclick="AddRole(@((long)role))" class="role-item esi-role">@(Gware.Standard.Data.EnumDisplayAttribute.GetEnumString(role))</div>
                         }
                     </div>
                 }
             </div>
-            
+
         </div>
         <div id="standing" class="entity-standing" style="display:none">
+            <div>
+                <ejs-accordion id="standingAccordion">
+                    <e-accordion-accordionitems>
+                        @foreach (var entityType in allEntities.Keys)
+                        {
+                            <e-accordion-accordionitem header="@(Gware.Standard.Data.EnumDisplayAttribute.GetEnumString(entityType))" content="#@entityType"></e-accordion-accordionitem>
+                        }
+                    </e-accordion-accordionitems>
+                </ejs-accordion>
+
+                @foreach (var entityType in allEntities.Keys)
+                {
+
+                    <div id="@entityType" style="display:none">
+                        @foreach (var entity in allEntities[entityType])
+                        {
+                            <div class="standing-item">
+                                <img src="@parameters.Package.ESIConfiguration.GetImageSource(entityType,entity.EntityID,32)" />
+                                <div class="name">@( await parameters.Package.PublicDataProvider.GetEntityName(entityType, entity.EntityID))</div>
+                                <div class="e-btn-group">
+                                    <ejs-button onclick="AddStanding(@entity.EntityID,@((int)entityType),4);" cssClass ="e-small" id="@($"{entityType}{entity.EntityID}Excellent")"content="Excellent"></ejs-button>
+                                    <ejs-button onclick="AddStanding(@entity.EntityID,@((int)entityType),3);" cssClass="e-small" id="@($"{entityType}{entity.EntityID}Good")"content="Good"></ejs-button>
+                                    <ejs-button onclick="AddStanding(@entity.EntityID,@((int)entityType),0);" cssClass="e-small" id="@($"{entityType}{entity.EntityID}Neutral")"content="Neutral"></ejs-button>
+                                    <ejs-button onclick="AddStanding(@entity.EntityID,@((int)entityType),2);" cssClass="e-small" id="@($"{entityType}{entity.EntityID}Bad")"content="Bad"></ejs-button>
+                                    <ejs-button onclick="AddStanding(@entity.EntityID,@((int)entityType),1);" cssClass="e-small" id="@($"{entityType}{entity.EntityID}Terrible")"content="Terrible"></ejs-button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+        <div id="titles" style="display:none;">
+            @{
+                var authenticatedCorporations = Eve.ESI.Standard.AuthenticatedData.AuthenticatedEntity.ForEntityType(parameters.Package.ESIConfiguration, parameters.Package.TenantController, parameters.Package.Cache, parameters.Package.PublicDataProvider, Eve.ESI.Standard.eESIEntityType.corporation);
+                var titleCorporationList = new List<Object>();
+                foreach (var corp in authenticatedCorporations)
+                {
+                    titleCorporationList.Add(new { id = corp.EntityID, text = await parameters.Package.PublicDataProvider.GetEntityName(corp.EntityType, corp.EntityID) });
+                }
+            }
+            <p>Warning:  Titles have IDs that are not unique to the corporation. Creating a Rule with a title relationship should also have the relationship for the required corporation and have Match All selected. 
+            If this is not done the title will match on any character with that title in any corporation.</p>
+            <ejs-dropdownlist id="titleEntities" dataSource="titleCorporationList" placeholder="Select a Corporation" popupHeight="220px" change="OnTitleCorporationSelect">
+                <e-dropdownlist-fields text="text" value="id"></e-dropdownlist-fields>
+            </ejs-dropdownlist>
+            <div id="titleWait" class="line-spinner hidden">
+                <div class="rect1"></div>
+                <div class="rect2"></div>
+                <div class="rect3"></div>
+                <div class="rect4"></div>
+                <div class="rect5"></div>
+            </div>
+            <div id="titleResults"></div>
         </div>
     </div>
 </div>

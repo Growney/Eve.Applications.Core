@@ -19,11 +19,14 @@ namespace Eve.ESI.Standard.Authentication.Client
         public IStaticDataCache Cache { get; }
         public IESIAuthenticationClient Client { get; }
         public ICommandController Controller { get; }
-        public PublicDataProvider(IESIAuthenticationClient client, ICommandController publicDataController, IStaticDataCache cache)
+
+        private readonly ICommandController m_tenantController;
+        public PublicDataProvider(IESIAuthenticationClient client, ICommandController publicDataController, IStaticDataCache cache,ICommandController tenantController)
         {
             Client = client;
             Controller = publicDataController;
             Cache = cache;
+            m_tenantController = tenantController;
         }
 
         public Task<ESICallResponse<CharacterInfo>> GetCharacterInfo(long characterID, bool oldData = false)
@@ -86,10 +89,22 @@ namespace Eve.ESI.Standard.Authentication.Client
                         retVal = ((eESIRole)entityID).ToDelimitedString(suppressZero: true);
                     }
                     break;
+                case eESIEntityType.title:
+                    {
+                        CorporationTitle title = CorporationTitle.ForTitleID(m_tenantController, (int)entityID);
+                        if(title != null)
+                        {
+                            retVal = title.Name;
+                        }
+                    }
+                    break;
                 default:
                     break;
             }
-
+            if (string.IsNullOrEmpty(retVal))
+            {
+                retVal = "Name not found";
+            }
             return retVal;
         }
 
@@ -97,6 +112,7 @@ namespace Eve.ESI.Standard.Authentication.Client
         {
             return SearchResults.Search(Client, Controller, query, entities);
         }
+        
         
     }
 }

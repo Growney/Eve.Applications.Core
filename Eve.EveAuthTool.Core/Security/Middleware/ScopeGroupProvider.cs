@@ -18,15 +18,15 @@ namespace Eve.EveAuthTool.Core.Security.Middleware
             new ScopeGroup(0x10, "Skills", "Read all things skill related including active skill queue, clones,implants and all skills", eESIScope.esi_skills_read_skillqueue_v1, eESIScope.esi_skills_read_skills_v1, eESIScope.esi_clones_read_clones_v1, eESIScope.esi_clones_read_implants_v1),
             new ScopeGroup(0x20, "Social", "Read your contacts and your standings", eESIScope.esi_characters_read_contacts_v1, eESIScope.esi_characters_read_standings_v1),
             new ScopeGroup(0x40, "Stats", "Read your character statistics including jump fatigue", eESIScope.esi_characters_read_fatigue_v1, eESIScope.esi_characterstats_read_v1),
-            new ScopeGroup(0x80, "Security", "Read your characters roles", eESIScope.esi_characters_read_corporation_roles_v1),
+            new ScopeGroup(0x80, "Security", "Read your characters roles", eESIScope.esi_characters_read_corporation_roles_v1, eESIScope.esi_characters_read_titles_v1),
             new ScopeGroup(0x100, "Fleet", "Read your fleet information to allow relationship information", eESIScope.esi_fleets_read_fleet_v1)
             );
         public static readonly ScopeGroupCollection CorporationScopes = new ScopeGroupCollection(
-            new ScopeGroup(0x01, "Roles/Members", "View the roles assigned in your corporation to allow permissions to be set automatically", eESIScope.esi_corporations_read_corporation_membership_v1, eESIScope.esi_corporations_read_titles_v1, eESIScope.esi_characters_read_corporation_roles_v1),
+            new ScopeGroup(0x01, "Roles/Members", "View the roles assigned in your corporation to allow permissions to be set automatically", eESIScope.esi_corporations_read_corporation_membership_v1, eESIScope.esi_corporations_read_titles_v1, eESIScope.esi_characters_read_corporation_roles_v1,eESIScope.esi_corporations_read_titles_v1),
             new ScopeGroup(0x02, "Standings", "Access your corporation standings to allow allies permissions to be set automatically", eESIScope.esi_corporations_read_contacts_v1)
             );
         public static readonly ScopeGroupCollection AllianceScopes = new ScopeGroupCollection(
-            new ScopeGroup(0x01, "Roles/Members", "View the roles assigned in your corporation to allow permissions to be set automatically", eESIScope.esi_corporations_read_corporation_membership_v1, eESIScope.esi_corporations_read_titles_v1, eESIScope.esi_characters_read_corporation_roles_v1),
+            new ScopeGroup(0x01, "Roles/Members", "View the roles assigned in your corporation to allow permissions to be set automatically", eESIScope.esi_corporations_read_corporation_membership_v1, eESIScope.esi_corporations_read_titles_v1, eESIScope.esi_characters_read_corporation_roles_v1, eESIScope.esi_corporations_read_titles_v1),
             new ScopeGroup(0x02, "Standings", "Access your corporation standings to allow allies permissions to be set automatically", eESIScope.esi_corporations_read_contacts_v1)
             );
 

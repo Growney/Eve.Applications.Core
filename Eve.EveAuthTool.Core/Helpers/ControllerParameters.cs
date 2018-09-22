@@ -38,7 +38,13 @@ namespace Eve.EveAuthTool.Core.Helpers
         }
         public ITenantConfiguration TenantConfiguration { get; }
 
-        public PublicDataProvider PublicData { get; }
+        public PublicDataProvider PublicData
+        {
+            get
+            {
+                return new PublicDataProvider(ESIConfiguration.Client, PublicDataController, Cache, TenantController);
+            }
+        }
 
         public ControllerParameters(ITenantConfiguration tenantConfiguration,ITenantControllerProvider tenantControllerProvider, IESIAuthenticatedConfig esiConfig, IAllowedCharactersProvider characters, IStaticDataCache cache)
         {
@@ -47,7 +53,6 @@ namespace Eve.EveAuthTool.Core.Helpers
             Characters = characters;
             Cache = cache;
             TenantConfiguration = tenantConfiguration;
-            PublicData = new PublicDataProvider(esiConfig.Client, TenantProvider.GetDefaultDataController(),Cache);
         }
 
         public ViewParameterPackage CreateViewParameters(HttpContext context)

@@ -69,13 +69,16 @@
     grid-area:edit
 }
 
-.esi-role {
+.role-item {
     padding: 5px;
     height: 32px;
-    display: grid;
     position: relative;
     border-radius: 3px;
-    line-height:32px;
+    line-height: 32px;
+}
+
+.esi-role {
+    display: grid;
 }
 
     .esi-role div {
@@ -120,3 +123,23 @@
     padding:10px;
 }
 
+.standing-item{
+    display:grid;
+    grid-column-gap:5px;
+    grid-template-rows: 1fr;
+    grid-template-columns: 32px 1fr auto;
+    grid-template-areas: "image name buttons";
+}
+.standing-item .e-btn-group{
+    grid-area:buttons;
+    font-size:0.5em;
+}
+
+.standing-item img{
+    grid-area:image;
+}
+
+.standing-item .name {
+    grid-area: name;
+    line-height:32px;
+}

@@ -89,9 +89,9 @@ namespace Eve.ESI.Standard.DataItem.Character
             return RolesAtOther.HasFlag(role);
         }
 
-        public static System.Threading.Tasks.Task<ESICallResponse<CharacterRoles>> GetCharacterRoles(IESIAuthenticationClient client, ICommandController controller, long characterID, Func<Task<ESITokenRefreshResponse>> authenticationTokenTask)
+        public static System.Threading.Tasks.Task<ESICallResponse<CharacterRoles>> GetCharacterRoles(IESIAuthenticationClient client, ICommandController controller, long characterID, Func<Task<ESITokenRefreshResponse>> authenticationTokenTask,bool olddata = false)
         {
-            return GetItem<CharacterRoles>(client, controller, new Dictionary<string, object>() { { "character_id", characterID } }, authenticationTokenTask: authenticationTokenTask);
+            return GetItem<CharacterRoles>(client, controller, new Dictionary<string, object>() { { "character_id", characterID } }, authenticationTokenTask: authenticationTokenTask, alwaysReturnOldData: olddata);
         }
     }
 }

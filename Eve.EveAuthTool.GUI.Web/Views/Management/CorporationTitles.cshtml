@@ -1,0 +1,15 @@
+﻿@model IEnumerable<Eve.ESI.Standard.DataItem.Corporation.CorporationTitle>
+
+@if (Model.Count<Eve.ESI.Standard.DataItem.Corporation.CorporationTitle>() == 0)
+{
+    <div>
+        No Titles Found
+    </div>
+}
+else
+{
+    foreach(var title in Model)
+    {
+        <div>@title.Name</div>
+    }
+}

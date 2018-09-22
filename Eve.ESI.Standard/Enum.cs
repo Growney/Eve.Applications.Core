@@ -4,15 +4,36 @@ namespace Eve.ESI.Standard
 {
     public enum eESIEntityType : int
     {
+        [EnumDisplay("Character")]
         character = 0,
+        [EnumDisplay("Corporation")]
         corporation = 1,
+        [EnumDisplay("Alliance")]
         alliance = 2,
+        [EnumDisplay("Faction")]
         faction = 3,
-
+        [EnumDisplay("Role")]
         role = 4,
+        [EnumDisplay("Fleet FC")]
         fleetFC = 5,
+        [EnumDisplay("Title")]
+        title = 6
     }
     
+    public enum eESIStanding
+    {
+        [EnumDisplay("Neutral Standing")]
+        NeutralStanding,
+        [EnumDisplay("Terrible Standing")]
+        TerribleStanding,
+        [EnumDisplay("Bad Standing")]
+        BadStanding,
+        [EnumDisplay("Good Standing")]
+        GoodStanding,
+        [EnumDisplay("Excellent Standing")]
+        ExcellentStanding,
+    }
+
     public enum eESIEntityRelationship : int
     {
         None = 0,
@@ -20,26 +41,26 @@ namespace Eve.ESI.Standard
         //Things that entities are in
         
         Fleet = 101,
-        [EnumDisplayAttribute("Neutral Standing")]
+        [EnumDisplay("Neutral Standing")]
         NeutralStanding = 102,
-        [EnumDisplayAttribute("Terrible Standing")]
+        [EnumDisplay("Terrible Standing")]
         TerribleStanding = 103,
-        [EnumDisplayAttribute("Bad Standing")]
+        [EnumDisplay("Bad Standing")]
         BadStanding = 104,
-        [EnumDisplayAttribute("Good Standing")]
+        [EnumDisplay("Good Standing")]
         GoodStanding = 105,
-        [EnumDisplayAttribute("Excellent Standing")]
+        [EnumDisplay("Excellent Standing")]
         ExcellentStanding = 107,
         WarEnemy = 108,
         WarAlly = 109,
 
         //Things that entities have
         Roles = 201,
-        [EnumDisplayAttribute("Roles At Base")]
+        [EnumDisplay("Roles At Base")]
         RolesAtBase = 202,
-        [EnumDisplayAttribute("Roles At HQ")]
+        [EnumDisplay("Roles At HQ")]
         RolesAtHQ = 203,
-        [EnumDisplayAttribute("Roles At Other")]
+        [EnumDisplay("Roles At Other")]
         RolesAtOther =  204,
         Title = 205,
         Capital = 206,
