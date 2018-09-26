@@ -99,7 +99,7 @@ namespace Eve.ESI.Standard.AuthenticatedData
         {
             return ESIToken.FindWithScope(m_accountTokens, scope) != null;
         }
-        
+
         public Task<ESICallResponse<CharacterSkillSheet>> GetSkillSheet(bool oldData)
         {
             return CharacterSkillSheet.GetCharacterSkillSheet(Config.Client, TenantController, EntityID, GetAuthenticationToken(eESIScope.esi_skills_read_skills_v1), oldData);
@@ -247,7 +247,7 @@ namespace Eve.ESI.Standard.AuthenticatedData
         {
             List<EntityRelationship> retVal = new List<EntityRelationship>();
             retVal.AddRange(await CalculateRoleRelationships(oldData));
-#warning Calculate Title relationships 
+            retVal.AddRange(await CalculateTitleRelationships(oldData));
 #warning Calculate Asset relationships
 
             retVal.AddRange(await CalculatePropertyRelationships(oldData));
@@ -418,7 +418,22 @@ namespace Eve.ESI.Standard.AuthenticatedData
             }
             return retVal;
         }
-        
+        public async Task<List<EntityRelationship>> CalculateTitleRelationships(bool oldData = false)
+        {
+            List<EntityRelationship> retVal = new List<EntityRelationship>();
+
+            if(EntityType == eESIEntityType.character)
+            {
+                ESICollectionCallResponse<CharacterTitle> characterTitles = await GetCharacterTitles(oldData);
+
+                foreach (CharacterTitle title in characterTitles.Data)
+                {
+                    retVal.Add(new EntityRelationship(EntityID, EntityType, title.TitleId, eESIEntityType.title, eESIEntityRelationship.Title));
+                }
+            }
+            return retVal;
+        }
+
         public static List<AuthenticatedEntity> GetForAccounts(IESIAuthenticatedConfig config,ICommandController tenantcontroller,IStaticDataCache cache, PublicDataProvider publicData,IEnumerable<UserAccount> accounts)
         {
             List<AuthenticatedEntity> retVal = new List<AuthenticatedEntity>();

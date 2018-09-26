@@ -107,7 +107,6 @@ namespace Eve.ESI.Standard
     {
         public override long Id { get; set; }
         public Guid CallID { get; set; }
-        public Guid ParameterGuid { get; set; }
         public string Uri { get; set; }
         public DateTime Executed { get; set; }
         public System.Net.HttpStatusCode ResponseCode { get; set; }
@@ -158,7 +157,6 @@ namespace Eve.ESI.Standard
         {
             DataCommand command = new DataCommand("ESICallResponse", "Save");
             command.AddParameter("CallID", System.Data.DbType.Guid).Value = CallID;
-            command.AddParameter("ParameterGuid", System.Data.DbType.Guid).Value = ParameterGuid;
             command.AddParameter("Uri", System.Data.DbType.String).Value = Uri;
             command.AddParameter("Executed", System.Data.DbType.DateTime).Value = Executed;
             command.AddParameter("ResponseCode", System.Data.DbType.Int16).Value = (short)ResponseCode;
@@ -174,7 +172,6 @@ namespace Eve.ESI.Standard
         {
             Id = adapter.GetValue("Id", 0L);
             CallID = new Guid(adapter.GetValue("CallID", string.Empty));
-            ParameterGuid = new Guid(adapter.GetValue("ParameterGuid", string.Empty));
             Uri = adapter.GetValue("Uri", String.Empty);
             Executed = adapter.GetValue("Executed", DateTime.MinValue);
             ResponseCode = (System.Net.HttpStatusCode)adapter.GetValue("ResponseCode", 0);
@@ -185,11 +182,11 @@ namespace Eve.ESI.Standard
             Pages = adapter.GetValue("Pages", 0);
         }
 
-        public static T GetResponseForParameterHash<T>(ICommandController controller, Guid hash) where T : ESICallResponse, new()
+        public static T ForCallID<T>(ICommandController controller, Guid callID) where T : ESICallResponse, new()
         {
             T retVal = null;
-            DataCommand command = new DataCommand("ESICallResponse", "ParameterHash");
-            command.AddParameter("ParameterGuid", System.Data.DbType.Guid).Value = hash;
+            DataCommand command = new DataCommand("ESICallResponse", "ForCallID");
+            command.AddParameter("CallID", System.Data.DbType.Guid).Value = callID;
 
             retVal = LoadSingle<T>(controller.ExecuteCollectionCommand(command));
 

@@ -34,7 +34,7 @@ namespace Eve.ESI.Standard.DataItem
             ESIIntegerCollectionCallResponse<T> result = null;
             if (controller != null)
             {
-                result = ESICallResponse.GetResponseForParameterHash<ESIIntegerCollectionCallResponse<T>>(controller, parameters.GetGuid());
+                result = ESICallResponse.ForCallID<ESIIntegerCollectionCallResponse<T>>(controller, parameters.GetGuid());
             }
             if (ShouldReRunResponse(result, alwaysReturnOldData))
             {
@@ -57,7 +57,7 @@ namespace Eve.ESI.Standard.DataItem
                     {
                         parameters.IfNoneMatch = result.ETag;
                     }
-                    result = await client.GetIntegerCollectionResponse<ESIIntegerCollectionCallResponse<T>,T>(result?.CallID ?? Guid.NewGuid(), parameters);
+                    result = await client.GetIntegerCollectionResponse<ESIIntegerCollectionCallResponse<T>,T>(parameters);
                     if (result != null)
                     {
                         if (controller != null)

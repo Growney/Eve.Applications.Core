@@ -72,57 +72,87 @@ namespace Eve.EveAuthTool.Standard.Security.Rules
             DataCommand command = new DataCommand("AuthRule", "All");
             return Load<AuthRule>(controller.ExecuteCollectionCommand(command));
         }
+
+        private static async Task<bool> CheckHasFromRelationship(IESIAuthenticatedConfig config, ICommandController tenantcontroller, IStaticDataCache staticCache, PublicDataProvider publicData, AuthRuleRelationship relationship, IEnumerable<EntityRelationship> inRelationships)
+        {
+            bool retVal = false;
+            AuthenticatedEntity ruleRelationshipEntity = AuthenticatedEntity.GetForEntity(config, tenantcontroller, staticCache, publicData, relationship.EntityID, relationship.EntityType);
+            if (ruleRelationshipEntity != null)
+            {
+                IEnumerable<EntityRelationship> ruleEntityRelationships = await ruleRelationshipEntity.CalculateInRelationships(relationship.Relationship);
+                EntityRelationshipCache ruleEntityCache = new EntityRelationshipCache(ruleEntityRelationships);
+                foreach (EntityRelationship inRelationship in inRelationships)
+                {
+                    if (ruleEntityCache.TryGet(inRelationship.ToEntityID, inRelationship.ToEntityType, relationship.Relationship, out _))
+                    {
+                        retVal = true;
+                        break;
+                    }
+                }
+            }
+            return retVal;
+        }
+        public static bool CheckRuleParentRelationships(AuthRuleRelationship rule, IEnumerable<EntityRelationship> inRelationships)
+        {
+            bool retVal = true;
+
+            if(rule.ParentEntityID != 0 && rule.ParentEntityType != eESIEntityType.none)
+            {
+                retVal = false;
+                foreach(EntityRelationship relationship in inRelationships)
+                {
+                    if(relationship.ToEntityID == rule.ParentEntityID && relationship.ToEntityType == rule.ParentEntityType)
+                    {
+                        retVal = true;
+                        break;
+                    }
+                }
+            }
+
+            return retVal;
+        }
         public static async Task<Role> GetEntityRole(IESIAuthenticatedConfig config, ICommandController tenantcontroller, IStaticDataCache staticCache, PublicDataProvider publicData, List<AuthRule> inOrderRules,IEnumerable<EntityRelationship> queryRelationships)
         {
             long roleID = 0;
             EntityRelationshipCache cache = new EntityRelationshipCache(queryRelationships);
             foreach (AuthRule rule in inOrderRules)
             {
-                bool matched = rule.MatchAll && rule.Relationships.Count > 0;
+                bool matched = rule.MatchAll;
                 foreach (AuthRuleRelationship relationship in rule.Relationships)
                 {
                     bool found = false;
-                    if (EntityRelationship.MeetsMask(relationship.Relationship, eESIEntityRelationshipOperatorMask.HasFrom))
+                    if (CheckRuleParentRelationships(relationship, cache.InRelationships))
                     {
-                        AuthenticatedEntity ruleRelationshipEntity = AuthenticatedEntity.GetForEntity(config, tenantcontroller, staticCache, publicData, relationship.EntityID, relationship.EntityType);
-                        if(ruleRelationshipEntity != null)
+                        if (EntityRelationship.MeetsMask(relationship.Relationship, eESIEntityRelationshipOperatorMask.HasFrom))
                         {
-                            IEnumerable<EntityRelationship> ruleEntityRelationships = await ruleRelationshipEntity.CalculateInRelationships(relationship.Relationship);
-                            EntityRelationshipCache ruleEntityCache = new EntityRelationshipCache(ruleEntityRelationships);
-                            foreach(EntityRelationship queryRelationship in queryRelationships)
+                            if (await CheckHasFromRelationship(config, tenantcontroller, staticCache, publicData, relationship, cache.InRelationships))
                             {
-                                if (EntityRelationship.MeetsMask(queryRelationship.Relationship, eESIEntityRelationshipOperatorMask.In))
-                                {
-                                    if(ruleEntityCache.TryGet(queryRelationship.ToEntityID,queryRelationship.ToEntityType,relationship.Relationship,out _))
-                                    {
-                                        found = true;
-                                        break;
-                                    }
-                                }
+                                found = true;
+                            }
+                        }
+                        else
+                        {
+                            found = cache.TryGet(relationship, out EntityRelationship _);
+                        }
+
+                        if (rule.MatchAll)
+                        {
+                            if (!found)
+                            {
+                                matched = false;
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            if (found)
+                            {
+                                matched = true;
+                                break;
                             }
                         }
                     }
-                    else
-                    {
-                        found = cache.TryGet(relationship, out EntityRelationship _);
-                    }
-                     
-                    if (rule.MatchAll)
-                    {
-                        if (!found)
-                        {
-                            matched = false;
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        if (found)
-                        {
-                            matched = true;
-                            break;
-                        }
-                    }
+                    
                 }
                 if (matched)
                 {
@@ -175,7 +205,7 @@ namespace Eve.EveAuthTool.Standard.Security.Rules
             Role allRole = new Role()
             {
                 Name = "Members",
-                Permissions = eRulePermission.Discord,
+                Permissions = eRulePermission.Register,
                 Ordinal = 1
             };
             AuthRule retVal = new AuthRule()
@@ -195,18 +225,38 @@ namespace Eve.EveAuthTool.Standard.Security.Rules
             Role allRole = new Role()
             {
                 Name = "Blues",
-                Permissions = eRulePermission.Discord,
-                Ordinal = 1
+                Permissions = eRulePermission.Register,
+                Ordinal = 2
             };
             AuthRule retVal = new AuthRule()
             {
                 Name = "Blues",
                 RoleId = allRole.Save(controller),
-                Ordinal = 1,
+                Ordinal = 2,
                 MatchAll = false
 
             }.AddRelationship(AuthRuleRelationship.GetRelationshipRule(entityID, entityType, eESIEntityRelationship.GoodStanding))
             .AddRelationship(AuthRuleRelationship.GetRelationshipRule(entityID, entityType, eESIEntityRelationship.ExcellentStanding));
+            retVal.Save(controller);
+            return retVal;
+        }
+
+        public static AuthRule CreatePublicRule(ICommandController controller)
+        {
+            Role allRole = new Role()
+            {
+                Name = "Public",
+                Permissions = eRulePermission.None,
+                Ordinal = 3
+            };
+            AuthRule retVal = new AuthRule()
+            {
+                Name = "Public",
+                RoleId = allRole.Save(controller),
+                Ordinal = 3,
+                MatchAll = true
+            };
+
             retVal.Save(controller);
             return retVal;
         }

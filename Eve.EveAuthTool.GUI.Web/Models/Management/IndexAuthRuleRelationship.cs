@@ -17,6 +17,8 @@ namespace Eve.EveAuthTool.GUI.Web.Models.Management
             EntityID = relationship.EntityID;
             EntityType = relationship.EntityType;
             Relationship = relationship.Relationship;
+            ParentEntityID = relationship.ParentEntityID;
+            ParentEntityType = relationship.ParentEntityType;
             Index = index;
         }
     }

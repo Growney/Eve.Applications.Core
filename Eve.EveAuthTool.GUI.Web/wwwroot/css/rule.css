@@ -69,7 +69,7 @@
     grid-area:edit
 }
 
-.role-item {
+.role-item, .corporation-title-result {
     padding: 5px;
     height: 32px;
     position: relative;
@@ -86,18 +86,18 @@
         line-height: 32px;
     }
 
-.entitySearchResult:hover, .esi-role:hover {
-    background-color: var(--theme-secondary-back-colour);
-}
-.entitySearchResult:after, .esi-role:after {
-    font-family: "Font Awesome 5 Free";
-    font-weight: 900;
-    content: '\f067';
-    position: absolute;
-    right: 5px;
-    top: 0px;
-    line-height: 42px;
-}
+    .entitySearchResult:hover, .role-item:hover, .corporation-title-result:hover {
+        background-color: var(--theme-secondary-back-colour);
+    }
+    .entitySearchResult:after, .role-item:after, .corporation-title-result:after {
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        content: '\f067';
+        position: absolute;
+        right: 5px;
+        top: 0px;
+        line-height: 42px;
+    }
 #entitySearchResults{
     width:100%;
     height:calc(100% - 30px);

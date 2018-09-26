@@ -41,7 +41,7 @@
                     <div class="rule-relationship">
                         <img class="rule-relationship-image" src="@parameters.Package.ESIConfiguration.GetImageSource(relationship.EntityType,relationship.EntityID,32)">
                         <div class="rule-relationship-type">@(Gware.Standard.Data.EnumDisplayAttribute.GetEnumString(relationship.Relationship))</div>
-                        <div class="rule-relationship-entity-name">@await parameters.Package.PublicDataProvider.GetEntityName(relationship.EntityType, relationship.EntityID)</div>
+                        <div class="rule-relationship-entity-name">@await relationship.GetRelationshipEntityName(parameters.Package.TenantController,parameters.Package.PublicDataProvider)</div>
                     </div>
                 }
             </div>

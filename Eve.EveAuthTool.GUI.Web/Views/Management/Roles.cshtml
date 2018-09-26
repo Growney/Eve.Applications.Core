@@ -1,0 +1,18 @@
+﻿@model IEnumerable<Eve.EveAuthTool.GUI.Web.Models.Management.RoleModel>
+@{
+    ViewData["Title"] = "Roles";
+}
+@section Styles{
+    <link rel="stylesheet" href="~/css/rule.css" />
+}
+<a asp-action="EditRole" asp-controller="Management" asp-route-roleID="-1">Add</a>
+@foreach (var role in Model)
+{
+    <div class="content-box theme-border">
+        <div>@role.Name</div>
+        <div>Manage - @role.Manage</div>
+        <div>Register - @role.Register</div>
+        <a asp-action="EditRole" asp-controller="Management" asp-route-roleID="@role.Id"><i class="fas fa-edit"></i></a>
+    </div>
+}
+

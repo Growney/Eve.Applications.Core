@@ -4,6 +4,7 @@ using Eve.ESI.Standard.Authentication.Client;
 using Eve.ESI.Standard.Authentication.Configuration;
 using Eve.ESI.Standard.DataItem.Search;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 
 namespace Eve.ESI.Core
 {
@@ -26,11 +27,12 @@ namespace Eve.ESI.Core
         public IESIAuthenticationClient Client { get; }
 
         private readonly IConfiguration m_config;
+        private readonly IHostingEnvironment m_enviroment;
 
-        public ESIAuthenticatedConfig(IConfiguration config)
+        public ESIAuthenticatedConfig(IHostingEnvironment enviroment, IConfiguration config)
         {
             m_config = config;
-            Client = new ESIWebClient(ESIUrl,AuthUrl, ClientID, Secret, VerifyUrl);
+            Client = new ESIWebClient(enviroment,ESIUrl,AuthUrl, ClientID, Secret, VerifyUrl);
         }
 
         private string GetConfigSetting(string key)

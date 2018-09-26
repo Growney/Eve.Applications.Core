@@ -11,7 +11,6 @@ var onEntitySearchSuccess = function (context) {
     $('#entitySearchResults').html(context);
     bindSearchResults('entitySearchResult', function (el) {
         $.ajax({
-            method: "POST",
             url: "/Management/FormEntityRule/",
             data: {
                 entityID: $(el).data('entityid'),
@@ -28,12 +27,11 @@ var onEntitySearchSuccess = function (context) {
 
 function AddRole(roleID) {
     $.ajax({
-        method: "POST",
         url: "/Management/FormRoleRule/",
         data: {
             roleID: roleID,
             location: document.getElementById('roleLocations').ej2_instances[0].value,
-            index: (HighestRuleIndex() + 1)
+            index: HighestRuleIndex() + 1
         },
         success: function (data) {
             $('#relationships').append(data);
@@ -42,7 +40,6 @@ function AddRole(roleID) {
 }
 function AddStanding(entityID,entityType,standing) {
     $.ajax({
-        method: "POST",
         url: "/Management/FormStandingRule/",
         data: {
             entityID: entityID,
@@ -56,6 +53,19 @@ function AddStanding(entityID,entityType,standing) {
     });
 }
 
+function AddTitle(corporationID, titleID) {
+    $.ajax({
+        url: "/Management/FormTitleRole/",
+        data: {
+            corporationID: corporationID,
+            titleID: titleID,
+            index: HighestRuleIndex() + 1
+        },
+        success: function (data) {
+            $('#relationships').append(data);
+        }
+    });
+}
 var onEntitySearchFailed = function (context) {
     $("#entitySearchWait").addClass("hidden");
 };
@@ -87,6 +97,7 @@ function DeleteAuthRule(element, ruleID) {
 function OnTitleCorporationSelect() {
     var listObj = document.getElementById('titleEntities').ej2_instances[0];
     $('#titleWait').removeClass('hidden');
+    $('#titleResults').html('');
     $.ajax({
         url: "/Management/CorporationTitles/",
         data: {
@@ -95,6 +106,29 @@ function OnTitleCorporationSelect() {
         success: function (data) {
             $('#titleWait').addClass('hidden');
             $('#titleResults').html(data);
+            BindCorporationTitles();
         }
     });
+}
+
+function BindCorporationTitles() {
+    $('#titleResults').children('.corporation-title-result').each(
+        function (index, element) {
+            $(element).click(function (ev) {
+                var clickedElement = $(ev.target);
+                console.log(clickedElement);
+                $.ajax({
+                    url: "/Management/FormTitleRole/",
+                    data: {
+                        titleID: clickedElement.data('title-id'),
+                        corporationID: document.getElementById('titleEntities').ej2_instances[0].value,
+                        index: HighestRuleIndex() + 1
+                    },
+                    success: function (data) {
+                        $('#relationships').append(data);
+                    }
+                });
+            });
+        }
+    );
 }

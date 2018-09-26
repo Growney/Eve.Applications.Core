@@ -6,12 +6,18 @@ namespace Eve.EveAuthTool.Standard.Security.Rules
 {
     internal class EntityRelationshipCache
     {
+        public List<EntityRelationship> InRelationships { get; } = new List<EntityRelationship>();
+
         private Dictionary<(long, eESIEntityType, eESIEntityRelationship), EntityRelationship> m_cache = new Dictionary<(long, eESIEntityType, eESIEntityRelationship), EntityRelationship>();
         public EntityRelationshipCache(IEnumerable<EntityRelationship> relationships)
         {
             foreach(EntityRelationship relationship in relationships)
             {
                 m_cache.Add((relationship.ToEntityID, relationship.ToEntityType, relationship.Relationship), relationship);
+                if(EntityRelationship.MeetsMask(relationship.Relationship, eESIEntityRelationshipOperatorMask.In))
+                {
+                    InRelationships.Add(relationship);
+                }
             }
         }
         

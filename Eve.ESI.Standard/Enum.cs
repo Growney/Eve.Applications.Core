@@ -4,6 +4,7 @@ namespace Eve.ESI.Standard
 {
     public enum eESIEntityType : int
     {
+        none = -1,
         [EnumDisplay("Character")]
         character = 0,
         [EnumDisplay("Corporation")]

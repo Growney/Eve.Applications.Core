@@ -89,15 +89,6 @@ namespace Eve.ESI.Standard.Authentication.Client
                         retVal = ((eESIRole)entityID).ToDelimitedString(suppressZero: true);
                     }
                     break;
-                case eESIEntityType.title:
-                    {
-                        CorporationTitle title = CorporationTitle.ForTitleID(m_tenantController, (int)entityID);
-                        if(title != null)
-                        {
-                            retVal = title.Name;
-                        }
-                    }
-                    break;
                 default:
                     break;
             }

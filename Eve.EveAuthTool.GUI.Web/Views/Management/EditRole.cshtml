@@ -1,0 +1,16 @@
+﻿@model Eve.EveAuthTool.GUI.Web.Models.Management.RoleModel
+@{
+    ViewData["Title"] = "EditRole";
+}
+
+<form class="content-box theme-border width-50 center" asp-controller="Management" asp-action="EditRole">
+
+    @Html.HiddenFor(x => Model.Id)
+    Name - @Html.TextBoxFor(x => Model.Name)
+    Manage - @Html.CheckBoxFor(x => Model.Manage)
+    Register - @Html.CheckBoxFor(x => Model.Register)
+
+
+    <button type="submit">Save</button>
+</form>
+

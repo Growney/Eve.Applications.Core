@@ -45,20 +45,33 @@ namespace Eve.ESI.Standard
         {
             return response == null || (response.ReRun && !alwaysReturnOldData);
         }
-
-        private static Guid GenerateGuid<T>(ICommandController controller, Dictionary<string, object> values = null, Dictionary<string, string> queryParameters = null)
+        protected static T GetStoredSingle<T>(ICommandController controller,string filter,Dictionary<string, object> values = null, Dictionary<string, string> queryParameters = null) where T : ESIItemBase,new()
         {
-
+            return LoadSingle<T>(controller.ExecuteCollectionCommand(CreateFilterCommand<T>(filter,values,queryParameters)));
         }
-        protected static T GetStoredSingle<T>(ICommandController controller, Dictionary<string, object> values = null, Dictionary<string, string> queryParameters = null)
+        protected static List<T> GetStoredCollection<T>(ICommandController controller, string filter, Dictionary<string, object> values = null, Dictionary<string, string> queryParameters = null) where T : ESIItemBase, new()
         {
+            return Load<T>(controller.ExecuteCollectionCommand(CreateFilterCommand<T>(filter, values, queryParameters)));
+        }
 
+        private static DataCommand CreateFilterCommand<T>(string filter, Dictionary<string, object> values, Dictionary<string, string> queryParameters)
+        {
+            DataCommand command = new DataCommand("ESICallResponse", "ForFilter");
+            command.AddParameter("TableName", System.Data.DbType.String).Value = ESIItemAttribute.GetTableName(typeof(T));
+            command.AddParameter("CallID", System.Data.DbType.Guid).Value = GetCallID<T>(values, queryParameters);
+            if (!string.IsNullOrWhiteSpace(filter))
+            {
+                command.AddParameter("Filter", System.Data.DbType.String).Value = filter;
+            }
+            return command;
+        }
+        protected static Guid GetCallID<T>(Dictionary<string, object> values = null, Dictionary<string, string> queryParameters = null)
+        {
+            return new ESICallParameters(template: ESIItemAttribute.GetRouteTemplate(typeof(T)), tokenValue: values, queryParameters: queryParameters).GetGuid();
         }
         protected static void ClearStoredData<T>(ICommandController controller,Dictionary<string,object> values = null, Dictionary<string, string> queryParameters = null) where T : ESIItemBase
         {
-            ESICallParameters parameters = new ESICallParameters(template: ESIItemAttribute.GetRouteTemplate(typeof(T)), tokenValue: values, queryParameters: queryParameters);
-            ESICallResponse<T> result = ESICallResponse.GetResponseForParameterHash<ESICallResponse<T>>(controller, parameters.GetGuid());
-            ESICallResponse<T>.ExecuteClearDataCommand<T>(controller, result.CallID);
+            ESICallResponse<T>.ExecuteClearDataCommand<T>(controller, GetCallID<T>(values,queryParameters));
         }
         protected static async System.Threading.Tasks.Task<ESICallResponse<T>> GetItem<T>(IESIAuthenticationClient authClient, ICommandController controller, Dictionary<string, object> values = null, Dictionary<string, string> queryParameters = null, Func<Task<ESITokenRefreshResponse>> authenticationTokenTask = null, bool alwaysReturnOldData = c_alwaysReturnOldData) where T : ESIItemBase, new()
         {
@@ -68,7 +81,7 @@ namespace Eve.ESI.Standard
             ESICallResponse<T> result = null;
             if (controller != null)
             {
-                result = ESICallResponse.GetResponseForParameterHash<ESICallResponse<T>>(controller, parameters.GetGuid());
+                result = ESICallResponse.ForCallID<ESICallResponse<T>>(controller, parameters.GetGuid());
             }
             if (ShouldReRunResponse(result,alwaysReturnOldData))
             {
@@ -91,7 +104,7 @@ namespace Eve.ESI.Standard
                     {
                         parameters.IfNoneMatch = result.ETag;
                     }
-                    result = await authClient.GetSingleResponseAsync<ESICallResponse<T>,T>(result?.CallID ?? Guid.NewGuid(), parameters);
+                    result = await authClient.GetSingleResponseAsync<ESICallResponse<T>,T>(parameters);
                     if (result != null)
                     {
                         if (controller != null)
@@ -136,7 +149,8 @@ namespace Eve.ESI.Standard
         private static async System.Threading.Tasks.Task<ESICollectionCallResponse<T>> GetCollection<T>(IESIAuthenticationClient apiClient, ICommandController controller, Dictionary<string, object> values, Func<Task<ESITokenRefreshResponse>> authenticationTokenTask = null, int page = -1, bool alwaysReturnOldData = c_alwaysReturnOldData) where T : ESIItemBase, new()
         {
             ESICallParameters parameters = new ESICallParameters(template: ESIItemAttribute.GetRouteTemplate(typeof(T)), tokenValue: values, page: page);
-            ESICollectionCallResponse<T> result = ESICallResponse.GetResponseForParameterHash<ESICollectionCallResponse<T>>(controller, parameters.GetGuid());
+            ESICollectionCallResponse<T> result = ESICallResponse.ForCallID<ESICollectionCallResponse<T>>(controller, parameters.GetGuid());
+
             if (ShouldReRunResponse(result, alwaysReturnOldData))
             {
                 bool authenticated = true;
@@ -158,7 +172,7 @@ namespace Eve.ESI.Standard
                     {
                         parameters.IfNoneMatch = result.ETag;
                     }
-                    result = await apiClient.GetCollectionResponseAsync<ESICollectionCallResponse<T>,T>(result?.CallID ?? Guid.NewGuid(), parameters);
+                    result = await apiClient.GetCollectionResponseAsync<ESICollectionCallResponse<T>,T>(parameters);
                     if (result != null)
                     {
                         if (result.ResponseCode == System.Net.HttpStatusCode.OK)

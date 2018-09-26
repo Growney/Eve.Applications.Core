@@ -39,7 +39,7 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
         [Authorize(Roles = "Manage")]
         public IActionResult Roles()
         {
-            return View();
+            return View(RoleModel.CreateFrom(Role.All(TenantController)));
         }
 
         [HttpGet]
@@ -54,7 +54,36 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
             
             return View(rule);
         }
-
+        [HttpGet]
+        [Authorize(Roles = "Manage")]
+        public IActionResult EditRole(long roleID)
+        {
+            //role.Save(TenantController);
+            Role role = Role.Get<Role>(TenantController, roleID);
+            if(role.Id != roleID)
+            {
+                role.Name = "New Role";
+            }
+            return View("EditRole", RoleModel.CreateFrom(role));
+        }
+        [HttpPost]
+        [Authorize(Roles = "Manage")]
+        public IActionResult EditRole(RoleModel role)
+        {
+            Role systemRole = Role.Get<Role>(TenantController, role.Id);
+            systemRole.Name = role.Name;
+            systemRole.Permissions = Standard.Security.eRulePermission.None;
+            if (role.Register)
+            {
+                systemRole.Permissions |= Standard.Security.eRulePermission.Register;
+            }
+            if (role.Manage)
+            {
+                systemRole.Permissions |= Standard.Security.eRulePermission.Manage;
+            }
+            systemRole.Save(TenantController);
+            return RedirectToAction("Roles");
+        }
         [HttpPost]
         [Authorize(Roles = "Manage")]
         public IActionResult EditRule(AuthRule rule)
@@ -70,25 +99,31 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
             AuthRule.Delete<AuthRule>(TenantController, ruleID);
             return RedirectToAction("Rules");
         }
-        [HttpPost]
+        [HttpGet]
         public IActionResult FormEntityRule(long entityID,int searchType,int index)
         {
             return PartialView("IndexedAuthRuleRelationship", new IndexAuthRuleRelationship(index, AuthRuleRelationship.GetStaticRelationship(entityID, SearchResults.SearchTypeToEntityType((eSearchEntity)searchType))));
         }
-        [HttpPost]
+        [HttpGet]
         public IActionResult FormRoleRule(long roleID,int location, int index)
         {
             return PartialView("IndexedAuthRuleRelationship", new IndexAuthRuleRelationship(index, 
                 AuthRuleRelationship.GetRelationshipRule(roleID,eESIEntityType.role,
                 ESI.Standard.DataItem.Helper.RoleLocationToRelationship((ESI.Standard.DataItem.eRoleLocation)location))));
         }
-
-        [HttpPost]
+        [HttpGet]
         public IActionResult FormStandingRule(long entityID, int entityType,int standingType, int index)
         {
             return PartialView("IndexedAuthRuleRelationship", new IndexAuthRuleRelationship(index,
                 AuthRuleRelationship.GetRelationshipRule(entityID, (eESIEntityType)entityType,
                 ESI.Standard.DataItem.Helper.StandingToRelationship((eESIStanding)standingType))));
+        }
+
+        [HttpGet]
+        public IActionResult FormTitleRole(int corporationID,int titleID, int index)
+        {
+            return PartialView("IndexedAuthRuleRelationship", new IndexAuthRuleRelationship(index,
+                AuthRuleRelationship.GetRelationshipRule(titleID,eESIEntityType.title,eESIEntityRelationship.Title,corporationID,eESIEntityType.corporation)));
         }
         [HttpGet]
         [Authorize(Roles = "Manage")]
@@ -99,7 +134,7 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
             if(entity != null)
             {
                 ESICollectionCallResponse<CorporationTitle> titles = await entity.GetCorporationTitles();
-                retVal.AddRange(titles.Data);
+                retVal.AddRange(titles.Data.Where(x => !string.IsNullOrWhiteSpace(x.Name)));
             }
             return PartialView("CorporationTitles", retVal);
         }

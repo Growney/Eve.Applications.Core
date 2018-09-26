@@ -2,7 +2,6 @@
 	@Result NCHAR(50),
 	@Id BIGINT = NULL,
 	@CallID UNIQUEIDENTIFIER = NULL,
-	@ParameterGuid UNIQUEIDENTIFIER = NULL,
 	@Uri VARCHAR(MAX) = NULL,
 	@Executed DATETIME = NULL,
 	@ResponseCode SMALLINT = NULL,
@@ -11,7 +10,8 @@
 	@LastModified DATETIME = NULL,
 	@Page INT = NULL,
 	@Pages INT = NULL,
-	@TableName VARCHAR(MAX) = NULL
+	@TableName VARCHAR(MAX) = NULL,
+	@Filter VARCHAR(MAX) = NULL
 AS
 BEGIN
 	IF @Result = 'Save'
@@ -19,8 +19,8 @@ BEGIN
 		
 		IF NOT EXISTS (SELECT* FROM ESICallResponse WHERE CallID = @CallID)
 		BEGIN
-			INSERT INTO ESICallResponse(CallID,ParameterGuid,Uri,Executed,ResponseCode,ETag,Expires,LastModified,Page,Pages)
-			VALUES(@CallID,@ParameterGuid,@Uri,@Executed,@ResponseCode,@ETag,@Expires,@LastModified,@Page,@Pages)
+			INSERT INTO ESICallResponse(CallID,Uri,Executed,ResponseCode,ETag,Expires,LastModified,Page,Pages)
+			VALUES(@CallID,@Uri,@Executed,@ResponseCode,@ETag,@Expires,@LastModified,@Page,@Pages)
 
 			SELECT @@IDENTITY AS [Value]
 		END
@@ -55,12 +55,12 @@ BEGIN
 
 	END
 
-	IF @Result = 'ParameterHash'
+	IF @Result = 'ForCallID'
 	BEGIN
 
 		SELECT*
 		FROM ESICallResponse
-		WHERE ParameterGuid = @ParameterGuid
+		WHERE CallID = @CallID
 
 	END
 
@@ -76,5 +76,11 @@ BEGIN
 		DECLARE @Clear VARCHAR(500) = 'DELETE FROM '+ @TableName+ ' WHERE CallID = ''' + CONVERT(NVARCHAR(50),@CallID) + ''''
 		EXEC (@Clear)
 
+	END
+
+	IF @Result = 'ForFilter'
+	BEGIN
+		DECLARE @Filtered VARCHAR(500) = 'SELECT* FROM '+ @TableName+ ' WHERE CallID = ''' + CONVERT(NVARCHAR(50),@CallID) + '''' + ISNULL(' AND ' + @Filter,'')
+		EXEC (@Filtered)
 	END
 END

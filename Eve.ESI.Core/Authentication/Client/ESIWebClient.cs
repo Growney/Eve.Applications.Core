@@ -11,6 +11,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Hosting;
 
 namespace Eve.ESI.Core.Authentication.Client
 {
@@ -22,13 +23,16 @@ namespace Eve.ESI.Core.Authentication.Client
         private readonly string m_secret;
         private readonly string m_verifyUrl;
 
-        public ESIWebClient(string esiUrl,string authUrl, string clientID, string secret, string verifyUrl)
+        private readonly IHostingEnvironment m_enviroment;
+
+        public ESIWebClient(IHostingEnvironment enviroment, string esiUrl,string authUrl, string clientID, string secret, string verifyUrl)
         {
             m_esiUrl = esiUrl;
             m_authUrl = authUrl;
             m_clientID = clientID;
             m_secret = secret;
             m_verifyUrl = verifyUrl;
+            m_enviroment = enviroment;
         }
         public async Task<AuthenticationToken> RequestToken(string code)
         {
@@ -97,14 +101,14 @@ namespace Eve.ESI.Core.Authentication.Client
             return retVal;
         }
 
-        public async Task<T> GetSingleResponseAsync<T,K>(Guid callID, ESICallParameters parameters) 
+        public async Task<T> GetSingleResponseAsync<T,K>(ESICallParameters parameters) 
             where T : ESICallResponse<K>, new()
             where K : ESIItemBase
         {
             using (HttpClient client = GetHttpClient(m_esiUrl, parameters))
             {
                 HttpResponseMessage message = await client.GetAsync($"{m_esiUrl}{parameters.GetParametersUrl()}");
-                T retVal = ParseHTTPMessage<T>(parameters.GetGuid(), callID, message);
+                T retVal = ParseHTTPMessage<T>(parameters.GetGuid(), m_enviroment, message);
                 if(retVal.ResponseCode == System.Net.HttpStatusCode.OK)
                 {
                     retVal.SetData(await message.Content.ReadAsAsync<K>());
@@ -112,14 +116,14 @@ namespace Eve.ESI.Core.Authentication.Client
                 return retVal;
             }
         }
-        public async Task<T> GetCollectionResponseAsync<T, K>(Guid callID, ESICallParameters parameters) 
+        public async Task<T> GetCollectionResponseAsync<T, K>(ESICallParameters parameters) 
             where T : ESICollectionCallResponse<K>, new() 
             where K : ESIItemBase
         {
             using (HttpClient client = GetHttpClient(m_esiUrl, parameters))
             {
                 HttpResponseMessage message = await client.GetAsync($"{m_esiUrl}{parameters.GetParametersUrl()}");
-                T retVal = ParseHTTPMessage<T>(parameters.GetGuid(), callID, message);
+                T retVal = ParseHTTPMessage<T>(parameters.GetGuid(), m_enviroment, message);
                 if (retVal.ResponseCode == System.Net.HttpStatusCode.OK)
                 {
                     retVal.SetData(await message.Content.ReadAsAsync<IEnumerable<K>>());
@@ -127,14 +131,14 @@ namespace Eve.ESI.Core.Authentication.Client
                 return retVal;
             }
         }
-        public async Task<T> GetIntegerCollectionResponse<T,K>(Guid callID, ESICallParameters parameters)
+        public async Task<T> GetIntegerCollectionResponse<T,K>(ESICallParameters parameters)
             where T : ESIIntegerCollectionCallResponse<K>, new()
             where K : IntegerCollectionItem, new()
         {
             using (HttpClient client = GetHttpClient(m_esiUrl, parameters))
             {
                 HttpResponseMessage message = await client.GetAsync($"{m_esiUrl}{parameters.GetParametersUrl()}");
-                T retVal = ParseHTTPMessage<T>(parameters.GetGuid(), callID, message);
+                T retVal = ParseHTTPMessage<T>(parameters.GetGuid(),m_enviroment, message);
                 if (retVal.ResponseCode == System.Net.HttpStatusCode.OK)
                 {
                     retVal.SetData(await message.Content.ReadAsAsync<IEnumerable<int>>());
@@ -143,15 +147,14 @@ namespace Eve.ESI.Core.Authentication.Client
             }
         }
 
-        public static T ParseHTTPMessage<T>(Guid parameterHash, Guid callID, System.Net.Http.HttpResponseMessage message) where T : ESICallResponse, new()
+        private static T ParseHTTPMessage<T>(Guid parameterHash,IHostingEnvironment environment, System.Net.Http.HttpResponseMessage message) where T : ESICallResponse, new()
         {
             T retVal = new T
             {
-                Uri = message.RequestMessage.RequestUri.ToString(),
+                Uri = (environment.IsDevelopment()) ? message.RequestMessage.RequestUri.ToString() : message.RequestMessage.RequestUri.Host,
                 Executed = DateTime.UtcNow,
                 ResponseCode = message.StatusCode,
-                CallID = (callID == Guid.Empty) ? Guid.NewGuid() : callID,
-                ParameterGuid = parameterHash
+                CallID = parameterHash,
             };
             if (message.Content.Headers.TryGetValues("Last-Modified", out IEnumerable<string> lastModifiedValues))
             {
@@ -182,8 +185,6 @@ namespace Eve.ESI.Core.Authentication.Client
                 retVal.ETag = etagValues.First();
             }
 
-
-           
             return retVal;
         }
 

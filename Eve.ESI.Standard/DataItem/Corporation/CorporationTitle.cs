@@ -71,11 +71,9 @@ namespace Eve.ESI.Standard.DataItem.Corporation
             return GetCollection<CorporationTitle>(client, controller, new Dictionary<string, object>() { { "corporation_id", corporationID } }, authenticationTokenTask, oldData);
         }
 
-        public static CorporationTitle ForTitleID(ICommandController controller,int titleID)
+        public static CorporationTitle ForTitleID(ICommandController controller,int corporationID,int titleID)
         {
-            DataCommand command = new DataCommand("CorporationTitle", "ForTitleID");
-            command.AddParameter("TitleId", System.Data.DbType.Int32).Value = titleID;
-            return LoadSingle<CorporationTitle>(controller.ExecuteCollectionCommand(command));
+            return GetStoredSingle<CorporationTitle>(controller, $"TitleId = {titleID}", new Dictionary<string, object>() { { "corporation_id", corporationID } });
         }
     }
 }

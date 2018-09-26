@@ -167,8 +167,6 @@ new Breadcrumb() {Controller="Management",Action="Rules", Text="Rules"}
                     titleCorporationList.Add(new { id = corp.EntityID, text = await parameters.Package.PublicDataProvider.GetEntityName(corp.EntityType, corp.EntityID) });
                 }
             }
-            <p>Warning:  Titles have IDs that are not unique to the corporation. Creating a Rule with a title relationship should also have the relationship for the required corporation and have Match All selected. 
-            If this is not done the title will match on any character with that title in any corporation.</p>
             <ejs-dropdownlist id="titleEntities" dataSource="titleCorporationList" placeholder="Select a Corporation" popupHeight="220px" change="OnTitleCorporationSelect">
                 <e-dropdownlist-fields text="text" value="id"></e-dropdownlist-fields>
             </ejs-dropdownlist>

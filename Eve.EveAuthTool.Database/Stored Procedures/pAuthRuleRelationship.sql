@@ -4,7 +4,9 @@
 	@RuleID BIGINT = NULL,
 	@EntityID BIGINT = NULL,
 	@EntityType INT = NULL,
-	@Relationship INT = NULL
+	@Relationship INT = NULL,
+	@ParentEntityID BIGINT = NULL,
+	@ParentEntityType INT = NULL
 AS
 
 IF @Result = 'Save'
@@ -13,8 +15,8 @@ BEGIN
 	IF NOT EXISTS (SELECT* FROM Role WHERE Id = @Id)
 	BEGIN
 
-		INSERT INTO [AuthRuleRelationship] (RuleID,EntityID,EntityType,Relationship)
-		VALUES(@RuleID,@EntityID,@EntityType,@Relationship)
+		INSERT INTO [AuthRuleRelationship] (RuleID,EntityID,EntityType,Relationship,ParentEntityID,ParentEntityType)
+		VALUES(@RuleID,@EntityID,@EntityType,@Relationship,@ParentEntityID,@ParentEntityType)
 
 		SELECT @@IDENTITY AS [Value]
 
@@ -26,7 +28,9 @@ BEGIN
 		SET RuleID = @RuleID,
 		EntityID = @EntityID,
 		EntityType = @EntityType,
-		Relationship = @Relationship
+		Relationship = @Relationship,
+		ParentEntityID = @ParentEntityID,
+		ParentEntityType = @ParentEntityType
 		WHERE Id = @Id
 
 		SELECT @Id AS [Value]

@@ -2,7 +2,6 @@
 (
 	[Id] BIGINT IDENTITY(1,1) UNIQUE,
 	[CallID] UNIQUEIDENTIFIER NOT NULL,
-	[ParameterGuid] UNIQUEIDENTIFIER NOT NULL,
 	[Uri] VARCHAR(MAX) NOT NULL,
 	[Executed] DATETIME NOT NULL,
 	[ResponseCode] SMALLINT NOT NULL,
@@ -13,4 +12,4 @@
     [Pages] INT NOT NULL
 )
 GO
-CREATE CLUSTERED INDEX IX_ESICallResponse_ParameterGuid ON dbo.[ESICallResponse] (ParameterGuid)
+CREATE CLUSTERED INDEX IX_ESICallResponse_CallID ON dbo.[ESICallResponse] (CallID)
