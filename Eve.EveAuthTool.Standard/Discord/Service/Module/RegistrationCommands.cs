@@ -18,7 +18,7 @@ using Eve.EveAuthTool.Standard;
 using Gware.Standard.Storage.Controller;
 using Eve.ESI.Standard.Authentication.Client;
 
-namespace Eve.EveAuthTool.Core.Discord.Service.Module
+namespace Eve.EveAuthTool.Standard.Discord.Service.Module
 {
     public class RegistrationCommands : EveAuthToolModuleBase
     {

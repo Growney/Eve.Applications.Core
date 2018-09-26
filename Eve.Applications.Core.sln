@@ -5,15 +5,11 @@ VisualStudioVersion = 15.0.28010.2016
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eve.EveAuthTool.GUI.Web", "Eve.EveAuthTool.GUI.Web\Eve.EveAuthTool.GUI.Web.csproj", "{D489A825-B741-4977-941C-7F141D0496ED}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eve.ESI.Core", "Eve.ESI.Core\Eve.ESI.Core.csproj", "{A3FEFD64-5397-40C4-A267-13A80FE0DE1E}"
-EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Eve.ESI.Database", "Eve.ESI.Database\Eve.ESI.Database.sqlproj", "{0CBAD90B-B422-4BC2-B863-C147022DB412}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eve.ESI.Standard", "Eve.ESI.Standard\Eve.ESI.Standard.csproj", "{E92C6102-E52F-4800-AAAB-EE0022AC0261}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eve.ESIClassMaker", "Eve.ESIClassMaker\Eve.ESIClassMaker.csproj", "{8E2D32AA-23AF-4B50-A585-A3D95ECB3A30}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eve.EveAuthTool.Core", "Eve.EveAuthTool.Core\Eve.EveAuthTool.Core.csproj", "{C8F37E6D-3892-400F-947A-09461B3033D0}"
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Eve.EveAuthTool.Database", "Eve.EveAuthTool.Database\Eve.EveAuthTool.Database.sqlproj", "{142FE042-0BC5-4783-A327-8A337C1ABCA8}"
 EndProject
@@ -31,10 +27,6 @@ Global
 		{D489A825-B741-4977-941C-7F141D0496ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D489A825-B741-4977-941C-7F141D0496ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D489A825-B741-4977-941C-7F141D0496ED}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A3FEFD64-5397-40C4-A267-13A80FE0DE1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A3FEFD64-5397-40C4-A267-13A80FE0DE1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A3FEFD64-5397-40C4-A267-13A80FE0DE1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A3FEFD64-5397-40C4-A267-13A80FE0DE1E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0CBAD90B-B422-4BC2-B863-C147022DB412}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0CBAD90B-B422-4BC2-B863-C147022DB412}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0CBAD90B-B422-4BC2-B863-C147022DB412}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
@@ -49,10 +41,6 @@ Global
 		{8E2D32AA-23AF-4B50-A585-A3D95ECB3A30}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8E2D32AA-23AF-4B50-A585-A3D95ECB3A30}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E2D32AA-23AF-4B50-A585-A3D95ECB3A30}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C8F37E6D-3892-400F-947A-09461B3033D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C8F37E6D-3892-400F-947A-09461B3033D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C8F37E6D-3892-400F-947A-09461B3033D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C8F37E6D-3892-400F-947A-09461B3033D0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{142FE042-0BC5-4783-A327-8A337C1ABCA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{142FE042-0BC5-4783-A327-8A337C1ABCA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{142FE042-0BC5-4783-A327-8A337C1ABCA8}.Debug|Any CPU.Deploy.0 = Debug|Any CPU

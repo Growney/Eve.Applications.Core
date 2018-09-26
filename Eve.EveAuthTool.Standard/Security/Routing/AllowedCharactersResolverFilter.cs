@@ -2,8 +2,8 @@
 using Eve.ESI.Standard;
 using Eve.ESI.Standard.AuthenticatedData;
 using Eve.ESI.Standard.Authentication.Configuration;
-using Eve.EveAuthTool.Core.Helpers;
-using Eve.EveAuthTool.Core.Security.Middleware;
+using Eve.EveAuthTool.Standard.Helpers;
+using Eve.EveAuthTool.Standard.Security.Middleware;
 using Eve.EveAuthTool.Standard.Security;
 using Eve.Static.Standard;
 using Gware.Standard.Storage.Controller;
@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Collections.Generic;
 
-namespace Eve.EveAuthTool.Core.Security.Routing
+namespace Eve.EveAuthTool.Standard.Security.Routing
 {
     public class AllowedCharactersResolverFilter : TypeFilterAttribute
     {

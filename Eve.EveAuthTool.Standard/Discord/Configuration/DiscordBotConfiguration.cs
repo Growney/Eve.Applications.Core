@@ -1,7 +1,7 @@
 ﻿using Eve.EveAuthTool.Standard.Discord.Configuration;
 using Microsoft.Extensions.Configuration;
 
-namespace Eve.EveAuthTool.Core.Discord.Configuration
+namespace Eve.EveAuthTool.Standard.Discord.Configuration
 {
     public class DiscordBotConfiguration : IDiscordBotConfiguration
     {

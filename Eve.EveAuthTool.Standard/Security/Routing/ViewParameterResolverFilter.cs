@@ -1,5 +1,5 @@
-﻿using Eve.EveAuthTool.Core.Helpers;
-using Eve.EveAuthTool.Core.Security.Middleware;
+﻿using Eve.EveAuthTool.Standard.Helpers;
+using Eve.EveAuthTool.Standard.Security.Middleware;
 using Eve.EveAuthTool.Standard;
 using Eve.EveAuthTool.Standard.Security;
 using Gware.Standard.Web.Tenancy;
@@ -9,7 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Eve.EveAuthTool.Core.Security.Routing
+namespace Eve.EveAuthTool.Standard.Security.Routing
 {
     public class ViewParameterResolverFilter : TypeFilterAttribute
     {

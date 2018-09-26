@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Eve.EveAuthTool.Core.Security.Middleware
+namespace Eve.EveAuthTool.Standard.Security.Middleware
 {
     public class ViewParameterProvider : IViewParameterProvider
     {

@@ -1,7 +1,7 @@
 ﻿using Eve.ESI.Standard.Account;
 using Eve.ESI.Standard.Authentication.Client;
 using Eve.ESI.Standard.Authentication.Configuration;
-using Eve.EveAuthTool.Core.Security.Middleware;
+using Eve.EveAuthTool.Standard.Security.Middleware;
 using Eve.EveAuthTool.Standard;
 using Eve.EveAuthTool.Standard.Security;
 using Eve.Static.Standard;
@@ -14,7 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Eve.EveAuthTool.Core.Helpers
+namespace Eve.EveAuthTool.Standard.Helpers
 {
     public class ControllerParameters : IControllerParameters
     {

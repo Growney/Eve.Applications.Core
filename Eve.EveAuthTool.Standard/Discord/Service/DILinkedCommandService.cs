@@ -1,7 +1,7 @@
 ﻿using Discord.Commands;
 using System;
 
-namespace Eve.EveAuthTool.Core.Discord
+namespace Eve.EveAuthTool.Standard.Discord
 {
     public class DILinkedCommandService : CommandService
     {

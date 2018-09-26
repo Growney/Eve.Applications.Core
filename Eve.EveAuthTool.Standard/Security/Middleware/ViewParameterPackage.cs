@@ -8,7 +8,7 @@ using Gware.Standard.Storage.Controller;
 using Gware.Standard.Web.Tenancy;
 using Gware.Standard.Web.Tenancy.Configuration;
 
-namespace Eve.EveAuthTool.Core.Security.Middleware
+namespace Eve.EveAuthTool.Standard.Security.Middleware
 {
     public class ViewParameterPackage
     {

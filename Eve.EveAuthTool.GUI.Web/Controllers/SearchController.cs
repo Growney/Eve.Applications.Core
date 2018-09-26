@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Eve.ESI.Standard;
 using Eve.ESI.Standard.DataItem.Search;
-using Eve.EveAuthTool.Core.Security.Middleware;
+using Eve.EveAuthTool.Standard.Security.Middleware;
 using Eve.EveAuthTool.GUI.Web.Models.Search;
 using Microsoft.AspNetCore.Mvc;
 

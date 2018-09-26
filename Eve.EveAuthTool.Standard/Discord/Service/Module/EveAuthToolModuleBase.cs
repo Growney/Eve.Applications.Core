@@ -3,7 +3,7 @@ using Discord.Commands;
 using Eve.ESI.Standard;
 using Eve.ESI.Standard.Account;
 using Eve.ESI.Standard.Authentication.Configuration;
-using Eve.EveAuthTool.Core.Helpers;
+using Eve.EveAuthTool.Standard.Helpers;
 using Eve.Static.Standard;
 using Gware.Standard.Collections.Generic;
 using Gware.Standard.Storage.Controller;
@@ -13,7 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Eve.EveAuthTool.Core.Discord.Service.Module
+namespace Eve.EveAuthTool.Standard.Discord.Service.Module
 {
     public abstract class EveAuthToolModuleBase : ModuleBase<ContextWithDI<SocketCommandContext>>
     {

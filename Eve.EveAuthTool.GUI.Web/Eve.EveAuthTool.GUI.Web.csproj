@@ -17,9 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Eve.ESI.Core\Eve.ESI.Core.csproj" />
     <ProjectReference Include="..\Eve.ESI.Standard\Eve.ESI.Standard.csproj" />
-    <ProjectReference Include="..\Eve.EveAuthTool.Core\Eve.EveAuthTool.Core.csproj" />
     <ProjectReference Include="..\Eve.EveAuthTool.Standard\Eve.EveAuthTool.Standard.csproj" />
     <ProjectReference Include="..\Eve.StaticData.Standard\Eve.StaticData.Standard.csproj" />
   </ItemGroup>

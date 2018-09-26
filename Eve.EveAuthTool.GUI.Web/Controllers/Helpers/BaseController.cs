@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Eve.ESI.Standard.Account;
 using Eve.ESI.Standard.Authentication.Client;
 using Eve.ESI.Standard.Authentication.Configuration;
-using Eve.EveAuthTool.Core.Security.Middleware;
+using Eve.EveAuthTool.Standard.Security.Middleware;
 using Eve.EveAuthTool.Standard;
 using Eve.EveAuthTool.Standard.Security;
 using Eve.Static.Standard;

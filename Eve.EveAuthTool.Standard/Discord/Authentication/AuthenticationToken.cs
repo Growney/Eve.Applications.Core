@@ -1,4 +1,4 @@
-﻿using Eve.EveAuthTool.Core.Discord.Configuration;
+﻿using Eve.EveAuthTool.Standard.Discord.Configuration;
 using Eve.EveAuthTool.Standard.Discord.Configuration;
 using System;
 using System.Net.Http;

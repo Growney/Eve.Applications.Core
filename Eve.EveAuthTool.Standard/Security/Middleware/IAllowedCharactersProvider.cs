@@ -1,7 +1,7 @@
 ﻿using Eve.ESI.Standard.AuthenticatedData;
 using System.Collections.Generic;
 
-namespace Eve.EveAuthTool.Core.Security.Middleware
+namespace Eve.EveAuthTool.Standard.Security.Middleware
 {
     public interface IAllowedCharactersProvider
     {

@@ -1,4 +1,4 @@
-﻿using Eve.ESI.Core.Authentication.Client;
+﻿using Eve.ESI.Standard.Authentication.Client;
 using Eve.ESI.Standard;
 using Eve.ESI.Standard.Authentication.Client;
 using Eve.ESI.Standard.Authentication.Configuration;
@@ -6,7 +6,7 @@ using Eve.ESI.Standard.DataItem.Search;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
-namespace Eve.ESI.Core
+namespace Eve.ESI.Standard
 {
     public class ESIAuthenticatedConfig : IESIAuthenticatedConfig
     {

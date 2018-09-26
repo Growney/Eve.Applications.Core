@@ -6,7 +6,7 @@ using Eve.ESI.Standard;
 using Eve.ESI.Standard.AuthenticatedData;
 using Eve.ESI.Standard.DataItem.Corporation;
 using Eve.ESI.Standard.DataItem.Search;
-using Eve.EveAuthTool.Core.Security.Middleware;
+using Eve.EveAuthTool.Standard.Security.Middleware;
 using Eve.EveAuthTool.GUI.Web.Models.Management;
 using Eve.EveAuthTool.Standard.Security.Rules;
 using Gware.Standard.Web.Tenancy.Routing;

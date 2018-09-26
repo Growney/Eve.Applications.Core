@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using Eve.EveAuthTool.Core.Security.Middleware;
+using Eve.EveAuthTool.Standard.Security.Middleware;
 using Eve.EveAuthTool.GUI.Web.Controllers.Helpers;
 using Gware.Standard.Web.Tenancy.Routing;
 using Microsoft.AspNetCore.Authorization;

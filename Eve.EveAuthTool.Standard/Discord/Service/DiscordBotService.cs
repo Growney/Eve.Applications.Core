@@ -6,9 +6,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Eve.EveAuthTool.Standard.Discord.Configuration;
-using Eve.EveAuthTool.Core.Discord.Service.Module;
+using Eve.EveAuthTool.Standard.Discord.Service.Module;
 
-namespace Eve.EveAuthTool.Core.Discord
+namespace Eve.EveAuthTool.Standard.Discord
 {
     public class DiscordBotService : IHostedService
     {

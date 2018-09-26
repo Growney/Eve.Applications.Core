@@ -13,7 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 
-namespace Eve.ESI.Core.Authentication.Client
+namespace Eve.ESI.Standard.Authentication.Client
 {
     public class ESIWebClient : IESIAuthenticationClient
     {

@@ -3,7 +3,7 @@ using Eve.EveAuthTool.Standard.Security;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 
-namespace Eve.EveAuthTool.Core.Security.Middleware
+namespace Eve.EveAuthTool.Standard.Security.Middleware
 {
     public class AllowedCharacterProvider : IAllowedCharactersProvider
     {
