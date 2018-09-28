@@ -8,7 +8,7 @@ using Discord;
 using Eve.EveAuthTool.Standard.Discord.Configuration;
 using Eve.EveAuthTool.Standard.Discord.Service.Module;
 
-namespace Eve.EveAuthTool.Standard.Discord
+namespace Eve.EveAuthTool.Standard.Discord.Service
 {
     public class DiscordBotService : IHostedService
     {
@@ -55,7 +55,7 @@ namespace Eve.EveAuthTool.Standard.Discord
 
         private Task LoggedIn()
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
         private Task HandleUserJoined(SocketGuildUser arg)

@@ -1,0 +1,20 @@
+﻿@model Eve.EveAuthTool.GUI.Web.Models.Discord.UnlinkedInfo;
+@{
+    ViewData["Title"] = "Index";
+}
+@section SCripts{ 
+    <script src="~/js/discord.js"></script>
+}
+<h3>Your site is not linked !</h3>
+<p>Your site is not linked to a discord server please follow these simple steps to create the link.
+    <ol>
+        <li>Ensure that you have the Administrator permission on your discord guild</li>
+        <li>Click <a href="@Model.AddBotUrl" target="_blank">here</a> to add the bot to your guild.</li>
+        <li>Click <div id="keyQuery" style="display:inline-block"><a onclick="GetLink()" href="#">here</a></div> to generate a new link key.</li>
+        <li>Type (or copy) "@Model.CommandPrefix link <div id="keyResult" style="display:inline-block">{your key}</div>" into any channel in your guild and send it to form the link</li>
+        <li>Click <a asp-controller="Discord" asp-action="Index">here</a> to go to the linked account page.</li>
+    </ol>
+
+    Note: The bot cannot controller the owner of the guild and thus cannot set the username and roles so this will have to be done manually.
+</p>
+

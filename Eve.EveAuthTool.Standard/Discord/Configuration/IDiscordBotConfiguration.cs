@@ -6,5 +6,6 @@ namespace Eve.EveAuthTool.Standard.Discord.Configuration
     {
         string BotKey { get; }
         string CommandPrefix { get; }
+        string GetAddBotUrl();
     }
 }

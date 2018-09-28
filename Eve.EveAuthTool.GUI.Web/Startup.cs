@@ -27,6 +27,7 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Eve.EveAuthTool.Standard.Discord.Configuration;
 
 namespace Eve.EveAuthTool.GUI.Web
 {
@@ -55,7 +56,7 @@ namespace Eve.EveAuthTool.GUI.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("MjQ0NzdAMzEzNjJlMzIyZTMwbHlBbEdMYTczR3NTcCtDeHVnRkl5cTROTlZSUEdMdkRxZUh0andYWFNYST0=");
+            Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(Configuration["SyncFusionLicense"]);
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                     .AddCookie(options =>
@@ -103,13 +104,17 @@ namespace Eve.EveAuthTool.GUI.Web
             });
             services.AddSingleton<IArgumentsStore<OAuthRequestArguments>, ArgumentsStore<OAuthRequestArguments>>();
             services.AddSingleton<IArgumentsStore<ESITokenRequestParameters>, ArgumentsStore<ESITokenRequestParameters>>();
+            services.AddSingleton<IArgumentsStore<DiscordLinkParameters>, ArgumentsStore<DiscordLinkParameters>>();
             services.AddSingleton<IESIAuthenticatedConfig, ESIAuthenticatedConfig>();
+            services.AddSingleton<IDiscordBotConfiguration, DiscordBotConfiguration>();
 
             services.AddScoped<ITenantControllerProvider, TenantControllerProvider>();
             services.AddScoped<IAllowedCharactersProvider, AllowedCharacterProvider>();
             services.AddScoped<IControllerParameters, ControllerParameters>();
             services.AddScoped<IViewParameterProvider, ViewParameterProvider>();
             services.AddScoped<IScopeGroupProvider, ScopeGroupProvider>();
+
+            services.AddSingleton<Microsoft.Extensions.Hosting.IHostedService,Eve.EveAuthTool.Standard.Discord.Service.DiscordBotService>();
 
             services.AddMvc(config =>
             {

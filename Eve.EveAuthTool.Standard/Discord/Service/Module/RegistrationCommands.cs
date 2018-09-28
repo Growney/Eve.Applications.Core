@@ -35,12 +35,13 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Module
                     Tenant tenant = config.ReCallArguments(code)?.Tenant;
                     if (tenant != null)
                     {
+                        config.DiscardArguments(code);
                         TenantConfiguration.CreateTenantLink(tenant.Id, (byte)eTenantLinkType.Discord, guild);
                         m_currentTenant.Reset();
                         await Context.Channel.SendMessageAsync($"Link to {tenant.DisplayName} updating guild settings");
                         await UpdateDiscordGuild(CurrentTenant, ESIConfig, Context.Guild);
                         await Context.Channel.SendMessageAsync($"Linking users");
-                        await UpdateDiscordGuildUsers(ControllerParameters.PublicData,TenantController,CurrentTenant.EntityId,CurrentTenant.EntityType,ESIConfig, Cache, Context.Guild, await BotGuildHighestRole);
+                        await UpdateDiscordGuildUsers(PublicDataProvider,TenantController,CurrentTenant.EntityId,CurrentTenant.EntityType,ESIConfig, Cache, Context.Guild, await BotGuildHighestRole);
                         await Context.Channel.SendMessageAsync($"Link complete");
                     }
                     else
@@ -78,13 +79,14 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Module
                 using (System.IO.MemoryStream stream = new System.IO.MemoryStream(imageData))
                 {
                     image = new Image(stream);
+                    await guild.ModifyAsync(x =>
+                    {
+                        x.Name = new Optional<string>(tenant.DisplayName);
+                        x.Icon = new Optional<Image?>(image);
+                    });
                 }
             }
-            await guild.ModifyAsync(x =>
-            {
-                x.Name = new Optional<string>(tenant.DisplayName);
-                x.Icon = new Optional<Image?>(image);
-            });
+            
         }
 
         public static async Task<bool> UpdateLinkedAccount(IESIAuthenticatedConfig esiconfig,PublicDataProvider publicDataProvider,ICommandController tenantController,long tenantEntityID,int tenantEntityType,IStaticDataCache cache,IGuild guild,int modifyingHighestRole,LinkedUserAccount account)
@@ -194,7 +196,7 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Module
             {
                 if(CurrentAccount != null)
                 {
-                    List<AuthenticatedEntity> characters = AuthenticatedEntity.GetForAccount(ESIConfig,TenantController, Cache, ControllerParameters.PublicData,CurrentAccount.AccountGuid.ToString());
+                    List<AuthenticatedEntity> characters = AuthenticatedEntity.GetForAccount(ESIConfig,TenantController, Cache, PublicDataProvider,CurrentAccount.AccountGuid.ToString());
                     StringBuilder message = new StringBuilder();
                     foreach (var character in characters)
                     {

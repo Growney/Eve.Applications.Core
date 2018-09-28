@@ -2,7 +2,7 @@
 using Discord.Commands;
 using System;
 
-namespace Eve.EveAuthTool.Standard.Discord
+namespace Eve.EveAuthTool.Standard.Discord.Service
 {
     public class ContextWithDI<T> : ICommandContext where T : ICommandContext
     {

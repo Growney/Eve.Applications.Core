@@ -2,6 +2,7 @@
 using Discord.Commands;
 using Eve.ESI.Standard;
 using Eve.ESI.Standard.Account;
+using Eve.ESI.Standard.Authentication.Client;
 using Eve.ESI.Standard.Authentication.Configuration;
 using Eve.EveAuthTool.Standard.Helpers;
 using Eve.Static.Standard;
@@ -105,21 +106,13 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Module
                 return m_botGuildUser.Value;
             }
         }
-        protected OnceLoadedValue<IControllerParameters> m_controllerParameters = new OnceLoadedValue<IControllerParameters>();
-        public IControllerParameters ControllerParameters
-        {
-            get
-            {
-                m_controllerParameters.Load = ()=> Context.Provider.GetService(typeof(IControllerParameters)) as IControllerParameters;
-                return m_controllerParameters.Value;
-            }
-        }
         protected OnceLoadedValue<IESIAuthenticatedConfig> m_ESIConfig = new OnceLoadedValue<IESIAuthenticatedConfig>();
         public IESIAuthenticatedConfig ESIConfig
         {
             get
             {
-                return ControllerParameters.ESIConfiguration;
+                m_ESIConfig.Load = () => Context.Provider.GetService(typeof(IESIAuthenticatedConfig)) as IESIAuthenticatedConfig;
+                return m_ESIConfig.Value;
             }
         }
         protected OnceLoadedValue<IStaticDataCache> m_cache = new OnceLoadedValue<IStaticDataCache>();
@@ -127,7 +120,8 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Module
         {
             get
             {
-                return ControllerParameters.Cache;
+                m_cache.Load = () => Context.Provider.GetService(typeof(IStaticDataCache)) as IStaticDataCache;
+                return m_cache.Value;
             }
         }
         protected OnceLoadedValue<ITenantConfiguration> m_tenantConfiguration = new OnceLoadedValue<ITenantConfiguration>();
@@ -135,15 +129,24 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Module
         {
             get
             {
-                return ControllerParameters.TenantConfiguration;
+                m_tenantConfiguration.Load = () => Context.Provider.GetService(typeof(ITenantConfiguration)) as ITenantConfiguration;
+                return m_tenantConfiguration.Value;
             }
         }
-        protected OnceLoadedValue<ITenantControllerProvider> m_tenantControllerProvider = new OnceLoadedValue<ITenantControllerProvider>();
-        public ITenantControllerProvider TenantControllerProvider
+        public ICommandController PublicDataController
         {
             get
             {
-                return ControllerParameters.TenantProvider;
+                return Cache.Controller;
+            }
+        }
+        protected OnceLoadedValue<PublicDataProvider> m_publicDataProvider = new OnceLoadedValue<PublicDataProvider>();
+        public PublicDataProvider PublicDataProvider
+        {
+            get
+            {
+                m_publicDataProvider.Load = () => { return new PublicDataProvider(ESIConfig.Client, PublicDataController, Cache, TenantController); };
+                return m_publicDataProvider.Value;
             }
         }
         protected OnceLoadedValue<Tenant> m_currentTenant = new OnceLoadedValue<Tenant>();
@@ -164,16 +167,7 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Module
                 return m_tenantController.Value;
             }
         }
-
-        protected OnceLoadedValue<ICommandController> m_publicController = new OnceLoadedValue<ICommandController>();
-        public ICommandController PublicDataController
-        {
-            get
-            {
-                m_publicController.Load = () => TenantControllerProvider.GetDefaultDataController();
-                return m_publicController.Value;
-            }
-        }
+        
         protected OnceLoadedValue<UserAccount> m_currentAccount = new OnceLoadedValue<UserAccount>();
         public UserAccount CurrentAccount
         {

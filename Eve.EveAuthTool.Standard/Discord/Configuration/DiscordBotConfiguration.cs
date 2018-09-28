@@ -11,6 +11,8 @@ namespace Eve.EveAuthTool.Standard.Discord.Configuration
         public string ClientID { get; }
         public string CallBackUrl { get; }
         public string Secret { get; }
+        public string BotPermissions { get; }
+
         public DiscordBotConfiguration(IConfiguration configuration)
         {
             BotKey = configuration["Discord:BotKey"].ToString();
@@ -19,6 +21,12 @@ namespace Eve.EveAuthTool.Standard.Discord.Configuration
             ClientID = configuration["Discord:AuthClientID"].ToString();
             CallBackUrl = configuration["Discord:CallbackURL"].ToString();
             Secret = configuration["Discord:Secret"].ToString();
+            BotPermissions =  configuration["Discord:BotPermissions"].ToString();
+        }
+
+        public string GetAddBotUrl()
+        {
+            return $"{AuthUrl}/authorize?client_id={ClientID}&scope=bot&permissions={BotPermissions}";
         }
     }
 }

@@ -9,12 +9,13 @@ namespace Eve.Static.Standard
     public class StaticDataCache : IStaticDataCache
     {
         private Dictionary<Type, Dictionary<int, object>> m_cache = new Dictionary<Type, Dictionary<int, object>>();
-        private readonly ICommandController m_controller;
+        public ICommandController Controller { get; }
         private readonly object m_alterLock = new object();
+        
 
         public StaticDataCache(IControllerProvider provider)
         {
-            m_controller = provider.CreateController("StaticData");
+            Controller = provider.CreateController("StaticData");
         }
 
         public async Task<T> GetItemAsync<T>(int primaryKey) where T : LoadedFromAdapterBase, new()
@@ -49,14 +50,14 @@ namespace Eve.Static.Standard
         private async Task<T>GetStoredItemAsync<T>(int primaryKey, Type typeOfT = null) where T : LoadedFromAdapterBase, new()
         {
             Type tType = typeOfT ?? typeof(T);
-            T retVal = await StaticDataLoader.GetDataAsync<T>(m_controller, primaryKey);
+            T retVal = await StaticDataLoader.GetDataAsync<T>(Controller, primaryKey);
             CheckAndAdd(primaryKey, retVal);
             return retVal;
         }
         private T GetStoredItem<T>(int primaryKey, Type typeOfT = null) where T : LoadedFromAdapterBase, new()
         {
             Type tType = typeOfT ?? typeof(T);
-            T retVal = StaticDataLoader.GetData<T>(m_controller, primaryKey);
+            T retVal = StaticDataLoader.GetData<T>(Controller, primaryKey);
             CheckAndAdd(primaryKey,retVal);
             return retVal;
         }
