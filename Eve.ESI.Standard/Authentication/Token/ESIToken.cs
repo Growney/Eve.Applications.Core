@@ -236,7 +236,7 @@ namespace Eve.ESI.Standard.Authentication.Token
         {
             DataCommand command = new DataCommand("ESIToken", "ForScope");
             command.AddParameter("Scope", System.Data.DbType.String).Value = ESIScopeHelper.GetScopeString(scope);
-            command.AddParameter("Ids", "LongIDList").Value = ids.CreateIDList();
+            command.AddParameter("Ids", "LongIDList").Value = ids.CreateTableData();
             command.AddParameter("EntityID", System.Data.DbType.Int64).Value = entityID;
             command.AddParameter("EntityType", System.Data.DbType.Byte).Value = (byte)type;
             return Load<ESIToken>(controller.ExecuteCollectionCommand(command));
@@ -244,7 +244,7 @@ namespace Eve.ESI.Standard.Authentication.Token
         public static List<ESIToken> GetForID(ICommandController controller, IEnumerable<long> ids)
         {
             DataCommand command = new DataCommand("ESIToken", "ForId");
-            command.AddParameter("Ids", "LongIDList").Value = ids.CreateIDList();
+            command.AddParameter("Ids", "LongIDList").Value = ids.CreateTableData();
             return Load<ESIToken>(controller.ExecuteCollectionCommand(command));
         }
         public static async Task<ESIToken> Authenticate(IESIAuthenticatedConfig config, ICommandController controller, eESIEntityType type, string code)

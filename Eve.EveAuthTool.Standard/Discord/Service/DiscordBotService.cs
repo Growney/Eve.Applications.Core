@@ -7,11 +7,14 @@ using System.Threading.Tasks;
 using Discord;
 using Eve.EveAuthTool.Standard.Discord.Configuration;
 using Eve.EveAuthTool.Standard.Discord.Service.Module;
+using Gware.Standard.Collections.Generic;
 
 namespace Eve.EveAuthTool.Standard.Discord.Service
 {
     public class DiscordBotService : IHostedService
     {
+        private FixedTimeCache<(ulong guildID,ulong roleID), string> m_roleNameCache;
+
         private readonly IDiscordBotConfiguration m_config;
         private readonly IServiceProvider m_provider;
 
@@ -45,7 +48,26 @@ namespace Eve.EveAuthTool.Standard.Discord.Service
                 m_client.UserJoined += HandleUserJoined;
                 await m_client.LoginAsync(TokenType.Bot, m_config.BotKey);
                 await m_client.StartAsync();
+
+                m_roleNameCache = new FixedTimeCache<(ulong guildID, ulong roleID), string>(GetRoleName,TimeSpan.FromMinutes(30));
             }
+        }
+
+        private Task<string> GetRoleName((ulong guildID,ulong roleID) tuple)
+        {
+            return Task<string>.Factory.StartNew(() =>
+            {
+                IGuild guild = m_client.GetGuild(tuple.guildID);
+                if (guild != null)
+                {
+                    IRole role = guild.GetRole(tuple.roleID);
+                    if (role != null)
+                    {
+                        return role.Name;
+                    }
+                }
+                return "Unknown Name";
+            });
         }
 
         private static async Task AddServiceModules(DILinkedCommandService service)
@@ -104,6 +126,11 @@ namespace Eve.EveAuthTool.Standard.Discord.Service
         public Task<IGuildUser> GetBotGuildUser(IGuild guild)
         {
             return guild.GetUserAsync(m_client.CurrentUser.Id);
+        }
+
+        public Task<string> GetRoleName(ulong guildID,ulong roleID)
+        {
+            return m_roleNameCache.GetItem((guildID, roleID));
         }
     }
 }

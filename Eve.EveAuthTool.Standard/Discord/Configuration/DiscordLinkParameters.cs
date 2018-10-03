@@ -1,12 +1,10 @@
-﻿using Gware.Standard.Web.Tenancy;
-
-namespace Eve.EveAuthTool.Standard.Discord.Configuration
+﻿namespace Eve.EveAuthTool.Standard.Discord.Configuration
 {
     public class DiscordLinkParameters
     {
-        public Tenant Tenant { get; }
+        public Gware.Standard.Web.Tenancy.Tenant Tenant { get; }
 
-        public DiscordLinkParameters(Tenant tenant)
+        public DiscordLinkParameters(Gware.Standard.Web.Tenancy.Tenant tenant)
         {
             Tenant = tenant;
         }

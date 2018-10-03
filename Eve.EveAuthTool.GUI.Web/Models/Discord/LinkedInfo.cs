@@ -8,8 +8,6 @@ namespace Eve.EveAuthTool.GUI.Web.Models.Discord
     public class LinkedInfo
     {
         public string GuildName { get; set; }
-        public List<DiscordRole> Roles { get; set; }
-        public List<DiscordInvite> Invites { get; set; }
-        public int LinkedUsers { get; set; }
+        public List<DiscordConfiguration> Configurations { get; set; }
     }
 }

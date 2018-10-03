@@ -84,5 +84,9 @@
     <Build Include="Stored Procedures\pAuthRule.sql" />
     <Build Include="Tables\AuthRuleRelationship.sql" />
     <Build Include="Stored Procedures\pAuthRuleRelationship.sql" />
+    <Build Include="Tables\DiscordRoleConfiguration.sql" />
+    <Build Include="Tables\DiscordRoleConfigurationRole.sql" />
+    <Build Include="Stored Procedures\pDiscordRoleConfiguration.sql" />
+    <Build Include="DataTypes\DataList.sql" />
   </ItemGroup>
 </Project>

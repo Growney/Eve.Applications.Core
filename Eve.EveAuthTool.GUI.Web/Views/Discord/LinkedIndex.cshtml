@@ -5,3 +5,22 @@
 
 <h3>You are linked to @Model.GuildName</h3>
 
+<a asp-controller="Discord" asp-action="EditConfiguration" asp-route-configID="0">Add</a>
+
+<div>
+    @foreach (var config in Model.Configurations)
+    {
+        <div>
+            <div>@config.Name</div>
+            <div>
+                @foreach (var role in config.Roles)
+                {
+                    if (role.Selected)
+                    {
+                        <div>@role.Name</div>
+                    }
+                }
+            </div>
+        </div>
+    }
+</div>

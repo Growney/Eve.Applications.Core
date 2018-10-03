@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Discord;
 using Eve.EveAuthTool.Standard;
 using Eve.EveAuthTool.Standard.Discord.Configuration;
+using Eve.EveAuthTool.Standard.Discord.Configuration.Tenant;
 using Eve.EveAuthTool.Standard.Discord.Service;
 using Eve.EveAuthTool.Standard.Security.Middleware;
 using Gware.Standard.Collections.Generic;
@@ -118,35 +119,29 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
             m_discordConfiguration = discordConfiguration;
             m_serviceProvider = provider;
         }
-
+        private List<Models.Discord.DiscordRole> GetAllRoles()
+        {
+            List<Models.Discord.DiscordRole> allRoles = new List<Models.Discord.DiscordRole>();
+            foreach (IRole role in CurrentGuild?.Roles)
+            {
+                allRoles.Add(new Models.Discord.DiscordRole()
+                {
+                    ID = role.Id,
+                    Name = role.Name
+                });
+            }
+            return allRoles;
+        }
         [Authorize(Roles ="Manage")]
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             if (IsGuildLinked)
             {
-                List<Models.Discord.DiscordRole> roles = new List<Models.Discord.DiscordRole>();
-                foreach(IRole role in CurrentGuild?.Roles)
-                {
-                    roles.Add(new Models.Discord.DiscordRole()
-                    {
-                        ID = role.Id,
-                        Name = role.Name,
-                    });
-                }
-                List<Models.Discord.DiscordInvite> invites = new List<Models.Discord.DiscordInvite>();
-                IReadOnlyCollection<IInviteMetadata> guildInvites = await CurrentGuild.GetInvitesAsync();
-                foreach(var invite in guildInvites)
-                {
-                    invites.Add(new Models.Discord.DiscordInvite()
-                    {
-                        ID = invite.Id,
-                        Url = invite.Url
-                    });
-                }
+                
                 return View("LinkedIndex", new Models.Discord.LinkedInfo()
                 {
                     GuildName = CurrentGuild.Name,
-                    Roles = roles
+                    Configurations = Models.Discord.DiscordConfiguration.CreateFrom(DiscordRoleConfiguration.All(TenantController), GetAllRoles())
                 });
 
             }
@@ -160,7 +155,20 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
             }
             
         }
-
+        [HttpGet]
+        [Authorize(Roles = "Manage")]
+        public IActionResult EditConfiguration(long configID)
+        {
+            return View(Models.Discord.DiscordConfiguration.CreateFrom(DiscordRoleConfiguration.Get< DiscordRoleConfiguration>(TenantController,configID), GetAllRoles()));
+        }
+        [HttpPost]
+        [Authorize(Roles = "Manage")]
+        public IActionResult EditConfiguration(Models.Discord.DiscordConfiguration config)
+        {
+            DiscordRoleConfiguration roleConfig = config.Create();
+            roleConfig.Save(TenantController);
+            return RedirectToAction("Index");
+        }
         [Authorize(Roles = "Manage")]
         public IActionResult GenerateLink()
         {

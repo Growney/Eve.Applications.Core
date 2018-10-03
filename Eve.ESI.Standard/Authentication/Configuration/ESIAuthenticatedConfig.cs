@@ -1,6 +1,5 @@
 ﻿using Eve.ESI.Standard.Authentication.Client;
 using Eve.ESI.Standard;
-using Eve.ESI.Standard.Authentication.Client;
 using Eve.ESI.Standard.Authentication.Configuration;
 using Eve.ESI.Standard.DataItem.Search;
 using Microsoft.Extensions.Configuration;
@@ -27,7 +26,6 @@ namespace Eve.ESI.Standard
         public IESIAuthenticationClient Client { get; }
 
         private readonly IConfiguration m_config;
-        private readonly IHostingEnvironment m_enviroment;
 
         public ESIAuthenticatedConfig(IHostingEnvironment enviroment, IConfiguration config)
         {

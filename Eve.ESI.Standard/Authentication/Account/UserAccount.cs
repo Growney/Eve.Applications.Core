@@ -45,7 +45,7 @@ namespace Eve.ESI.Standard.Account
                 List<long> ids = new List<long>() { token.Id };
                 DataCommand command = new DataCommand("UserAccount", "AddTokens");
                 command.AddParameter("Id", System.Data.DbType.UInt64).Value = Id;
-                command.AddParameter("TokenIds", "LongIDList").Value = ids.CreateIDList();
+                command.AddParameter("TokenIds", "LongIDList").Value = ids.CreateTableData();
                 controller.ExecuteQuery(command);
 
                 TokenIds.Add(token.Id);
@@ -91,7 +91,7 @@ namespace Eve.ESI.Standard.Account
             command.AddParameter("Id", System.Data.DbType.Int64).Value = Id;
             command.AddParameter("AccountGuid", System.Data.DbType.Guid).Value = AccountGuid;
             command.AddParameter("CreatedDate", System.Data.DbType.DateTime).Value = CreatedDate;
-            command.AddParameter("TokenIds", "LongIDList").Value = TokenIds.CreateIDList();
+            command.AddParameter("TokenIds", "LongIDList").Value = TokenIds.CreateTableData();
             return command;
         }
         protected override void OnLoad(IDataAdapter adapter)

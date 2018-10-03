@@ -1,0 +1,21 @@
+﻿@model Eve.EveAuthTool.GUI.Web.Models.Discord.DiscordConfiguration
+@{
+    ViewData["Title"] = "EditDiscordConfiguration";
+}
+
+<form class="content-box width-50 center theme-colored theme-border" asp-controller="Discord" asp-action="EditConfiguration">
+    @Html.HiddenFor(x => Model.Id)
+    Name - @Html.TextBoxFor(x => Model.Name)
+    @{
+        for (int i = 0; i < Model.Roles.Count; i++)
+        {
+            <div>
+                @Html.HiddenFor(x => Model.Roles[i].ID)
+                @Html.CheckBoxFor(x => Model.Roles[i].Selected)
+                @Model.Roles[i].Name
+            </div>
+        }
+    }
+
+    <button type="submit">Save</button>
+</form>
