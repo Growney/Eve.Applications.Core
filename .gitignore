@@ -328,12 +328,8 @@ ASALocalRun/
 
 # MFractors (Xamarin productivity tool) working folder 
 .mfractor/
-/Eve.EveAuthTool.Blazor.Server/appsettings.Testing.json
-/Eve.EveAuthTool.Blazor.Server/appsettings.live.json
-/Eve.EveAuthTool.Blazor.Server/appsettings.Development.json
-Eve.EveAuthTool.Web.GUI/appsettings.Development.json
-Eve.EveAuthTool.Web.GUI/appsettings.live.json
-Eve.EveAuthTool.Web.GUI/appsettings.Testing.json
-Eve.EveAuthTool.GUI.Web/appsettings.Development.json
-Eve.EveAuthTool.GUI.Web/appsettings.live.json
-Eve.EveAuthTool.GUI.Web/appsettings.Testing.json
+
+# Configuration Files
+Eve.EveAuthTool.Configuration/appsettings.Testing.json
+Eve.EveAuthTool.Configuration/appsettings.Development.json
+Eve.EveAuthTool.Configuration/appsettings.live.json

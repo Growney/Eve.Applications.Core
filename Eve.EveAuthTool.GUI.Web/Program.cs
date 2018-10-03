@@ -20,10 +20,12 @@ namespace Eve.EveAuthTool.GUI.Web
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
-                .ConfigureAppConfiguration(config =>
+                .ConfigureAppConfiguration((hostingContext,config) =>
                 {
-                    config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-                    config.AddJsonFile("appsettings.{ctx.HostingEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: true);
+
+                    var env = hostingContext.HostingEnvironment;
+                    var sharedFolder = Path.Combine(env.ContentRootPath, "..", "Eve.EveAuthTool.Configuration");
+                    config.AddJsonFile(Path.Combine(env.ContentRootPath, sharedFolder, "appsettings.{ ctx.HostingEnvironment.EnvironmentName}.json"), optional: false, reloadOnChange: true);
                 });
     }
 }
