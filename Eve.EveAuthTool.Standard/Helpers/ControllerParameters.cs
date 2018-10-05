@@ -36,7 +36,7 @@ namespace Eve.EveAuthTool.Standard.Helpers
                 return TenantProvider.GetDefaultDataController();
             }
         }
-        public ITenantConfiguration TenantConfiguration { get; }
+        public ITenantWebConfiguration TenantConfiguration { get; }
 
         public PublicDataProvider PublicData
         {
@@ -46,7 +46,7 @@ namespace Eve.EveAuthTool.Standard.Helpers
             }
         }
 
-        public ControllerParameters(ITenantConfiguration tenantConfiguration,ITenantControllerProvider tenantControllerProvider, IESIAuthenticatedConfig esiConfig, IAllowedCharactersProvider characters, IStaticDataCache cache)
+        public ControllerParameters(ITenantWebConfiguration tenantConfiguration,ITenantControllerProvider tenantControllerProvider, IESIAuthenticatedConfig esiConfig, IAllowedCharactersProvider characters, IStaticDataCache cache)
         {
             TenantProvider = tenantControllerProvider;
             ESIConfiguration = esiConfig;

@@ -18,7 +18,7 @@ namespace Eve.EveAuthTool.Standard.Helpers
         ICommandController TenantController { get; }
         ICommandController PublicDataController { get; }
         ITenantControllerProvider TenantProvider { get; }
-        ITenantConfiguration TenantConfiguration { get; }
+        ITenantWebConfiguration TenantConfiguration { get; }
         PublicDataProvider PublicData { get; }
 
         ViewParameterPackage CreateViewParameters(HttpContext context);

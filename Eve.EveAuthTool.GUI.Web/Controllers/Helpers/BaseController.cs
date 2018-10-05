@@ -88,7 +88,7 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers.Helpers
         }
 
 
-        protected ITenantConfiguration TenantConfiguration
+        protected ITenantWebConfiguration TenantConfiguration
         {
             get
             {

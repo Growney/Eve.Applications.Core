@@ -39,10 +39,10 @@ namespace Eve.EveAuthTool.Standard.Security.Middleware
             }
         }
         public UserAccount User { get; }
-        public ITenantConfiguration TenantConfiguration { get; }
+        public ITenantWebConfiguration TenantConfiguration { get; }
         public PublicDataProvider PublicDataProvider { get; }
 
-        public ViewParameterPackage(IStaticDataCache cache, IESIAuthenticatedConfig esiConfig, Tenant tenant, ICommandController tenantController,PublicDataProvider publicDataProvider, IAllowedCharactersProvider characters,UserAccount account,ITenantConfiguration tenantConfiguration)
+        public ViewParameterPackage(IStaticDataCache cache, IESIAuthenticatedConfig esiConfig, Tenant tenant, ICommandController tenantController,PublicDataProvider publicDataProvider, IAllowedCharactersProvider characters,UserAccount account, ITenantWebConfiguration tenantConfiguration)
         {
             TenantController = tenantController;
             CurrentTenant = tenant;

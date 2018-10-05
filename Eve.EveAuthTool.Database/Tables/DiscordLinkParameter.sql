@@ -1,0 +1,7 @@
+﻿CREATE TABLE [dbo].[DiscordLinkParameter]
+(
+	[Id] BIGINT NOT NULL IDENTITY(1,1) PRIMARY KEY, 
+    [LinkGuid] UNIQUEIDENTIFIER NOT NULL, 
+    [TenantID] BIGINT NOT NULL, 
+    [Expires] DATETIME NOT NULL
+)

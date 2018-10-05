@@ -14,4 +14,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="Relationship" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="1db7716b-5541-4d51-8730-dc7d64285c8b" ChangeDateTime="10/05/2018 09:49:28">
+    <Property Name="ElementName" Value="[dbo].[DiscordLinkParameters].[TenantID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[DiscordLinkParameters]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="LinkGuid" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="99e525d2-76b3-46db-9eb0-caa2fb3d0a7c" ChangeDateTime="10/05/2018 09:52:17">
+    <Property Name="ElementName" Value="[dbo].[DiscordLinkParameters].[CreatedDate]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[DiscordLinkParameters]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="Expires" />
+  </Operation>
 </Operations>

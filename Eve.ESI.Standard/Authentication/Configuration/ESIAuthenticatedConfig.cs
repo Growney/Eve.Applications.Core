@@ -5,7 +5,7 @@ using Eve.ESI.Standard.DataItem.Search;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
-namespace Eve.ESI.Standard
+namespace Eve.ESI.Standard.Authentication.Configuration
 {
     public class ESIAuthenticatedConfig : IESIAuthenticatedConfig
     {

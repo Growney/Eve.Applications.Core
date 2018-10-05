@@ -30,9 +30,14 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Module
             string guild = Context.Guild.Id.ToString();
             if (CurrentTenant == null)
             {
-                if (Context.Provider.GetService(typeof(IArgumentsStore<DiscordLinkParameters>)) is IArgumentsStore<DiscordLinkParameters> config)
+                if (Context.Provider.GetService(typeof(IArgumentsStore<DiscordLinkParameter>)) is IArgumentsStore<DiscordLinkParameter> config)
                 {
-                    Tenant tenant = config.ReCallArguments(code)?.Tenant;
+                    Tenant tenant = null;
+                    long? tenantID = config.ReCallArguments(code)?.TenantID;
+                    if (tenantID.HasValue)
+                    {
+                        tenant = TenantConfiguration.GetTenant(tenantID.Value);
+                    }
                     if (tenant != null)
                     {
                         config.DiscardArguments(code);

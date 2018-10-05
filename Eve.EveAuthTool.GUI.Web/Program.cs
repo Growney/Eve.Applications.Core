@@ -22,10 +22,7 @@ namespace Eve.EveAuthTool.GUI.Web
                 .UseStartup<Startup>()
                 .ConfigureAppConfiguration((hostingContext,config) =>
                 {
-
-                    var env = hostingContext.HostingEnvironment;
-                    var sharedFolder = Path.Combine(env.ContentRootPath, "..", "Eve.EveAuthTool.Configuration");
-                    config.AddJsonFile(Path.Combine(env.ContentRootPath, sharedFolder, "appsettings.{ ctx.HostingEnvironment.EnvironmentName}.json"), optional: false, reloadOnChange: true);
+                    config.AddJsonFile(Path.Combine(AppContext.BaseDirectory,$"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json"), optional: false, reloadOnChange: true);
                 });
     }
 }

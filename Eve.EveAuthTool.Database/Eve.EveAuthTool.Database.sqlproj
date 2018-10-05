@@ -88,5 +88,7 @@
     <Build Include="Tables\DiscordRoleConfigurationRole.sql" />
     <Build Include="Stored Procedures\pDiscordRoleConfiguration.sql" />
     <Build Include="DataTypes\DataList.sql" />
+    <Build Include="Tables\DiscordLinkParameter.sql" />
+    <Build Include="Stored Procedures\pDiscordLinkParameter.sql" />
   </ItemGroup>
 </Project>

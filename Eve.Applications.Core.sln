@@ -17,7 +17,22 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eve.EveAuthTool.Standard", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eve.StaticData.Standard", "Eve.StaticData.Standard\Eve.StaticData.Standard.csproj", "{62A97FC4-FE2D-428C-8659-93708D17DCE3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eve.EveAuthTool.Service", "Eve.EveAuthTool.Service\Eve.EveAuthTool.Service.csproj", "{643E0361-9412-4BD7-95ED-7B25FF9766DF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eve.EveAuthTool.Service", "Eve.EveAuthTool.Service\Eve.EveAuthTool.Service.csproj", "{643E0361-9412-4BD7-95ED-7B25FF9766DF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ESI", "ESI", "{70F52C28-1D14-469E-A972-94FB8F271C65}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Eve Auth Tool", "Eve Auth Tool", "{B4A6A61A-57D9-4439-91D0-E24247C5C48A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Static Data", "Static Data", "{FA617757-58AE-413B-AC3E-312628E47B5C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Configuration", "Configuration", "{D2DC2681-833D-4832-8BC3-969B30587DAA}"
+	ProjectSection(SolutionItems) = preProject
+		Eve.EveAuthTool.Configuration\appsettings.Development.json = Eve.EveAuthTool.Configuration\appsettings.Development.json
+		Eve.EveAuthTool.Configuration\appsettings.example.json = Eve.EveAuthTool.Configuration\appsettings.example.json
+		Eve.EveAuthTool.Configuration\appsettings.json = Eve.EveAuthTool.Configuration\appsettings.json
+		Eve.EveAuthTool.Configuration\appsettings.live.json = Eve.EveAuthTool.Configuration\appsettings.live.json
+		Eve.EveAuthTool.Configuration\appsettings.Testing.json = Eve.EveAuthTool.Configuration\appsettings.Testing.json
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -64,6 +79,17 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D489A825-B741-4977-941C-7F141D0496ED} = {B4A6A61A-57D9-4439-91D0-E24247C5C48A}
+		{0CBAD90B-B422-4BC2-B863-C147022DB412} = {70F52C28-1D14-469E-A972-94FB8F271C65}
+		{E92C6102-E52F-4800-AAAB-EE0022AC0261} = {70F52C28-1D14-469E-A972-94FB8F271C65}
+		{8E2D32AA-23AF-4B50-A585-A3D95ECB3A30} = {70F52C28-1D14-469E-A972-94FB8F271C65}
+		{142FE042-0BC5-4783-A327-8A337C1ABCA8} = {B4A6A61A-57D9-4439-91D0-E24247C5C48A}
+		{F710E814-56BA-4061-9B8A-94CDA1827EDC} = {B4A6A61A-57D9-4439-91D0-E24247C5C48A}
+		{62A97FC4-FE2D-428C-8659-93708D17DCE3} = {FA617757-58AE-413B-AC3E-312628E47B5C}
+		{643E0361-9412-4BD7-95ED-7B25FF9766DF} = {B4A6A61A-57D9-4439-91D0-E24247C5C48A}
+		{D2DC2681-833D-4832-8BC3-969B30587DAA} = {B4A6A61A-57D9-4439-91D0-E24247C5C48A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ADFE6880-3181-46C2-BC42-6CB207ED4806}

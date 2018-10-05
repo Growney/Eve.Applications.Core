@@ -28,6 +28,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Eve.EveAuthTool.Standard.Discord.Configuration;
+using Eve.EveAuthTool.Standard.Discord.Service;
 
 namespace Eve.EveAuthTool.GUI.Web
 {
@@ -73,23 +74,33 @@ namespace Eve.EveAuthTool.GUI.Web
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
-            
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddSingleton<IControllerProvider>(new DelegatedControllerProvider(CreateController));
+
+            services.AddDelegatedControllerProvider(CreateController);
+
+            services.AddSingleton<IArgumentsStore<OAuthRequestArguments>, ArgumentsStore<OAuthRequestArguments>>();
+            services.AddSingleton<IArgumentsStore<ESITokenRequestParameters>, ArgumentsStore<ESITokenRequestParameters>>();
+            services.AddSingleton<IArgumentsStore<DiscordLinkParameter>, DiscordLinkParameterStore>();
+
+            services.AddSingleton<IESIAuthenticatedConfig, ESIAuthenticatedConfig>();
+            services.AddSingleton<IDiscordBotConfiguration, DiscordBotConfiguration>();
             services.AddSingleton<IStaticDataCache, StaticDataCache>();
+            services.AddSingleton<IDiscordBot, DiscordBot>();
+
+            services.AddScoped<IAllowedCharactersProvider, AllowedCharacterProvider>();
+            services.AddScoped<IControllerParameters, ControllerParameters>();
+            services.AddScoped<IViewParameterProvider, ViewParameterProvider>();
+            services.AddScoped<IScopeGroupProvider, ScopeGroupProvider>();
+            
+
             RouteTemplateDomain[] domains = Configuration.GetSection("TenantConfig:Domains").Get<RouteTemplateDomain[]>();
-            services.AddSingleton<ITenantConfiguration>(new TenantConfiguration()
+            services.AddTenantMVC(x =>
             {
-                TenantHome = new RedirectToActionResult("Welcome", "Home", null),
-                CreateNewResult = new RedirectResult($"{domains[0].GetAddress()}/Home/CreateNewTenant",false,false),
-                NotFoundResult = new RedirectToActionResult("TenantNotFound", "Home", null),
-                Controller = CreateController("TenantDB"),
-                SchemaFile = Configuration["TenantConfig:SchemaFile"],
-                DBNameFormat = Configuration["TenantConfig:DBNameFormat"],
-                Domains = domains,
-                CreateComposite = true,
-                Upgrading = new RedirectToActionResult("Upgrading", "Tenant", null),
-                OnDeployTenantSchema = async (ICommandController controller) =>
+                x.Controller = CreateController("TenantDB");
+                x.SchemaFile = Configuration["TenantConfig:SchemaFile"];
+                x.DBNameFormat = Configuration["TenantConfig:DBNameFormat"];
+                x.Domains = domains;
+                x.CreateComposite = true;
+                x.OnDeployTenantSchema = async (ICommandController controller) =>
                 {
                     bool retVal = false;
 
@@ -99,32 +110,23 @@ namespace Eve.EveAuthTool.GUI.Web
                     }
 
                     return retVal;
-                },
-                SearchIn = new Assembly[]{ typeof(MSSQLCommandController).Assembly }
-            });
-            services.AddSingleton<IArgumentsStore<OAuthRequestArguments>, ArgumentsStore<OAuthRequestArguments>>();
-            services.AddSingleton<IArgumentsStore<ESITokenRequestParameters>, ArgumentsStore<ESITokenRequestParameters>>();
-            services.AddSingleton<IArgumentsStore<DiscordLinkParameters>, ArgumentsStore<DiscordLinkParameters>>();
-            services.AddSingleton<IESIAuthenticatedConfig, ESIAuthenticatedConfig>();
-            services.AddSingleton<IDiscordBotConfiguration, DiscordBotConfiguration>();
-
-            services.AddScoped<ITenantControllerProvider, TenantControllerProvider>();
-            services.AddScoped<IAllowedCharactersProvider, AllowedCharacterProvider>();
-            services.AddScoped<IControllerParameters, ControllerParameters>();
-            services.AddScoped<IViewParameterProvider, ViewParameterProvider>();
-            services.AddScoped<IScopeGroupProvider, ScopeGroupProvider>();
-
-            services.AddSingleton<Microsoft.Extensions.Hosting.IHostedService,Eve.EveAuthTool.Standard.Discord.Service.DiscordBotService>();
-
-            services.AddMvc(config =>
+                };
+                x.SearchIn = new Assembly[] { typeof(MSSQLCommandController).Assembly };
+            },
+            x =>
             {
-                config.Filters.Add(new TenantResolverFilter());
-                config.Filters.Add(new TenantVersionCheckingFilter());
+                x.TenantHome = new RedirectToActionResult("Welcome", "Home", null);
+                x.CreateNewResult = new RedirectResult($"{domains[0].GetAddress()}/Home/CreateNewTenant", false, false);
+                x.NotFoundResult = new RedirectToActionResult("TenantNotFound", "Home", null);
+                x.Upgrading = new RedirectToActionResult("Upgrading", "Tenant", null);
+            },
+            config =>
+            {
                 config.Filters.Add(new TenantRequiredIfProvidedAttribute());
                 config.Filters.Add(new AllowedCharactersResolverFilter());
                 config.Filters.Add(new ViewParameterResolverFilter());
+            }).SetCompatibilityVersion(CompatibilityVersion.Version_2_1); 
 
-            }).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -147,19 +149,7 @@ namespace Eve.EveAuthTool.GUI.Web
 
             Microsoft.AspNetCore.Routing.RouteValueDictionary defaults = new Microsoft.AspNetCore.Routing.RouteValueDictionary { { "controller", c_defaultController }, { "action", c_defaultAction } };
 
-            app.UseMvc(routes =>
-            {
-                routes.MapDomainRoutes(
-                    domains: configuration.Domains,
-                    routeTemplate: "{controller}/{action}/{id?}",
-                    defaults: defaults
-                    );
-
-            routes.MapRoute(
-                name: "default",
-                defaults: defaults,
-                template: "{controller}/{action}/{id?}");
-            });
+            app.UseTenantMvc(configuration.Domains, defaults);
         }
     }
 }

@@ -13,8 +13,6 @@ namespace Eve.EveAuthTool.Standard.Discord.Service
 {
     public class DiscordBotService : IHostedService
     {
-        private FixedTimeCache<(ulong guildID,ulong roleID), string> m_roleNameCache;
-
         private readonly IDiscordBotConfiguration m_config;
         private readonly IServiceProvider m_provider;
 
@@ -48,28 +46,11 @@ namespace Eve.EveAuthTool.Standard.Discord.Service
                 m_client.UserJoined += HandleUserJoined;
                 await m_client.LoginAsync(TokenType.Bot, m_config.BotKey);
                 await m_client.StartAsync();
-
-                m_roleNameCache = new FixedTimeCache<(ulong guildID, ulong roleID), string>(GetRoleName,TimeSpan.FromMinutes(30));
+                
             }
+            
         }
-
-        private Task<string> GetRoleName((ulong guildID,ulong roleID) tuple)
-        {
-            return Task<string>.Factory.StartNew(() =>
-            {
-                IGuild guild = m_client.GetGuild(tuple.guildID);
-                if (guild != null)
-                {
-                    IRole role = guild.GetRole(tuple.roleID);
-                    if (role != null)
-                    {
-                        return role.Name;
-                    }
-                }
-                return "Unknown Name";
-            });
-        }
-
+        
         private static async Task AddServiceModules(DILinkedCommandService service)
         {
             await service.AddModuleAsync(typeof(RegistrationCommands));
@@ -113,24 +94,7 @@ namespace Eve.EveAuthTool.Standard.Discord.Service
             m_client?.Dispose();
         }
 
-        public IUser GetUser(ulong id)
-        {
-            return m_client.GetUser(id);
-        }
+        
 
-        public SocketGuild GetGuild(ulong id)
-        {
-            return m_client.GetGuild(id);
-        }
-
-        public Task<IGuildUser> GetBotGuildUser(IGuild guild)
-        {
-            return guild.GetUserAsync(m_client.CurrentUser.Id);
-        }
-
-        public Task<string> GetRoleName(ulong guildID,ulong roleID)
-        {
-            return m_roleNameCache.GetItem((guildID, roleID));
-        }
     }
 }
