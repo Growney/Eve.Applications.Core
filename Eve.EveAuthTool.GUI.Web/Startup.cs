@@ -63,7 +63,7 @@ namespace Eve.EveAuthTool.GUI.Web
                     .AddCookie(options =>
                     {
                         options.ExpireTimeSpan = TimeSpan.FromDays(30);
-                        options.LoginPath = "/Registration/Index/";
+                        options.LoginPath = "/Registration/EveLogin/";
                         options.AccessDeniedPath = "/Registration/Denied/";
 
                     });
@@ -84,8 +84,8 @@ namespace Eve.EveAuthTool.GUI.Web
             services.AddSingleton<IESIAuthenticatedConfig, ESIAuthenticatedConfig>();
             services.AddSingleton<IDiscordBotConfiguration, DiscordBotConfiguration>();
             services.AddSingleton<IStaticDataCache, StaticDataCache>();
-            services.AddSingleton<IDiscordBot, DiscordBot>();
 
+            services.AddTransient<IDiscordBot, DiscordBot>();
             services.AddScoped<IAllowedCharactersProvider, AllowedCharacterProvider>();
             services.AddScoped<IControllerParameters, ControllerParameters>();
             services.AddScoped<IViewParameterProvider, ViewParameterProvider>();
@@ -118,7 +118,10 @@ namespace Eve.EveAuthTool.GUI.Web
                 x.TenantHome = new RedirectToActionResult("Welcome", "Home", null);
                 x.CreateNewResult = new RedirectResult($"{domains[0].GetAddress()}/Home/CreateNewTenant", false, false);
                 x.NotFoundResult = new RedirectToActionResult("TenantNotFound", "Home", null);
-                x.Upgrading = new RedirectToActionResult("Upgrading", "Tenant", null);
+                x.Upgrading = context =>
+                {
+                    return new RedirectToActionResult("TenantUpgrade", "Registration", new { returnUrl = context.HttpContext.Request.Path });
+                };
             },
             config =>
             {

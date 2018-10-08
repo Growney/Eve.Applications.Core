@@ -1,8 +1,25 @@
-﻿@model Eve.EveAuthTool.GUI.Web.Models.Management.RoleModel
+﻿@model Eve.EveAuthTool.GUI.Web.Models.Management.EditRoleModel
 @{
-    ViewData["Title"] = "EditRole";
-}
+    ViewData["Title"] = "Edit Role";
 
+    var breadcrumbs = new List<Breadcrumb>()
+    {
+        new Breadcrumb(){ Controller="Management",Action="Index",Text="Management"  },
+        new Breadcrumb(){ Controller="Management",Action="Roles",Text="Roles" }
+    };
+
+    var configurationObject = new List<Object>();
+    configurationObject.Add(new { id = 0, text = "None" });
+    foreach (var configuration in Model.AllConfigurations)
+    {
+        configurationObject.Add(new { id = configuration.Id, text = configuration.Name });
+    }
+
+    var configurationSelectList = new SelectList(configurationObject, "id", "text", Model.DiscordRoleConfigurationID);
+}
+@section Breadcrumbs{
+    <partial name="breadcrumbs" model="breadcrumbs">
+}
 <form class="content-box theme-border width-50 center" asp-controller="Management" asp-action="EditRole">
 
     @Html.HiddenFor(x => Model.Id)
@@ -10,6 +27,7 @@
     Manage - @Html.CheckBoxFor(x => Model.Manage)
     Register - @Html.CheckBoxFor(x => Model.Register)
 
+    Discord Configuration @Html.DropDownListFor(x => Model.DiscordRoleConfigurationID, configurationSelectList)
 
     <button type="submit">Save</button>
 </form>

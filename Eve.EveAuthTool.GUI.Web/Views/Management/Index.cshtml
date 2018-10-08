@@ -3,17 +3,38 @@
     ViewData["Title"] = "Management";
 }
 
-<p>
-    <a asp-action="Rules" asp-controller="Management">Rules</a> - Manage the rules that assign people roles.
-</p>
+<div class="content-box theme-border width-50 center">
+    <h3>Management</h3>
+    <p>
+        In order to make ESA as configurable as possible there are lots of ways that the system can be setup and it designed to be easy to add features to.
+        The main problem with this is that it can look a little empty until the system is filled out with more features.
+    </p>
+    <p>
+        To setup your system first visit the discord page to add and link ESA to your discord guild. When that is done you can create discord configurations that contain
+        roles from your discord server that will be assigned to people.
+    </p>
 
-<p>
-    <a asp-action="Index" asp-controller="Discord">Discord</a> - Manage your discord link and configurations so that they can be assigned to roles.
-</p>
+    <p>
+        Next up you create ESA roles that allow you to link discord configuration to a set of permissions that will be assigned to users.
+    </p>
+    <p>
+        The final part is to create the rules that choose what roles characters will be given.
+    </p>
+    <hr />
+    <p>
+        <a asp-action="Index" asp-controller="Discord">Discord</a> - Manage your discord link and configurations so that they can be assigned to roles.
+    </p>
+    <p>
+        <a asp-action="Roles" asp-controller="Management">Roles</a> - Manage the permissions and configurations assigned to roles.
+    </p>
+    <p>
+        <a asp-action="Rules" asp-controller="Management">Rules</a> - Manage the rules that assign people roles.
+    </p>
+</div>
 
-<p>
-    <a asp-action="Roles" asp-controller="Management">Roles</a> - Manage the permissions and configurations assigned to roles.
-</p>
+
+
+
 
 
 

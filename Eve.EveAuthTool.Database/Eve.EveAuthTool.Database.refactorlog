@@ -28,4 +28,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="Expires" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="a0f4bcbe-a7b3-420b-9a73-fd4ef35eb3ec" ChangeDateTime="10/07/2018 11:18:39">
+    <Property Name="ElementName" Value="[dbo].[DiscordRoleConfiguration].[GuildInvite]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[DiscordRoleConfiguration]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="GuildInviteID" />
+  </Operation>
 </Operations>

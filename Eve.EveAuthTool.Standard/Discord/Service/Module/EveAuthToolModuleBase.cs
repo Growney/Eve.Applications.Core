@@ -53,23 +53,25 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Module
             {
                 m_botGuildRoles.Load = async () =>
                 {
-                    return GetUserRoles(await BotGuildUser);
+                    IGuildUser botUser = await BotGuildUser;
+                    return GetUserRoles(botUser.Guild,botUser);
                 };
                 return m_botGuildRoles.Value;
             }
         }
-        public static IEnumerable<IRole> GetUserRoles(IGuildUser user)
+        public static IEnumerable<IRole> GetUserRoles(IGuild guild,IGuildUser user)
         {
             List<IRole> roles = new List<IRole>();
             HashSet<ulong> userGuildRoles = GetUserRoleIds(user);
-            foreach (var role in user.Guild.Roles)
+
+            foreach (var role in guild.Roles)
             {
                 if (userGuildRoles.Contains(role.Id))
                 {
                     roles.Add(role);
                 }
             }
-
+            
             return roles;
         }
 
@@ -81,16 +83,17 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Module
             {
                 m_botGuildHighestRole.Load = async () =>
                 {
-                    return GetUserHighestRole(await BotGuildUser);
+                    IGuildUser botUser = await BotGuildUser;
+                    return GetUserHighestRole(botUser.Guild, botUser);
                 };
                 return m_botGuildHighestRole.Value;
             }
         }
-        public static int GetUserHighestRole(IGuildUser user)
+        public static int GetUserHighestRole(IGuild guild,IGuildUser user)
         {
             int max = int.MinValue;
 
-            foreach (var role in GetUserRoles(user))
+            foreach (var role in GetUserRoles(guild,user))
             {
                 max = Math.Max(role.Position, max);
             }

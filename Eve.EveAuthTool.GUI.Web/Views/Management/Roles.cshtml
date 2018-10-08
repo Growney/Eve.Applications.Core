@@ -1,9 +1,16 @@
 ﻿@model IEnumerable<Eve.EveAuthTool.GUI.Web.Models.Management.RoleModel>
 @{
     ViewData["Title"] = "Roles";
+    var breadcrumbs = new List<Breadcrumb>()
+    {
+        new Breadcrumb(){ Controller="Management",Action="Index",Text="Management"  }
+    };
 }
 @section Styles{
     <link rel="stylesheet" href="~/css/rule.css" />
+}
+@section Breadcrumbs{
+    <partial name="breadcrumbs" model="breadcrumbs">
 }
 <a asp-action="EditRole" asp-controller="Management" asp-route-roleID="-1">Add</a>
 @foreach (var role in Model)
@@ -12,6 +19,7 @@
         <div>@role.Name</div>
         <div>Manage - @role.Manage</div>
         <div>Register - @role.Register</div>
+        <div>Discord Config - @role.DiscordRoleConfigurationName</div>
         <a asp-action="EditRole" asp-controller="Management" asp-route-roleID="@role.Id"><i class="fas fa-edit"></i></a>
     </div>
 }

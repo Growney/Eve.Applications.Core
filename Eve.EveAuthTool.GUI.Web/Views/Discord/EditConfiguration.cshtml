@@ -1,21 +1,40 @@
-﻿@model Eve.EveAuthTool.GUI.Web.Models.Discord.DiscordConfiguration
+﻿@model Eve.EveAuthTool.GUI.Web.Models.Discord.EditDiscordConfiguration
 @{
     ViewData["Title"] = "EditDiscordConfiguration";
-}
+    var breadcrumbs = new List<Breadcrumb>()
+    {
+        new Breadcrumb(){ Controller="Management",Action="Index",Text="Management"  },
+        new Breadcrumb(){ Controller="Discord",Action="Index",Text="Discord"  }
+    };
 
-<form class="content-box width-50 center theme-colored theme-border" asp-controller="Discord" asp-action="EditConfiguration">
-    @Html.HiddenFor(x => Model.Id)
-    Name - @Html.TextBoxFor(x => Model.Name)
-    @{
-        for (int i = 0; i < Model.Roles.Count; i++)
-        {
-            <div>
-                @Html.HiddenFor(x => Model.Roles[i].ID)
-                @Html.CheckBoxFor(x => Model.Roles[i].Selected)
-                @Model.Roles[i].Name
-            </div>
-        }
+    var inviteObject = new List<Object>();
+    inviteObject.Add(new { id = 0, text = "None" });
+    foreach (var invite in Model.Invites)
+    {
+        inviteObject.Add(new { id = invite.ID, text = invite.Url });
     }
 
-    <button type="submit">Save</button>
-</form>
+    var inviteSelectList = new SelectList(inviteObject, "id", "text", Model.GuildInviteID);
+}
+@section Breadcrumbs{
+    <partial name="breadcrumbs" model="breadcrumbs">
+}
+        <form class="content-box width-50 center theme-colored theme-border" asp-controller="Discord" asp-action="EditConfiguration">
+            @Html.HiddenFor(x => Model.Id)
+            Name - @Html.TextBoxFor(x => Model.Name)
+            Invite @Html.DropDownListFor(x => Model.GuildInviteID, inviteSelectList)
+            <hr />
+            @{
+                <div class="bold">Discord Roles</div>
+                for (int i = 0; i < Model.Roles.Count; i++)
+                {
+                    <div>
+                        @Html.HiddenFor(x => Model.Roles[i].ID)
+                        @Html.CheckBoxFor(x => Model.Roles[i].Selected)
+                        @Model.Roles[i].Name
+                    </div>
+                }
+            }
+
+            <button type="submit">Save</button>
+        </form>

@@ -4,6 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <LangVersion>7.3</LangVersion>
+    <Configurations>Debug;Release;Testing</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,6 +31,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.1.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="2.1.0" />
+    <PackageReference Include="NLog" Version="4.5.10" />
     <PackageReference Include="System.Data.SqlClient" Version="4.5.1" />
   </ItemGroup>
 
@@ -53,6 +55,12 @@
 
   <ItemGroup>
     <Folder Include="Configuration\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\Eve.EveAuthTool.Configuration\NLog.config" Link="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

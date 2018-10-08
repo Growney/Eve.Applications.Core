@@ -32,8 +32,8 @@
                 <a asp-action="EditRule" asp-controller="Management" asp-route-ruleID="@rule.Id"><i class="fas fa-edit"></i></a>
                 <a onclick="DeleteAuthRule(this,@rule.Id)"><i class="fas fa-times"></i></a>
             </div>
-            <div class="rule-name">@rule.Name</div>
-            <div class="rule-relationship-header">Relationships</div>
+            <div class="rule-name bold">@rule.Name</div>
+            <div class="rule-relationship-header bold">Relationships</div>
             <div class="rule-relationships">
 
                 @foreach (var relationship in rule.Relationships)

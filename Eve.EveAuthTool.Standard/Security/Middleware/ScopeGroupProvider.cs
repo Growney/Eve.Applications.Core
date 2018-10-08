@@ -36,18 +36,21 @@ namespace Eve.EveAuthTool.Standard.Security.Middleware
         {
             m_parameters = parameters;
         }
-
-        private ulong GetCharacterRequired()
+        private uint GetCharacterQuickAuth()
+        {
+            return CharacterScopes.GetValue("Security");
+        }
+        private uint GetCharacterRequired()
         {
             return (m_parameters.Package.IsTenant ? CharacterScopes.GetValue("Security") : 0);
         }
 
-        private ulong GetCorporationRequired()
+        private uint GetCorporationRequired()
         {
             return CorporationScopes.GetValue("Roles/Members");
         }
 
-        private ulong GetAllianceRequired()
+        private uint GetAllianceRequired()
         {
             return AllianceScopes.GetValue("Roles/Members");
         }
@@ -96,5 +99,13 @@ namespace Eve.EveAuthTool.Standard.Security.Middleware
         {
             return CorporationScopes.GetScopes(uint.MaxValue, GetCorporationRequired());
         }
+
+        public eESIScope[] GetCharacterQuickAuthScopes()
+        {
+            return CharacterScopes.GetScopes(GetCharacterQuickAuth(), GetCharacterRequired());
+        }
+        
+        
+
     }
 }

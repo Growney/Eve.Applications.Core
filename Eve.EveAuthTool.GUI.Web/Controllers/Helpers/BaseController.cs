@@ -14,10 +14,12 @@ using Gware.Standard.Storage.Controller;
 using Gware.Standard.Web.Tenancy;
 using Gware.Standard.Web.Tenancy.Configuration;
 using Microsoft.AspNetCore.Mvc;
+using Eve.EveAuthTool.Standard.Security.Rules;
+using Microsoft.Extensions.Logging;
 
 namespace Eve.EveAuthTool.GUI.Web.Controllers.Helpers
 {
-    public class EveAuthBaseController : Controller
+    public class EveAuthBaseController<T> : Controller
     {
         private IViewParameterProvider m_viewParameters;
 
@@ -95,9 +97,23 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers.Helpers
                 return ViewParameters.TenantConfiguration;
             }
         }
-        public EveAuthBaseController(IViewParameterProvider parameters)
+
+        public Task<Role> CurrentRole
+        {
+            get
+            {
+                return ViewParameters.CurrentRole;
+            }
+        }
+
+        public ILogger<T> Logger
+        {
+            get;
+        }
+        public EveAuthBaseController(ILogger<T> logger,IViewParameterProvider parameters)
         {
             m_viewParameters = parameters;
+            Logger = logger;
         }
     }
 }

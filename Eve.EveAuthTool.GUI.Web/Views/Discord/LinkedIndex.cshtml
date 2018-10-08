@@ -1,26 +1,61 @@
 ﻿@model Eve.EveAuthTool.GUI.Web.Models.Discord.LinkedInfo;
 @{
     ViewData["Title"] = "LinkedInde";
+    var breadcrumbs = new List<Breadcrumb>()
+    {
+        new Breadcrumb(){ Controller="Management",Action="Index",Text="Management"  }
+    };
 }
-
-<h3>You are linked to @Model.GuildName</h3>
+@section Breadcrumbs{
+    <partial name="breadcrumbs" model="breadcrumbs">
+}
+<h3>You are linked to discord guild - @Model.GuildName</h3>
 
 <a asp-controller="Discord" asp-action="EditConfiguration" asp-route-configID="0">Add</a>
 
 <div>
     @foreach (var config in Model.Configurations)
     {
+        
+    <div class="content-box theme-border">
+        <div class="bold">@config.Name</div>
         <div>
-            <div>@config.Name</div>
-            <div>
-                @foreach (var role in config.Roles)
+            Invite =
+            @if (!string.IsNullOrEmpty(config.InviteUrl))
+            {
+                <a href="@config.InviteUrl">@config.InviteUrl</a>
+            }
+            else
+            {
+                @("None")
+            }
+
+        </div>
+        <div>
+            Discord Roles -
+            @{
+                int selected = 0;
+                for (int i = 0; i < config.Roles.Count; i++)
                 {
+                    var role = config.Roles[i];
+
                     if (role.Selected)
                     {
-                        <div>@role.Name</div>
+                        if (selected > 0)
+                        {
+                            @(", ")
+                        }
+                        @role.Name
+                        selected++;
                     }
+
                 }
-            </div>
+            }
         </div>
+
+        <div>
+            <a asp-action="EditConfiguration" asp-controller="Discord" asp-route-configID="@config.Id"><i class="fas fa-edit"></i></a>
+        </div>
+    </div>
     }
 </div>

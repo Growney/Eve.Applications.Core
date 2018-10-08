@@ -8,13 +8,14 @@ using Eve.EveAuthTool.GUI.Web.Controllers.Helpers;
 using Gware.Standard.Web.Tenancy.Routing;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace Eve.EveAuthTool.GUI.Web.Controllers
 {
-    public class HomeController : EveAuthBaseController
+    public class HomeController : EveAuthBaseController<HomeController>
     {
-        public HomeController(IViewParameterProvider parameters)
-            : base(parameters)
+        public HomeController(ILogger<HomeController> logger,IViewParameterProvider parameters)
+            : base(logger,parameters)
         {
 
         }

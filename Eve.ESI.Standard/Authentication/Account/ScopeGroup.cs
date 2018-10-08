@@ -4,7 +4,7 @@ namespace Eve.ESI.Standard.Account
 {
     public class ScopeGroup
     {
-        public ulong Value { get; }
+        public uint Value { get; }
         public string Name { get; }
 
         public eESIScope[] Scopes { get; }
@@ -13,11 +13,11 @@ namespace Eve.ESI.Standard.Account
 
         public bool Required { get; }
 
-        public ScopeGroup(ulong value,string name, string description = "", params eESIScope[] scopes)
+        public ScopeGroup(uint value,string name, string description = "", params eESIScope[] scopes)
             :this(value,name,false,description,scopes)
         {
         }
-        public ScopeGroup(ulong value, string name, bool required, string description = "", params eESIScope[] scopes)
+        public ScopeGroup(uint value, string name, bool required, string description = "", params eESIScope[] scopes)
         {
             Value = value;
             Name = name;

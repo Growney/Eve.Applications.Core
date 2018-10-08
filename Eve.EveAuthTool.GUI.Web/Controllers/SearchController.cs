@@ -7,14 +7,15 @@ using Eve.ESI.Standard.DataItem.Search;
 using Eve.EveAuthTool.Standard.Security.Middleware;
 using Eve.EveAuthTool.GUI.Web.Models.Search;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace Eve.EveAuthTool.GUI.Web.Controllers
 {
-    public class SearchController : Helpers.EveAuthBaseController
+    public class SearchController : Helpers.EveAuthBaseController<SearchController>
     {
 
-        public SearchController(IViewParameterProvider provider)
-            :base(provider)
+        public SearchController(ILogger<SearchController> logger,IViewParameterProvider provider)
+            :base(logger,provider)
         {
 
         }

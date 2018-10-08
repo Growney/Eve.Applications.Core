@@ -25,20 +25,26 @@ using Gware.Standard.Web.Tenancy.Configuration;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Eve.EveAuthTool.Standard.Security;
+using Eve.EveAuthTool.Standard.Discord.Configuration;
+using Gware.Standard.Web.Tenancy.Routing;
+using Microsoft.Extensions.Logging;
 
 namespace Eve.EveAuthTool.GUI.Web.Controllers
 { 
-    public class RegistrationController : EveAuthBaseController
+    public class RegistrationController : EveAuthBaseController<RegistrationController>
     {
+        public IDiscordBotConfiguration DiscordConfiguration { get; }
         public IArgumentsStore<ESITokenRequestParameters> TokenStore { get; }
         public IArgumentsStore<OAuthRequestArguments> OAuthArgStore { get; }
         public IScopeGroupProvider Scopes { get; }
-        public RegistrationController(IArgumentsStore<ESITokenRequestParameters> tokenStore,IArgumentsStore<OAuthRequestArguments> oAuthArgStore,IScopeGroupProvider scopes,IViewParameterProvider parameters)
-            :base(parameters)
+
+        public RegistrationController(ILogger<RegistrationController> logger,IDiscordBotConfiguration discordConfiguration,IArgumentsStore<ESITokenRequestParameters> tokenStore,IArgumentsStore<OAuthRequestArguments> oAuthArgStore,IScopeGroupProvider scopes,IViewParameterProvider parameters)
+            :base(logger,parameters)
         {
             TokenStore = tokenStore;
             OAuthArgStore = oAuthArgStore;
             Scopes = scopes;
+            DiscordConfiguration = discordConfiguration;
         }
         public IActionResult Group()
         {
@@ -55,15 +61,23 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
                 bool success = await SignInToken(token);
                 if (success)
                 {
-                    return RedirectToAction(Startup.c_defaultAction, Startup.c_defaultController);
+                    if (!string.IsNullOrEmpty(arguments.ReturnUrl))
+                    {
+                        return Redirect(arguments.ReturnUrl);
+                    }
+                    else
+                    {
+                        return RedirectToAction(Startup.c_defaultAction, Startup.c_defaultController);
+                    }
                 }
                 else
                 {
-                    return new JsonResult("Character account not found");
+                    return View("Error", new Models.Shared.ErrorModel() { Message = "Character account not found" });
                 }
 
             }
-            return new JsonResult("Bad ESI Authorisation");
+
+            return View("Error", new Models.Shared.ErrorModel() { Message = "Bad ESI Authorisation" });
         }
         private async Task SignInAccount(UserAccount account)
         {
@@ -139,16 +153,17 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
         {
             return View();
         }
-        public IActionResult EveLogin()
+        public IActionResult EveLogin(string ReturnUrl)
         {
             ESIAuthRequestArguments args = HttpContext.GetLocalArguments<ESIAuthRequestArguments>(
-                redirectPath: "Registration/CharacterLogin");
+                redirectPath: "Registration/CharacterLogin",
+                returnUrl: ReturnUrl);
 
             return Redirect(args.GetAuthenticationUrl(
                 state: OAuthArgStore.StoreArguments(args),
                 config: ESIConfiguration));
         }
-        public async Task<IActionResult> CharacterRegister(string state)
+        private async Task<IActionResult> GenericCharacterRegistration(string state,IActionResult successResult)
         {
             ESIAuthRequestArguments arguments = OAuthArgStore.ReCallArguments(state) as ESIAuthRequestArguments;
 
@@ -164,8 +179,8 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
                     if (IsTenant)
                     {
                         allowedByTenant = false;
-                        AuthenticatedEntity entity = AuthenticatedEntity.FromToken(ESIConfiguration, TenantController, Cache,PublicDataProvider, token);
-                        Role role = await AuthRule.GetEntityRole(ESIConfiguration,TenantController,Cache,PublicDataProvider, entity);
+                        AuthenticatedEntity entity = AuthenticatedEntity.FromToken(ESIConfiguration, TenantController, Cache, PublicDataProvider, token);
+                        Role role = await AuthRule.GetEntityRole(ESIConfiguration, TenantController, Cache, PublicDataProvider, entity);
                         if (role != null)
                         {
                             if (role.Permissions.HasFlag(eRulePermission.Register))
@@ -208,28 +223,33 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
                         }
 
                         await SignInAccount(loginAccount);
-                        return RedirectToAction("Welcome", "Home");
+                        return successResult;
                     }
                     else
                     {
-                        return new JsonResult($"Character access denied by {CurrentTenant.DisplayName}");
+                        return View("Error", new Models.Shared.ErrorModel() { Message = $"Character access denied by {CurrentTenant.DisplayName}" });
                     }
                 }
                 else
                 {
-                    return new JsonResult("Bad ESI Authorisation");
+
+                    return View("Error", new Models.Shared.ErrorModel() { Message = "Bad ESI Authorisation" });
                 }
             }
             else
             {
-                return new JsonResult("Bad ESI Authorisation");
+                return View("Error", new Models.Shared.ErrorModel() { Message = "Bad ESI Authorisation" });
             }
+        }
+        public Task<IActionResult> CharacterRegister(string state)
+        {
+            return GenericCharacterRegistration(state, RedirectToAction("Welcome", "Home"));
         }
         public IActionResult Character(uint[] selectedScopes)
         {
             ESIAuthRequestArguments args = HttpContext.GetLocalArguments<ESIAuthRequestArguments>(
                 redirectPath: "Registration/CharacterRegister");
-            args.Scopes = Scopes.GetCharacterScopes();
+            args.Scopes = Scopes.GetCharacterScopes(selectedScopes);
 
             return Redirect(args.GetAuthenticationUrl(
                 state: OAuthArgStore.StoreArguments(args),
@@ -325,45 +345,45 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
                                         }
                                         else
                                         {
-                                            return new JsonResult("Must be a director of the executor corp to register as an alliance");
+                                            return View("Error", new Models.Shared.ErrorModel() { Message = "Must be a director of the executor corp to register as an alliance" });
                                         }
                                     }
                                     else
                                     {
-                                        return new JsonResult("Error getting Alliance Info");
+                                        return View("Error", new Models.Shared.ErrorModel() { Message = "Error getting Alliance Info" });
                                     }
                                 }
                                 else
                                 {
-                                    return new JsonResult("Entity already has a tenant");
+                                    return View("Error", new Models.Shared.ErrorModel() { Message = "Entity already has a tenant" });
                                 }
                             }
                             else
                             {
-                                return new JsonResult("Must have in game role director to register");
+                                return View("Error", new Models.Shared.ErrorModel() { Message = "Must have in game role director to register" });
                             }
 
                         }
                         else
                         {
-                            return new JsonResult("Could not get character roles");
+                            return View("Error", new Models.Shared.ErrorModel() { Message = "Could not get character roles" });
                         }
                     }
                     else
                     {
-                        return new JsonResult("Corporation not in an alliance");
+                        return View("Error", new Models.Shared.ErrorModel() { Message = "Corporation not in an alliance" });
                     }
 
                 }
                 else
                 {
-                    return new JsonResult("ESI Authentication error");
+                    return View("Error", new Models.Shared.ErrorModel() { Message = "ESI Authentication error" });
                 }
 
             }
             else
             {
-                return  new JsonResult("Bad ESI Authorisation");
+                return View("Error", new Models.Shared.ErrorModel() { Message = "Bad ESI Authorisation" });
             }
 
         }
@@ -405,36 +425,34 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
                                 }
                                 else
                                 {
-                                    return new JsonResult("Error getting corporation info");
+                                    return View("Error", new Models.Shared.ErrorModel() { Message = "Error getting corporation info" });
                                 }
                             }
                             else
                             {
-                                return new JsonResult("Must have in game role director to register");
+                                return View("Error", new Models.Shared.ErrorModel() { Message = "Must have in game role director to register" });
                             }
 
                         }
                         else
                         {
-                            return new JsonResult("Could not get character roles");
+                            return View("Error", new Models.Shared.ErrorModel() { Message = "Could not get character roles" });
                         }
-
-
                     }
                     else
                     {
-                        return new JsonResult("Entity already has a tenant");
+                        return View("Error", new Models.Shared.ErrorModel() { Message = "Entity already has a tenant" });
                     }
                 }
                 else
                 {
-                    return new JsonResult("ESI Authentication error");
+                    return View("Error", new Models.Shared.ErrorModel() { Message = "ESI Authentication error" });
                 }
 
             }
             else
             {
-                return new JsonResult("Bad ESI Authorisation");
+                return View("Error", new Models.Shared.ErrorModel() { Message = "Bad ESI Authorisation" });
             }
         }
         public IActionResult ValidateTenant(string name, string displayname)
@@ -534,6 +552,7 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
                 AuthRule.CreateAdminRule(TenantController, token.CorporationID);
                 AuthRule.CreateMemberRule(TenantController, token.EntityID, token.EntityType);
                 AuthRule.CreateStandingRule(TenantController, token.EntityID, token.EntityType);
+                AuthRule.CreatePublicRule(TenantController);
 
                 if (parameters.CreateFrom != null)
                 {
@@ -558,7 +577,7 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
             }
             else
             {
-                return new JsonResult("Bad ESI Authorisation");
+                return View("Error", new Models.Shared.ErrorModel() { Message = "Bad ESI Authorisation" });
             }
         }
         public IActionResult OAuthCallBack(string code, string state)
@@ -571,8 +590,44 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
             }
             else
             {
-                return new JsonResult("Bad OAuth");
+                return View("Error", new Models.Shared.ErrorModel() { Message = "Bad OAuth" });
             }
+        }
+
+        public IActionResult QuickAuth()
+        {
+            ESIAuthRequestArguments args = HttpContext.GetLocalArguments<ESIAuthRequestArguments>(
+                redirectPath: "Registration/QuickAuthCharacter");
+            args.Scopes = Scopes.GetCharacterQuickAuthScopes();
+
+            return Redirect(args.GetAuthenticationUrl(
+                state: OAuthArgStore.StoreArguments(args),
+                config: ESIConfiguration));
+        }
+        public Task<IActionResult> QuickAuthCharacter(string state)
+        {
+            return GenericCharacterRegistration(state, RedirectToAction("QuickAuthDiscord", "Registration"));
+        }
+        public IActionResult QuickAuthDiscord()
+        {
+            DiscordOAuthRequestArguments args = HttpContext.GetLocalArguments<DiscordOAuthRequestArguments>(
+                redirectPath: "Discord/LinkDiscordAccount");
+
+            return Redirect(args.GetAuthenticationUrl(
+                state: OAuthArgStore.StoreArguments(args),
+                config: DiscordConfiguration));
+        }
+
+        [IgnoreVersionCheckAttribute]
+        public IActionResult TenantUpgrade(string returnUrl)
+        {
+            return View("TenantUpgrade", new Models.Shared.UpgradeModel() { Url = returnUrl });
+        }
+
+        [IgnoreVersionCheck]
+        public IActionResult IsTenantReady()
+        {
+            return new JsonResult((CurrentTenant?.UpgradeStatus ?? eUpgradeStatus.Upgrading) == eUpgradeStatus.Ok);
         }
     }
 }

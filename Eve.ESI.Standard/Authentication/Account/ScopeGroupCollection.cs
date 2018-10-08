@@ -57,7 +57,7 @@ namespace Eve.ESI.Standard.Account
             return retval;
         }
 
-        public eESIScope[] GetScopes(ulong selected, ulong required = 0)
+        public eESIScope[] GetScopes(uint selected, ulong required = 0)
         {
             List<eESIScope> retval = new List<eESIScope>();
 
@@ -75,7 +75,7 @@ namespace Eve.ESI.Standard.Account
 
         public eESIScope[] GetScopes(uint[] selected, ulong required = 0)
         {
-            ulong scopeFlag = 0;
+            uint scopeFlag = 0;
             for (int i = 0; i < (selected?.Length ?? 0); i++)
             {
                 scopeFlag |= selected[i];
@@ -83,9 +83,9 @@ namespace Eve.ESI.Standard.Account
             return GetScopes(scopeFlag,required);
         }
 
-        public ulong GetValue(string name)
+        public uint GetValue(string name)
         {
-            ulong retVal = 0;
+            uint retVal = 0;
             for (int i = 0; i < (m_groups?.Length ?? 0); i++)
             {
                 if(m_groups[i].Name == name)

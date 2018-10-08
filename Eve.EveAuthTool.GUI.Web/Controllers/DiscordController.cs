@@ -3,39 +3,53 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
+using Eve.ESI.Standard.Account;
 using Eve.EveAuthTool.Standard;
 using Eve.EveAuthTool.Standard.Discord.Configuration;
 using Eve.EveAuthTool.Standard.Discord.Configuration.Tenant;
 using Eve.EveAuthTool.Standard.Discord.Service;
+using Eve.EveAuthTool.Standard.Discord.Service.Module;
 using Eve.EveAuthTool.Standard.Security.Middleware;
+using Eve.EveAuthTool.Standard.Security.Rules;
 using Gware.Standard.Collections.Generic;
+using Gware.Standard.Web.OAuth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace Eve.EveAuthTool.GUI.Web.Controllers
 {
     [Authorize]
-    public class DiscordController : Helpers.EveAuthBaseController
+    public class DiscordController : Helpers.EveAuthBaseController<DiscordController>
     {
-        private readonly IDiscordBot m_bot;
         private readonly OnceLoadedValue<string> m_linkString = new OnceLoadedValue<string>();
         private readonly OnceLoadedValue<Task<IGuild>> m_currentGuild = new OnceLoadedValue<Task<IGuild>>();
         private readonly OnceLoadedValue<Task<IUser>> m_currentUser = new OnceLoadedValue<Task<IUser>>();
         private readonly OnceLoadedValue<Task<IUser>> m_botCurrentUser = new OnceLoadedValue<Task<IUser>>();
+        private readonly OnceLoadedValue<Task<IGuildUser>> m_botGuildUser = new OnceLoadedValue<Task<IGuildUser>>();
+        public Task<IGuildUser> BotGuildUser
+        {
+            get
+            {
+                m_botGuildUser.Load = () =>
+                {
+                    return Bot.GetGuildUser(CurrentGuild,BotCurrentUser);
+                };
+                return m_botGuildUser.Value;
+            }
+        }
 
-        
         public Task<IUser> BotCurrentUser
         {
             get
             {
                 m_botCurrentUser.Load = () =>
                 {
-                    return m_bot.GetBotUser(CurrentGuild);
+                    return Bot.GetBotUser(CurrentGuild);
                 };
                 return m_botCurrentUser.Value;
             }
         }
-
         public Task<IUser> CurrentUser
         {
             get
@@ -45,7 +59,7 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
                     string accountLink = CurrentAccount?.GetLink(TenantController, (byte)eTenantLinkType.Discord);
                     if (ulong.TryParse(accountLink, out ulong userID))
                     {
-                        return m_bot.GetUser(userID);
+                        return Bot.GetUser(userID);
                     }
 
                     return null;
@@ -64,7 +78,7 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
                     {
                         if (ulong.TryParse(LinkedGuildId, out ulong guildID))
                         {
-                            return m_bot.GetGuild(guildID);
+                            return Bot.GetGuild(guildID);
                         }
                     }
                     return null;
@@ -89,15 +103,18 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
             }
         }
 
-        private readonly IArgumentsStore<DiscordLinkParameter> m_discordLinkStore;
-        private IDiscordBotConfiguration m_discordConfiguration;
+        public IDiscordBot Bot { get; }
+        public IArgumentsStore<DiscordLinkParameter> DiscordLinkStore { get; }
+        public IDiscordBotConfiguration DiscordConfiguration { get; }
+        public IArgumentsStore<OAuthRequestArguments> OAuthArgStore { get; }
 
-        public DiscordController(IDiscordBot bot,IDiscordBotConfiguration discordConfiguration,IArgumentsStore<DiscordLinkParameter> discordLinkStore, IViewParameterProvider parameters)
-            :base(parameters)
+        public DiscordController(ILogger<DiscordController> logger,IArgumentsStore<OAuthRequestArguments> oauthArgsStore,IDiscordBot bot,IDiscordBotConfiguration discordConfiguration,IArgumentsStore<DiscordLinkParameter> discordLinkStore, IViewParameterProvider parameters)
+            :base(logger,parameters)
         {
-            m_discordLinkStore = discordLinkStore;
-            m_discordConfiguration = discordConfiguration;
-            m_bot = bot;
+            DiscordLinkStore = discordLinkStore;
+            DiscordConfiguration = discordConfiguration;
+            Bot = bot;
+            OAuthArgStore = oauthArgsStore;
         }
         private List<Models.Discord.DiscordRole> GetAllRoles(IGuild currentGuild)
         {
@@ -113,6 +130,24 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
             }
             return allRoles;
         }
+        private async Task<List<Models.Discord.DiscordInvite>> GetInvites(IGuild currentGuild)
+        {
+            List<Models.Discord.DiscordInvite> allRoles = new List<Models.Discord.DiscordInvite>();
+            IReadOnlyCollection<IInviteMetadata> invites = await currentGuild.GetInvitesAsync();
+            foreach (IInviteMetadata invite in invites)
+            {
+                if (!invite.IsRevoked && !invite.IsTemporary)
+                {
+                    allRoles.Add(new Models.Discord.DiscordInvite()
+                    {
+                        ID = invite.Id,
+                        Url = invite.Url
+                    });
+                }
+                
+            }
+            return allRoles;
+        }
         [Authorize(Roles ="Manage")]
         public async Task<IActionResult> Index()
         {
@@ -122,7 +157,7 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
                 return View("LinkedIndex", new Models.Discord.LinkedInfo()
                 {
                     GuildName = currentGuild.Name,
-                    Configurations = Models.Discord.DiscordConfiguration.CreateFrom(DiscordRoleConfiguration.All(TenantController), GetAllRoles(currentGuild))
+                    Configurations = Models.Discord.DiscordConfiguration.CreateFrom<Models.Discord.DiscordConfiguration>(DiscordRoleConfiguration.All(TenantController), GetAllRoles(currentGuild),await GetInvites(currentGuild))
                 });
 
             }
@@ -130,8 +165,8 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
             {
                 return View("UnlinkedIndex", new Models.Discord.UnlinkedInfo()
                 {
-                    AddBotUrl = m_discordConfiguration.GetAddBotUrl(),
-                    CommandPrefix = m_discordConfiguration.CommandPrefix
+                    AddBotUrl = DiscordConfiguration.GetAddBotUrl(),
+                    CommandPrefix = DiscordConfiguration.CommandPrefix
                 });
             }
             
@@ -140,7 +175,20 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
         [Authorize(Roles = "Manage")]
         public async Task<IActionResult> EditConfiguration(long configID)
         {
-            return View(Models.Discord.DiscordConfiguration.CreateFrom(DiscordRoleConfiguration.Get< DiscordRoleConfiguration>(TenantController,configID), GetAllRoles(await CurrentGuild)));
+            DiscordRoleConfiguration config = DiscordRoleConfiguration.Get<DiscordRoleConfiguration>(TenantController, configID);
+            if(config == null)
+            {
+                config = new DiscordRoleConfiguration()
+                {
+                    Name = "New Discord Configuration"
+                };
+            }
+            IGuild currentGuild = await CurrentGuild;
+
+            List<Models.Discord.DiscordInvite> invites = await GetInvites(currentGuild);
+            Models.Discord.EditDiscordConfiguration configuration = Models.Discord.DiscordConfiguration.CreateFrom<Models.Discord.EditDiscordConfiguration>(config, GetAllRoles(currentGuild), invites);
+            configuration.Invites = invites;
+            return View(configuration);
         }
         [HttpPost]
         [Authorize(Roles = "Manage")]
@@ -153,7 +201,105 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
         [Authorize(Roles = "Manage")]
         public IActionResult GenerateLink()
         {
-            return new JsonResult(m_discordLinkStore.StoreArguments(new DiscordLinkParameter(CurrentTenant.Id)));
+            return new JsonResult(DiscordLinkStore.StoreArguments(new DiscordLinkParameter(CurrentTenant.Id)));
+        }
+
+        public async Task<IActionResult> LinkDiscordAccount(string state)
+        {
+            DiscordOAuthRequestArguments arguments = OAuthArgStore.ReCallArguments(state) as DiscordOAuthRequestArguments;
+            try
+            {
+                if (arguments != null)
+                {
+                    Standard.Discord.Authentication.AuthenticationToken token = await Standard.Discord.Authentication.AuthenticationToken.RequestToken(DiscordConfiguration, arguments.Code);
+                    if (token != null)
+                    {
+                        Discord.Rest.DiscordRestClient client = new Discord.Rest.DiscordRestClient();
+                        client.Log += x =>
+                        {
+                            if (x.Severity == LogSeverity.Error)
+                            {
+                                Logger.LogError(x.Exception, "Discord Client exception");
+                            }
+                            else
+                            {
+                                Logger.LogInformation(x.Message);
+                            }
+                            
+                            return Task.CompletedTask;
+                        };
+                        await client.LoginAsync(Discord.TokenType.Bearer, token.Access_Token);
+                        if(client.CurrentUser != null)
+                        {
+                            string link = client.CurrentUser.Id.ToString();
+                            LinkedUserAccount.CreateLink(TenantController, CurrentAccount.AccountGuid, (byte)eTenantLinkType.Discord, link);
+                            LinkedUserAccount account = LinkedUserAccount.CreateObject(link, (byte)eTenantLinkType.Discord, CurrentAccount);
+
+                            await JoinCurrentGuild(client);
+
+                            await RegistrationCommands.UpdateLinkedAccount(ESIConfiguration, PublicDataProvider, TenantController, CurrentTenant.EntityId, CurrentTenant.EntityType, Cache, await CurrentGuild, EveAuthToolModuleBase.GetUserHighestRole(await CurrentGuild, await BotGuildUser), account);
+
+                            return View("/Views/Registration/AuthSuccess.cshtml");
+                        }
+                        else
+                        {
+                            return View("Error", new Models.Shared.ErrorModel() { Message = "Unable to login to discord account" });
+                        }
+                        
+
+                        
+                    }
+                    else
+                    {
+                        return View("Error", new Models.Shared.ErrorModel() { Message = "Could not get discord token" });
+                    }
+                }
+                else
+                {
+                    return View("Error", new Models.Shared.ErrorModel() { Message = "Bad Discord Authorisation" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return View("Error", new Models.Shared.ErrorModel() { Message = ex.Message });
+            }
+            
+        }
+
+        private async Task<bool> IsInCurrentGuild(IDiscordClient client)
+        {
+            ulong currentGuild = (await CurrentGuild).Id;
+            bool retVal = false;
+            IReadOnlyCollection<IGuild> guilds = await client.GetGuildsAsync();
+            foreach(IGuild guild in guilds)
+            {
+                if(guild.Id == currentGuild)
+                {
+                    retVal = true;
+                    break;
+                }
+            }
+            return retVal;
+        }
+
+        private async Task JoinCurrentGuild(IDiscordClient client)
+        {
+            Role currentRole = await CurrentRole;
+            if (currentRole != null)
+            {
+                DiscordRoleConfiguration discordConfig = DiscordRoleConfiguration.Get<DiscordRoleConfiguration>(TenantController, currentRole.DiscordRoleConfigurationID);
+                if (discordConfig != null)
+                {
+                    if (!string.IsNullOrEmpty(discordConfig.GuildInviteID))
+                    {
+                        IInvite invite = await client.GetInviteAsync(discordConfig.GuildInviteID);
+                        if (invite != null)
+                        {
+                            await invite.AcceptAsync();
+                        }
+                    }
+                }
+            }
         }
     }
 }

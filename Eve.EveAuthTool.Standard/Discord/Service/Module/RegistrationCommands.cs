@@ -17,6 +17,8 @@ using Eve.ESI.Standard.Authentication.Configuration;
 using Eve.EveAuthTool.Standard;
 using Gware.Standard.Storage.Controller;
 using Eve.ESI.Standard.Authentication.Client;
+using Eve.EveAuthTool.Standard.Security.Rules;
+using Eve.EveAuthTool.Standard.Discord.Configuration.Tenant;
 
 namespace Eve.EveAuthTool.Standard.Discord.Service.Module
 {
@@ -102,8 +104,9 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Module
                 IGuildUser user = await guild.GetUserAsync(userID);
                 if (userID != guild.OwnerId)
                 {
-                    if (GetUserHighestRole(user) <= modifyingHighestRole)
+                    if (GetUserHighestRole(guild,user) <= modifyingHighestRole)
                     {
+
                         List<AuthenticatedEntity> accountCharacters = AuthenticatedEntity.GetForAccount(esiconfig, tenantController, cache,publicDataProvider, account);
                         if (accountCharacters.Count > 0)
                         {
@@ -149,6 +152,25 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Module
                                 });
                                 retVal = true;
                             }
+
+                            Role role = await AuthRule.GetEntityRole(esiconfig, tenantController, cache, publicDataProvider, firstCharacter);
+                            DiscordRoleConfiguration botConfiguration;
+                            if (role != null && (botConfiguration = DiscordRoleConfiguration.Get<DiscordRoleConfiguration>(tenantController,role.DiscordRoleConfigurationID)) != null)
+                            {
+                                await user.AddRolesAsync(CreateRoleList(botConfiguration.AssignedRoles, guild.Roles));
+                            }
+                            else
+                            {
+                                List<ulong> toRemove = new List<ulong>();
+                                foreach(ulong currentRoll in user.RoleIds)
+                                {
+                                    if(currentRoll != guild.EveryoneRole.Id)
+                                    {
+                                        toRemove.Add(currentRoll);
+                                    }
+                                }
+                                await user.RemoveRolesAsync(CreateRoleList(toRemove, guild.Roles));
+                            }
                         }
                     }
                     else
@@ -166,6 +188,21 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Module
             }
             return retVal;
         }
+
+        private static IEnumerable<IRole> CreateRoleList(IEnumerable<ulong> selected,IEnumerable<IRole> allRoles)
+        {
+            HashSet<ulong> set = new HashSet<ulong>(selected);
+            List<IRole> roles = new List<IRole>();
+            foreach(IRole role in allRoles)
+            {
+                if (set.Contains(role.Id))
+                {
+                    roles.Add(role);
+                }
+            }
+            return roles;
+        }
+
         [Command("Unlink")]
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task Unlink()

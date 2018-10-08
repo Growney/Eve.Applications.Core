@@ -12,12 +12,15 @@ namespace Eve.EveAuthTool.Standard.Discord.Configuration.Tenant
     {
         public override long Id { get; set; }
         public string Name { get; set; }
+        public string GuildInviteID { get; set; }
         public HashSet<ulong> AssignedRoles { get; } = new HashSet<ulong>();
       
 
         protected override void OnLoad(IDataAdapter adapter)
         {
             Name = adapter.GetValue("Name", string.Empty);
+            GuildInviteID = adapter.GetValue("GuildInviteID", string.Empty);
+
             AssignedRoles.Clear();
             List<byte[]> values = Load<LoadedFromAdapterBytes>(adapter.Controller.ExecuteCollectionCommand(GetRoleSelectCommand())).ToList();
             foreach(byte[] value in values)
@@ -28,6 +31,7 @@ namespace Eve.EveAuthTool.Standard.Discord.Configuration.Tenant
         protected override void AddParametersToSave(IDataCommand command)
         {
             command.AddParameter("Name", System.Data.DbType.String).Value = Name;
+            command.AddParameter("GuildInviteID", System.Data.DbType.String).Value = GuildInviteID;
 
             List<byte[]> values = new List<byte[]>();
             foreach(ulong roleID in AssignedRoles)

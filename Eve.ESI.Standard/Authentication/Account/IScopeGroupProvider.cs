@@ -18,5 +18,7 @@ namespace Eve.ESI.Standard.Authentication.Account
         eESIScope[] GetCharacterScopes();
         eESIScope[] GetCorporationScopes();
         eESIScope[] GetAllianceScopes();
+
+        eESIScope[] GetCharacterQuickAuthScopes();
     }
 }

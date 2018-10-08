@@ -11,10 +11,6 @@
     padding-top: 10px;
 }
 
-
-.rule-name, .rule-relationship-header {
-    font-weight: bold;
-}
 .rule-name {
     grid-area: name;
 }

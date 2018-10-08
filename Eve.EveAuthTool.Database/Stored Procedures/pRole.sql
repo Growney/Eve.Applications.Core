@@ -3,7 +3,8 @@
 	@Id BIGINT = NULL,
 	@Permissions INT = NULL,
 	@Ordinal INT = NULL,
-	@Name VARCHAR(200) = NULL
+	@Name VARCHAR(200) = NULL,
+	@DiscordRoleConfigurationID BIGINT = NULL
 AS
 
 IF @Result = 'Save'
@@ -12,8 +13,8 @@ BEGIN
 	IF NOT EXISTS (SELECT* FROM Role WHERE Id = @Id)
 	BEGIN
 
-		INSERT INTO Role ([Permissions],[Ordinal],[Name])
-		VALUES(@Permissions,@Ordinal,@Name)
+		INSERT INTO Role ([Permissions],[Ordinal],[Name],[DiscordRoleConfigurationID])
+		VALUES(@Permissions,@Ordinal,@Name,@DiscordRoleConfigurationID)
 
 		SELECT @@IDENTITY AS [Value]
 
@@ -24,7 +25,8 @@ BEGIN
 		UPDATE [Role]
 		SET [Permissions] = @Permissions,
 		Ordinal = @Ordinal,
-		[Name] = @Name
+		[Name] = @Name,
+		DiscordRoleConfigurationID = @DiscordRoleConfigurationID
 		WHERE Id = @Id
 
 		SELECT @Id AS [Value]

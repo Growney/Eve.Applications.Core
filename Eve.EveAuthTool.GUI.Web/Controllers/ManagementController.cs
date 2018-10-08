@@ -12,15 +12,17 @@ using Eve.EveAuthTool.Standard.Security.Rules;
 using Gware.Standard.Web.Tenancy.Routing;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Eve.EveAuthTool.Standard.Discord.Configuration.Tenant;
+using Microsoft.Extensions.Logging;
 
 namespace Eve.EveAuthTool.GUI.Web.Controllers
 {
     [Authorize]
     [TenantRequired]
-    public class ManagementController : Helpers.EveAuthBaseController
+    public class ManagementController : Helpers.EveAuthBaseController<ManagementController>
     {
-        public ManagementController(IViewParameterProvider parameters)
-            :base(parameters)
+        public ManagementController(ILogger<ManagementController> logger,IViewParameterProvider parameters)
+            :base(logger, parameters)
         {
 
         }
@@ -39,7 +41,7 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
         [Authorize(Roles = "Manage")]
         public IActionResult Roles()
         {
-            return View(RoleModel.CreateFrom(Role.All(TenantController)));
+            return View(RoleModel.CreateFrom(Role.All(TenantController), DiscordRoleConfiguration.All(TenantController)));
         }
 
         [HttpGet]
@@ -47,9 +49,12 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
         public IActionResult EditRule(long ruleID)
         {
             AuthRule rule = AuthRule.Get<AuthRule>(TenantController, ruleID);
-            if(rule.Id != ruleID)
+            if(rule == null)
             {
-                rule.Name = "New Rule";
+                rule = new AuthRule()
+                {
+                    Name = "New Rule"
+                };
             }
             
             return View(rule);
@@ -60,17 +65,27 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
         {
             //role.Save(TenantController);
             Role role = Role.Get<Role>(TenantController, roleID);
-            if(role.Id != roleID)
+            if(role == null)
             {
-                role.Name = "New Role";
+                role = new Role()
+                {
+                    Name = "New Role"
+                };
             }
-            return View("EditRole", RoleModel.CreateFrom(role));
+
+            EditRoleModel model = RoleModel.CreateFrom<EditRoleModel>(role, DiscordRoleConfiguration.Get<DiscordRoleConfiguration>(TenantController, role.DiscordRoleConfigurationID));
+            model.AllConfigurations = Models.Discord.DiscordConfiguration.CreateFrom<Models.Discord.DiscordConfiguration>(DiscordRoleConfiguration.All(TenantController),new List<Models.Discord.DiscordRole>(),new List<Models.Discord.DiscordInvite>());
+            return View("EditRole", model);
         }
         [HttpPost]
         [Authorize(Roles = "Manage")]
         public IActionResult EditRole(RoleModel role)
         {
             Role systemRole = Role.Get<Role>(TenantController, role.Id);
+            if(systemRole == null)
+            {
+                systemRole = new Role();
+            }
             systemRole.Name = role.Name;
             systemRole.Permissions = Standard.Security.eRulePermission.None;
             if (role.Register)
@@ -81,9 +96,11 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
             {
                 systemRole.Permissions |= Standard.Security.eRulePermission.Manage;
             }
+            systemRole.DiscordRoleConfigurationID = role.DiscordRoleConfigurationID;
             systemRole.Save(TenantController);
             return RedirectToAction("Roles");
         }
+        
         [HttpPost]
         [Authorize(Roles = "Manage")]
         public IActionResult EditRule(AuthRule rule)

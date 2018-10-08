@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <TypeScriptToolsVersion>3.0</TypeScriptToolsVersion>
+    <Configurations>Debug;Release;Testing</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,12 +27,20 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.0" />
+    <PackageReference Include="NLog" Version="4.5.10" />
+    <PackageReference Include="NLog.Web.AspNetCore" Version="4.7.0" />
     <PackageReference Include="Syncfusion.EJ2" Version="16.2.0.50" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="wwwroot\images\" />
     <Folder Include="wwwroot\lib\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\Eve.EveAuthTool.Configuration\NLog.config" Link="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>

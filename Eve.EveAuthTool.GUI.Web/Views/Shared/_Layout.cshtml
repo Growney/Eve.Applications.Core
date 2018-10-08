@@ -16,12 +16,12 @@
 
     @{
         ViewBag.menus = new List<object>()
-    {
-        new {text= "Account" },
-        new {text= "About ESA", path = "/Home/AboutESA/" },
-        new {text= "About Me", path = "/Home/AboutMe/" },
-        new {text= "Management", path = "/Management/Index" }
-    };
+        {
+            new {text= "Account" },
+            new {text= "About ESA", path = "/Home/AboutESA/" },
+            new {text= "About Me", path = "/Home/AboutMe/" },
+            new {text= "Management", path = "/Management/Index" }
+        };
     }
 
 </head>
@@ -34,6 +34,26 @@
             @(parameters.Package.IsTenant ? parameters.Package.CurrentTenant.DisplayName : "")
         </div>
         <div class="site-info">
+            @if (parameters.Package.IsTenant)
+            {
+                @if (parameters.Package.IsAuthenticated)
+                {
+                    var characters = parameters.Package.Characters.GetAccountCharacters().ToList();
+                    if(characters.Count > 0)
+                    {
+                        @($"Welcome {await parameters.Package.PublicDataProvider.GetEntityName(Eve.ESI.Standard.eESIEntityType.character,characters[0].EntityID)}")
+                    }
+                    
+                    <a class="button-list-button registration-button-small" asp-action="Logout" asp-controller="Registration">Log Out</a>
+                }
+                else
+                {
+                    <a asp-action="EveLogin" asp-controller="Registration" asp-route-ReturnUrl="@Context.Request.Path" class="button-list-button registration-button-small hover-image-button">Login<img src="~/images/eve-sso-login-black-small.png" /></a>
+                    <a class="button-list-button registration-button-small" href="#" onclick="showDialog('characterRegistrationDialog')">Register</a>
+                }
+            }
+        </div>
+        <div class="site-user-info">
 
         </div>
         <div class="site-breadcrumbs">
@@ -47,54 +67,22 @@
             {
                 <a asp-controller="Management" asp-action="Index">Management</a>
             }
-            <button onclick="showDialog('registrationDialog')">Account</button>
-            <a asp-controller="Home" asp-action="AboutESA">About ESA</a>
-            <a asp-controller="Home" asp-action="AboutMe">About Me</a>
-
-        </div>
-    </div>
-
-    <div id="registrationDialog" class="dialog-container">
-        <div class="dialog">
-            @if (parameters.Package.IsTenant)
-            {
-                @if (parameters.Package.IsAuthenticated)
-                {
-                    <h3>Your Account</h3>
-                    <button class="button-list-button registration-button" onclick="showDialog('addCharacterRegistrationDialog')">Add Character</button>
-                    <a class="button-list-button registration-button" asp-action="Logout" asp-controller="Registration">Log Out</a>
-                }
-                else
-                {
-                    <a asp-action="EveLogin" asp-controller="Registration" class="button-list-button registration-button hover-image-button">Login<img src="~/images/eve-sso-login-black-large.png" /></a>
-                    <button class="button-list-button registration-button" onclick="showDialog('characterRegistrationDialog')">Register</button>
-                }
-            }
             else
             {
-                <a asp-action="Group" asp-controller="Registration" class="button-list-button registration-button">Create Group</a>
+                <a asp-controller="Registration" asp-action="Group">Create Group</a>
             }
+            <a asp-controller="Home" asp-action="AboutESA">About ESA</a>
+            <a asp-controller="Home" asp-action="AboutMe">About Me</a>
+        </div>
+        <div class="site-footer">
+            All
+            <a href="/information/legal/">EVE related materials</a>
+            are property of
+            <a href="http://www.ccpgames.com">CCP Games</a> -
+            <a href="/information/legal/">CCP Copyright Notice</a>
         </div>
     </div>
 
-    <div id="addCharacterRegistrationDialog" class="dialog-container">
-        <div class="dialog-close">
-            <i class="fas fa-times"></i>
-        </div>
-        <div class="dialog">
-            @{
-                var addCharacterOptions = new Eve.EveAuthTool.GUI.Web.Models.Registration.RegistrationFormOptions()
-                {
-                    Action = "AddCharacter",
-                    Controller = "Registration",
-                    Title = "Add a character to your account",
-                    Description = "Register to use the application as a single user allowing you to view and multiple characters information",
-                    Groups = scopes.GetCharacterScopeGroups()
-                };
-            }
-            <partial name="RegistrationForm" model="addCharacterOptions" />
-        </div>
-    </div>
     <div id="characterRegistrationDialog" class="dialog-container">
         <div class="dialog-close">
             <i class="fas fa-times"></i>
@@ -113,11 +101,6 @@
             <partial name="RegistrationForm" model="characterOptions" />
         </div>
     </div>
-
-
-
-
-
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/Microsoft.jQuery.Unobtrusive.Ajax/jquery.unobtrusive-ajax.min.js"></script>

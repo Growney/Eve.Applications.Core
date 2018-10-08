@@ -13,6 +13,7 @@ namespace Eve.EveAuthTool.Standard.Security.Rules
         public string Name { get; set; }
         public int Ordinal { get; set; }
         public eRulePermission Permissions { get; set; }
+        public long DiscordRoleConfigurationID { get; set; }
 
         public Role()
         {
@@ -24,6 +25,7 @@ namespace Eve.EveAuthTool.Standard.Security.Rules
             command.AddParameter("Name", System.Data.DbType.String).Value = Name ?? string.Empty;
             command.AddParameter("Permissions", System.Data.DbType.Int64).Value = (long)Permissions;
             command.AddParameter("Ordinal", System.Data.DbType.Int32).Value = Ordinal;
+            command.AddParameter("DiscordRoleConfigurationID", System.Data.DbType.Int64).Value = DiscordRoleConfigurationID;
         }
 
         protected override void OnLoad(IDataAdapter adapter)
@@ -31,6 +33,7 @@ namespace Eve.EveAuthTool.Standard.Security.Rules
             Name = adapter.GetValue("Name", string.Empty);
             Permissions = (eRulePermission)adapter.GetValue("Permissions", 0L);
             Ordinal = adapter.GetValue("Ordinal", 0);
+            DiscordRoleConfigurationID = adapter.GetValue("DiscordRoleConfigurationID", 0L);
         }
 
         public static List<Role> All(ICommandController controller)

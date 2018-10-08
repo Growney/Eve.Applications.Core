@@ -1,8 +1,8 @@
 ﻿:root {
-    --theme-primary-back-colour: rgb(255, 255, 255);
+    --theme-primary-back-colour: rgb(212, 212, 206);
     --theme-secondary-back-colour: #5f5f5f;
     --theme-fore-colour: #000000;
-    --breadcrumb-height: 2.0em;
+    --breadcrumb-height: 45px;
     --headerbar-height: 40px;
 }
 * {
@@ -14,8 +14,8 @@ body{
 .site {
     display: grid;
     grid-template-columns: 270px 1fr 270px;
-    grid-template-rows: calc(128px - var(--breadcrumb-height)) var(--breadcrumb-height) 1fr;
-    grid-template-areas: "logo title info" "logo breadcrumbs breadcrumbs" "sidebarleft content content";
+    grid-template-rows: calc(128px - var(--breadcrumb-height)) var(--breadcrumb-height) 1fr 1.5em;
+    grid-template-areas: "logo title info" "logo breadcrumbs userinfo" "sidebarleft content content" "sidebarleft footer footer";
     height: 100vh;
 }
 
@@ -24,6 +24,11 @@ body{
     
 }
 
+.site-footer{
+    grid-area: footer;
+    text-align: center;
+    font-size:0.75em;
+}
 
 .site-title{
     grid-area:title;
@@ -37,6 +42,10 @@ body{
     grid-area:logo;
 }
 
+.site-user-info {
+    grid-area: userinfo;
+    background-color: var(--theme-primary-back-colour);
+}
 .site-info{
     grid-area:info;
 }
@@ -44,6 +53,7 @@ body{
 .site-breadcrumbs {
     grid-area: breadcrumbs;
     background-color: var(--theme-primary-back-colour);
+    line-height: var(--breadcrumb-height);
 }
 
 .site-content {
@@ -127,7 +137,7 @@ body{
     border-bottom-width: 3px;
 }
 
-.theme-left-border, .site-content {
+.theme-left-border, .site-content, .site-footer {
     border-left-color: var(--theme-secondary-back-colour);
     border-left-style: solid;
     border-left-width: 3px;
@@ -155,25 +165,28 @@ body{
     box-sizing:border-box;
     margin: 5px 0px;
 }
+.registration-button-small {
+    width: 195px;
+    height: 30px;
+    line-height: 30px;
+}
 .registration-button {
     width: 270px;
     height: 45px;
-    /*align text in the middle*/
-    text-align: center;
     line-height: 45px;
-
+}
+.registration-button, .registration-button-small {
+    text-align: center;
     color: var(--theme-fore-colour);
     background-color: transparent;
     transition: border-color 0.2s ease-in-out;
     font-size: 0.75em;
     letter-spacing: 0.3em;
     border: solid;
-
     border-color: var(--theme-fore-colour);
     border-width: 1px;
     border-radius: 4px;
-
-    text-decoration:none;
+    text-decoration: none;
 }
 
     .registration-button:hover {
@@ -280,4 +293,22 @@ body{
     padding-top:5px;
 }
    
+.bold{
+    font-weight:bold;
+}
 
+.center-page-container {
+    display: grid;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1vw;
+    height: 1vh;
+    grid-template-columns: 1fr auto 1fr;
+    grid-template-rows: 1fr auto 1fr;
+    grid-template-areas: ". . ." ". dialog ." ". . .";
+}
+
+.center-page{
+    grid-area:dialog;
+}

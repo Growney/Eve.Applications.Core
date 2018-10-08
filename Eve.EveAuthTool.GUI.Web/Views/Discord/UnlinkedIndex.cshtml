@@ -1,12 +1,20 @@
 ﻿@model Eve.EveAuthTool.GUI.Web.Models.Discord.UnlinkedInfo;
 @{
     ViewData["Title"] = "Index";
+    var breadcrumbs = new List<Breadcrumb>()
+    {
+        new Breadcrumb(){ Controller="Management",Action="Index",Text="Management"  }
+    };
 }
-@section SCripts{ 
+@section Scripts{
     <script src="~/js/discord.js"></script>
 }
+@section Breadcrumbs{
+    <partial name="breadcrumbs" model="breadcrumbs">
+}
 <h3>Your site is not linked !</h3>
-<p>Your site is not linked to a discord server please follow these simple steps to create the link.
+<p>
+    Your site is not linked to a discord server please follow these simple steps to create the link.
     <ol>
         <li>Ensure that you have the Administrator permission on your discord guild</li>
         <li>Click <a href="@Model.AddBotUrl" target="_blank">here</a> to add the bot to your guild.</li>

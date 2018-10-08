@@ -2,6 +2,7 @@
 	@Result NCHAR(50),
 	@Id BIGINT = NULL,
 	@Name VARCHAR(100) = NULL,
+	@GuildInviteID VARCHAR(100) = NULL,
 	@RoleIDs DataList READONLY
 AS
 BEGIN
@@ -12,8 +13,8 @@ BEGIN
 		IF NOT EXISTS (SELECT* FROM DiscordRoleConfiguration WHERE Id = @Id)
 		BEGIN
 
-			INSERT INTO DiscordRoleConfiguration([Name])
-			VALUES(@Name)
+			INSERT INTO DiscordRoleConfiguration([Name],[GuildInviteID])
+			VALUES(@Name,@GuildInviteID)
 
 			SET @UsedID = @@IDENTITY		
 
@@ -22,7 +23,8 @@ BEGIN
 		BEGIN
 
 			UPDATE DiscordRoleConfiguration
-			SET Name = @Name
+			SET Name = @Name,
+			GuildInviteID = @GuildInviteID
 			WHERE Id = @Id
 
 			SET @UsedID = @ID

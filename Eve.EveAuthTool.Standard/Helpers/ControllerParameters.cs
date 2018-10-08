@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace Eve.EveAuthTool.Standard.Helpers
 {
@@ -45,7 +46,7 @@ namespace Eve.EveAuthTool.Standard.Helpers
                 return new PublicDataProvider(ESIConfiguration.Client, PublicDataController, Cache, TenantController);
             }
         }
-
+        
         public ControllerParameters(ITenantWebConfiguration tenantConfiguration,ITenantControllerProvider tenantControllerProvider, IESIAuthenticatedConfig esiConfig, IAllowedCharactersProvider characters, IStaticDataCache cache)
         {
             TenantProvider = tenantControllerProvider;

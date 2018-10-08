@@ -539,7 +539,7 @@ namespace Eve.ESI.Standard.AuthenticatedData
         public static Dictionary<eESIEntityType,List<AuthenticatedEntity>> GetAll(IESIAuthenticatedConfig config, ICommandController tenantcontroller, IStaticDataCache cache, PublicDataProvider publicData)
         {
             List<AuthenticatedEntity> authenticatedEntities = FromTokens(config, tenantcontroller, cache, publicData, ESIToken.GetAll(tenantcontroller));
-            return authenticatedEntities.GroupBy(x => x.EntityType);
+            return authenticatedEntities.GroupWith(x => x.EntityType);
         }
         public static List<AuthenticatedEntity> ForEntityType(IESIAuthenticatedConfig config, ICommandController tenantcontroller, IStaticDataCache cache, PublicDataProvider publicData,eESIEntityType entityType)
         {
