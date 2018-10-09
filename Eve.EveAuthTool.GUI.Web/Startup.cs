@@ -30,6 +30,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Eve.EveAuthTool.Standard.Discord.Configuration;
 using Eve.EveAuthTool.Standard.Discord.Service;
 using Eve.ESI.Standard.Authentication.Client;
+using Eve.EveAuthTool.Standard.Discord.Service.Providers;
 
 namespace Eve.EveAuthTool.GUI.Web
 {
@@ -90,11 +91,12 @@ namespace Eve.EveAuthTool.GUI.Web
             services.AddSingleton<IPublicDataProvider, PublicDataProvider>();
             services.AddSingleton<ISingleParameters, SingleParameters>();
 
-            services.AddTransient<IDiscordBot, DiscordBot>();
+            services.AddScoped<IDiscordBot, DiscordBot>();
             services.AddScoped<IAllowedCharactersProvider, AllowedCharacterProvider>();
-            services.AddTransient<IScopeParameters, HttpContextScopeParameters>();
             services.AddScoped<IScopeGroupProvider, ScopeGroupProvider>();
-            
+            services.AddScoped<IScopeParameters, HttpContextScopeParameters>();
+
+            services.AddScoped<IDiscordLinkProvider, DiscordLinkProvider>();
 
             RouteTemplateDomain[] domains = Configuration.GetSection("TenantConfig:Domains").Get<RouteTemplateDomain[]>();
             services.AddTenantMVC(x =>

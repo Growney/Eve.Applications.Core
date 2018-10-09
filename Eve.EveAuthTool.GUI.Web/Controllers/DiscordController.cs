@@ -9,6 +9,7 @@ using Eve.EveAuthTool.Standard.Discord.Configuration;
 using Eve.EveAuthTool.Standard.Discord.Configuration.Tenant;
 using Eve.EveAuthTool.Standard.Discord.Service;
 using Eve.EveAuthTool.Standard.Discord.Service.Module;
+using Eve.EveAuthTool.Standard.Discord.Service.Providers;
 using Eve.EveAuthTool.Standard.Helpers;
 using Eve.EveAuthTool.Standard.Security.Middleware;
 using Eve.EveAuthTool.Standard.Security.Rules;
@@ -207,8 +208,26 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
         {
             return new JsonResult(DiscordLinkStore.StoreArguments(new DiscordLinkParameter(CurrentTenant.Id)));
         }
+        private Discord.Rest.DiscordRestClient CreateDiscordClient()
+        {
+            Discord.Rest.DiscordRestClient client = new Discord.Rest.DiscordRestClient();
+            client.Log += x =>
+            {
+                if (x.Severity == LogSeverity.Error)
+                {
+                    Logger.LogError(x.Exception, "Discord Client exception");
+                }
+                else
+                {
+                    Logger.LogInformation(x.Message);
+                }
+
+                return Task.CompletedTask;
+            };
+            return client;
+        }
         [Authorize]
-        public async Task<IActionResult> LinkDiscordAccount(string state)
+        public async Task<IActionResult> LinkDiscordAccount([FromServices]IDiscordLinkProvider linkProvider,string state)
         {
             DiscordOAuthRequestArguments arguments = OAuthArgStore.ReCallArguments(state) as DiscordOAuthRequestArguments;
             try
@@ -218,36 +237,71 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
                     Standard.Discord.Authentication.AuthenticationToken token = await Standard.Discord.Authentication.AuthenticationToken.RequestToken(DiscordConfiguration, arguments.Code);
                     if (token != null)
                     {
-                        Discord.Rest.DiscordRestClient client = new Discord.Rest.DiscordRestClient();
-                        client.Log += x =>
-                        {
-                            if (x.Severity == LogSeverity.Error)
-                            {
-                                Logger.LogError(x.Exception, "Discord Client exception");
-                            }
-                            else
-                            {
-                                Logger.LogInformation(x.Message);
-                            }
-                            
-                            return Task.CompletedTask;
-                        };
+                        Discord.Rest.DiscordRestClient client = CreateDiscordClient();
                         await client.LoginAsync(Discord.TokenType.Bearer, token.Access_Token);
                         if(client.CurrentUser != null)
                         {
-                            string link = client.CurrentUser.Id.ToString();
-                            LinkedUserAccount.CreateLink(TenantController, CurrentAccount.AccountGuid, (byte)eTenantLinkType.Discord, link);
-                            LinkedUserAccount account = LinkedUserAccount.CreateObject(link, (byte)eTenantLinkType.Discord, CurrentAccount);
-
-                            await JoinCurrentGuild(client);
-
-                            if(await RegistrationCommands.UpdateLinkedAccount(Logger,ESIConfiguration, PublicDataProvider, TenantController, CurrentTenant.EntityId, CurrentTenant.EntityType, Cache, await CurrentGuild, RegistrationCommands.GetUserHighestRole(await CurrentGuild, await BotGuildUser), account))
+                            if(linkProvider != null)
                             {
-                                return View("/Views/Registration/AuthSuccess.cshtml");
+                                string link = client.CurrentUser.Id.ToString();
+                                LinkedUserAccount account = LinkedUserAccount.CreateLink(TenantController, CurrentAccount, (byte)eTenantLinkType.Discord, link);
+                                Role role = await CurrentRole;
+                                IGuild currentGuild = await CurrentGuild;
+                                DiscordRoleConfiguration discordConfig = null;
+                                if (role != null)
+                                {
+                                    discordConfig = DiscordRoleConfiguration.Get<DiscordRoleConfiguration>(TenantController, role.DiscordRoleConfigurationID);
+                                }
+                                IGuildUser guildUser = await linkProvider.GetAccountGuildUser(currentGuild, account);
+                                if(guildUser == null)
+                                {
+                                    if (!string.IsNullOrEmpty(discordConfig?.GuildInviteID))
+                                    {
+                                        await linkProvider.JoinUserToGuild(client, discordConfig.GuildInviteID);
+                                        guildUser = await linkProvider.GetAccountGuildUser(currentGuild, account);
+                                    }
+                                    else
+                                    {
+                                        return View("Error", new Models.Shared.ErrorModel() { Message = "You are not a member of this guild and the configuration does not contain an invite." });
+                                    }
+                                }
+                                if (guildUser != null)
+                                {
+                                    IGuildUser botGuildUser = await BotGuildUser;
+                                    if (linkProvider.CanActionUpdateOnUser(currentGuild,botGuildUser, guildUser))
+                                    {
+                                        if (MainCharacterID.HasValue)
+                                        {
+                                            await linkProvider.UpdateNickname(guildUser, MainCharacterID.Value);
+                                            if (discordConfig != null)
+                                            {
+                                                await linkProvider.UpdateRoles(currentGuild.Roles, guildUser, discordConfig);
+                                            }
+                                            else
+                                            {
+                                                await linkProvider.RemoveRoles(currentGuild.Roles, guildUser);
+                                            }
+
+                                            return View("/Views/Registration/AuthSuccess.cshtml");
+                                        }
+                                        else
+                                        {
+                                            return View("Error", new Models.Shared.ErrorModel() { Message = "We are unable to update your discord settings as you have no main character ID. We have linked your account to ESA anyway." });
+                                        }
+                                    }
+                                    else
+                                    {
+                                        return View("Error", new Models.Shared.ErrorModel() { Message = "We are unable to update your discord settings as your permissions are greater than the bots. We have linked your account to ESA anyway." });
+                                    }
+                                }
+                                else
+                                {
+                                    return View("Error", new Models.Shared.ErrorModel() { Message = "The configuration invite failed to make you a member of the guild please join the guild manually" });
+                                }
                             }
                             else
                             {
-                                return View("Error", new Models.Shared.ErrorModel() { Message = "Your account has been created on ESA but we failed to link it to discord"});
+                                return View("Error", new Models.Shared.ErrorModel() { Message = "Error creating link provider" });
                             }
                         }
                         else
@@ -272,42 +326,6 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
                 return View("Error", new Models.Shared.ErrorModel() { Message = ex.Message });
             }
             
-        }
-
-        private async Task<bool> IsInCurrentGuild(IDiscordClient client)
-        {
-            ulong currentGuild = (await CurrentGuild).Id;
-            bool retVal = false;
-            IReadOnlyCollection<IGuild> guilds = await client.GetGuildsAsync();
-            foreach(IGuild guild in guilds)
-            {
-                if(guild.Id == currentGuild)
-                {
-                    retVal = true;
-                    break;
-                }
-            }
-            return retVal;
-        }
-
-        private async Task JoinCurrentGuild(IDiscordClient client)
-        {
-            Role currentRole = await CurrentRole;
-            if (currentRole != null)
-            {
-                DiscordRoleConfiguration discordConfig = DiscordRoleConfiguration.Get<DiscordRoleConfiguration>(TenantController, currentRole.DiscordRoleConfigurationID);
-                if (discordConfig != null)
-                {
-                    if (!string.IsNullOrEmpty(discordConfig.GuildInviteID))
-                    {
-                        IInvite invite = await client.GetInviteAsync(discordConfig.GuildInviteID);
-                        if (invite != null)
-                        {
-                            await invite.AcceptAsync();
-                        }
-                    }
-                }
-            }
         }
     }
 }

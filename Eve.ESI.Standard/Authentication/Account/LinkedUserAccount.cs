@@ -31,15 +31,17 @@ namespace Eve.ESI.Standard.Account
             TypeID = adapter.GetValue("TypeID", (byte)0);
         }
 
-        public static void CreateLink(ICommandController controller, Guid accountGuid, byte type, string link)
+        public static LinkedUserAccount CreateLink(ICommandController controller, UserAccount account, byte type, string link)
         {
             DataCommand command = new DataCommand("AccountLink", "Link");
 
-            command.AddParameter("AccountGuid", System.Data.DbType.Guid).Value = accountGuid;
+            command.AddParameter("AccountGuid", System.Data.DbType.Guid).Value = account.AccountGuid;
             command.AddParameter("TypeID", System.Data.DbType.Byte).Value = type;
             command.AddParameter("Link", System.Data.DbType.String).Value = link;
 
             controller.ExecuteQuery(command);
+
+            return CreateObject(link, type, account);
         }
 
         public static void RemoveLink(ICommandController controller, Guid accountGuid, byte type)

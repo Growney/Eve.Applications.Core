@@ -15,6 +15,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Gware.Standard.Web.Tenancy.Routing;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Eve.EveAuthTool.Standard.Helpers
 {
@@ -24,9 +25,11 @@ namespace Eve.EveAuthTool.Standard.Helpers
         public IESIAuthenticatedConfig ESIConfiguration { get; }
         public IPublicDataProvider PublicDataProvider { get; }
         public ITenantWebConfiguration TenantConfiguration { get; }
+        public IServiceProvider ServiceProvider { get; }
 
-        public SingleParameters(IStaticDataCache cache, IESIAuthenticatedConfig esiConfiguration, IPublicDataProvider publicData, ITenantWebConfiguration tenantconfiguration)
+        public SingleParameters(IServiceProvider serviceProvider,IStaticDataCache cache, IESIAuthenticatedConfig esiConfiguration, IPublicDataProvider publicData, ITenantWebConfiguration tenantconfiguration)
         {
+            ServiceProvider = serviceProvider;
             Cache = cache;
             ESIConfiguration = esiConfiguration;
             PublicDataProvider = publicData;

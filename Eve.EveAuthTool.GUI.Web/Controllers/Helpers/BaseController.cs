@@ -97,16 +97,33 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers.Helpers
                 return m_scopes.CurrentRole;
             }
         }
+        public IServiceProvider ServiceProvider
+        {
+            get
+            {
+                return m_singles.ServiceProvider;
+            }
+        }
 
+        public long? MainCharacterID
+        {
+            get
+            {
+                return m_scopes.MainCharacterID;
+            }
+        }
         public ILogger<T> Logger { get; }
         private readonly ISingleParameters m_singles;
         private readonly IScopeParameters m_scopes;
 
-        public EveAuthBaseController(ILogger<T> logger,ISingleParameters singles, IScopeParameters scopes)
+        
+
+        public EveAuthBaseController(ILogger<T> logger, ISingleParameters singles, IScopeParameters scopes)
         {
             m_singles = singles;
             m_scopes = scopes;
             Logger = logger;
         }
+        
     }
 }

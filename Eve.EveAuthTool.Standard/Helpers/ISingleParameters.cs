@@ -7,6 +7,7 @@ using Eve.Static.Standard;
 using Gware.Standard.Storage.Controller;
 using Gware.Standard.Web.Tenancy.Configuration;
 using Microsoft.AspNetCore.Http;
+using System;
 
 namespace Eve.EveAuthTool.Standard.Helpers
 {
@@ -16,5 +17,7 @@ namespace Eve.EveAuthTool.Standard.Helpers
         IESIAuthenticatedConfig ESIConfiguration { get; }
         IPublicDataProvider PublicDataProvider { get; }
         ITenantWebConfiguration TenantConfiguration { get; }
+        IServiceProvider ServiceProvider { get; }
+        
     }
 }
