@@ -28,6 +28,7 @@ using Eve.EveAuthTool.Standard.Security;
 using Eve.EveAuthTool.Standard.Discord.Configuration;
 using Gware.Standard.Web.Tenancy.Routing;
 using Microsoft.Extensions.Logging;
+using Eve.EveAuthTool.Standard.Helpers;
 
 namespace Eve.EveAuthTool.GUI.Web.Controllers
 { 
@@ -38,12 +39,13 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
         public IArgumentsStore<OAuthRequestArguments> OAuthArgStore { get; }
         public IScopeGroupProvider Scopes { get; }
 
-        public RegistrationController(ILogger<RegistrationController> logger,IDiscordBotConfiguration discordConfiguration,IArgumentsStore<ESITokenRequestParameters> tokenStore,IArgumentsStore<OAuthRequestArguments> oAuthArgStore,IScopeGroupProvider scopes,IViewParameterProvider parameters)
-            :base(logger,parameters)
+        public RegistrationController(ILogger<RegistrationController> logger,IDiscordBotConfiguration discordConfiguration,IArgumentsStore<ESITokenRequestParameters> tokenStore,IArgumentsStore<OAuthRequestArguments> oAuthArgStore,IScopeGroupProvider scopeGroups,
+            ISingleParameters singles, IScopeParameters scopes)
+            : base(logger, singles, scopes)
         {
             TokenStore = tokenStore;
             OAuthArgStore = oAuthArgStore;
-            Scopes = scopes;
+            Scopes = scopeGroups;
             DiscordConfiguration = discordConfiguration;
         }
         public IActionResult Group()
@@ -156,6 +158,7 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
         public IActionResult EveLogin(string ReturnUrl)
         {
             ESIAuthRequestArguments args = HttpContext.GetLocalArguments<ESIAuthRequestArguments>(
+                currentTenant: CurrentTenant,
                 redirectPath: "Registration/CharacterLogin",
                 returnUrl: ReturnUrl);
 
@@ -248,6 +251,7 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
         public IActionResult Character(uint[] selectedScopes)
         {
             ESIAuthRequestArguments args = HttpContext.GetLocalArguments<ESIAuthRequestArguments>(
+                currentTenant:CurrentTenant,
                 redirectPath: "Registration/CharacterRegister");
             args.Scopes = Scopes.GetCharacterScopes(selectedScopes);
 
@@ -258,6 +262,7 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
         public IActionResult Alliance(GroupRegistrationOptions options)
         {
             ESIAuthRequestArguments args = HttpContext.GetLocalArguments<ESIAuthRequestArguments>(
+                currentTenant: CurrentTenant,
                 redirectPath: $"Registration/AllianceProposal");
             args.Scopes = ESIScopeHelper.Merge(Scopes.GetAllianceScopes(options.SelectedScopes), (options.RegisterCharacter) ? Scopes.GetCharacterScopes() : null);
 
@@ -276,6 +281,7 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
         public IActionResult Corporation(GroupRegistrationOptions options)
         {
             ESIAuthRequestArguments args = HttpContext.GetLocalArguments<ESIAuthRequestArguments>(
+                currentTenant: CurrentTenant,
                 redirectPath: $"Registration/CorporationProposal");
             args.Scopes = ESIScopeHelper.Merge(Scopes.GetCorporationScopes(options.SelectedScopes), (options.RegisterCharacter) ? Scopes.GetCharacterScopes() : null);
 
@@ -597,6 +603,7 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
         public IActionResult QuickAuth()
         {
             ESIAuthRequestArguments args = HttpContext.GetLocalArguments<ESIAuthRequestArguments>(
+                currentTenant: CurrentTenant,
                 redirectPath: "Registration/QuickAuthCharacter");
             args.Scopes = Scopes.GetCharacterQuickAuthScopes();
 
@@ -611,6 +618,7 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
         public IActionResult QuickAuthDiscord()
         {
             DiscordOAuthRequestArguments args = HttpContext.GetLocalArguments<DiscordOAuthRequestArguments>(
+                currentTenant: CurrentTenant,
                 redirectPath: "Discord/LinkDiscordAccount");
 
             return Redirect(args.GetAuthenticationUrl(

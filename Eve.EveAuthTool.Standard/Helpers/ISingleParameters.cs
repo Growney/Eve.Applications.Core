@@ -10,17 +10,11 @@ using Microsoft.AspNetCore.Http;
 
 namespace Eve.EveAuthTool.Standard.Helpers
 {
-    public interface IControllerParameters
+    public interface ISingleParameters
     {
         IStaticDataCache Cache { get; }
-        IAllowedCharactersProvider Characters { get; }
         IESIAuthenticatedConfig ESIConfiguration { get; }
-        ICommandController TenantController { get; }
-        ICommandController PublicDataController { get; }
-        ITenantControllerProvider TenantProvider { get; }
+        IPublicDataProvider PublicDataProvider { get; }
         ITenantWebConfiguration TenantConfiguration { get; }
-        PublicDataProvider PublicData { get; }
-
-        ViewParameterPackage CreateViewParameters(HttpContext context);
     }
 }

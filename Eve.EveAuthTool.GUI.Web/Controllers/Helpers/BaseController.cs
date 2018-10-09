@@ -16,53 +16,45 @@ using Gware.Standard.Web.Tenancy.Configuration;
 using Microsoft.AspNetCore.Mvc;
 using Eve.EveAuthTool.Standard.Security.Rules;
 using Microsoft.Extensions.Logging;
+using Eve.EveAuthTool.Standard.Helpers;
 
 namespace Eve.EveAuthTool.GUI.Web.Controllers.Helpers
 {
     public class EveAuthBaseController<T> : Controller
     {
-        private IViewParameterProvider m_viewParameters;
-
-        public ViewParameterPackage ViewParameters
-        {
-            get
-            {
-                return m_viewParameters.Package;
-            }
-        }
         protected ICommandController TenantController
         {
             get
             {
-                return ViewParameters.TenantController;
+                return m_scopes.TenantController;
             }
         }
-        protected PublicDataProvider PublicDataProvider
+        protected IPublicDataProvider PublicDataProvider
         {
             get
             {
-                return ViewParameters.PublicDataProvider;
+                return m_singles.PublicDataProvider;
             }
         }
         protected IAllowedCharactersProvider Characters
         {
             get
             {
-                return ViewParameters.Characters;
+                return m_scopes.Characters;
             }
         }
         protected IESIAuthenticatedConfig ESIConfiguration
         {
             get
             {
-                return ViewParameters.ESIConfiguration;
+                return m_singles.ESIConfiguration;
             }
         }
         protected IStaticDataCache Cache
         {
             get
             {
-                return ViewParameters.Cache;
+                return m_singles.Cache;
             }
         }
 
@@ -70,7 +62,7 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers.Helpers
         {
             get
             {
-                return ViewParameters.IsTenant;
+                return m_scopes.IsTenant;
             }
         }
 
@@ -78,14 +70,14 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers.Helpers
         {
             get
             {
-                return ViewParameters.CurrentTenant;
+                return m_scopes.CurrentTenant;
             }
         }
         protected UserAccount CurrentAccount
         {
             get
             {
-                return ViewParameters.User;
+                return m_scopes.User;
             }
         }
 
@@ -94,7 +86,7 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers.Helpers
         {
             get
             {
-                return ViewParameters.TenantConfiguration;
+                return m_singles.TenantConfiguration;
             }
         }
 
@@ -102,17 +94,18 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers.Helpers
         {
             get
             {
-                return ViewParameters.CurrentRole;
+                return m_scopes.CurrentRole;
             }
         }
 
-        public ILogger<T> Logger
+        public ILogger<T> Logger { get; }
+        private readonly ISingleParameters m_singles;
+        private readonly IScopeParameters m_scopes;
+
+        public EveAuthBaseController(ILogger<T> logger,ISingleParameters singles, IScopeParameters scopes)
         {
-            get;
-        }
-        public EveAuthBaseController(ILogger<T> logger,IViewParameterProvider parameters)
-        {
-            m_viewParameters = parameters;
+            m_singles = singles;
+            m_scopes = scopes;
             Logger = logger;
         }
     }

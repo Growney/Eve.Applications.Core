@@ -91,7 +91,7 @@ namespace Eve.EveAuthTool.Standard.Security.Rules
             return retVal;
         }
 
-        public async Task<string> GetRelationshipEntityName(ICommandController tenantController,PublicDataProvider publicData)
+        public async Task<string> GetRelationshipEntityName(ICommandController tenantController,IPublicDataProvider publicData)
         {
             string retVal = string.Empty;
             switch (EntityType)

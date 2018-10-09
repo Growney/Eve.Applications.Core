@@ -19,10 +19,10 @@ using Gware.Standard.Storage.Controller;
 using Eve.ESI.Standard.Authentication.Client;
 using Eve.EveAuthTool.Standard.Security.Rules;
 using Eve.EveAuthTool.Standard.Discord.Configuration.Tenant;
-
+using Microsoft.Extensions.Logging;
 namespace Eve.EveAuthTool.Standard.Discord.Service.Module
 {
-    public class RegistrationCommands : EveAuthToolModuleBase
+    public class RegistrationCommands : EveAuthToolModuleBase<RegistrationCommands>
     {
         
         [Command("Link")]
@@ -48,7 +48,7 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Module
                         await Context.Channel.SendMessageAsync($"Link to {tenant.DisplayName} updating guild settings");
                         await UpdateDiscordGuild(CurrentTenant, ESIConfig, Context.Guild);
                         await Context.Channel.SendMessageAsync($"Linking users");
-                        await UpdateDiscordGuildUsers(PublicDataProvider,TenantController,CurrentTenant.EntityId,CurrentTenant.EntityType,ESIConfig, Cache, Context.Guild, await BotGuildHighestRole);
+                        await UpdateDiscordGuildUsers(Logger,PublicDataProvider,TenantController,CurrentTenant.EntityId,CurrentTenant.EntityType,ESIConfig, Cache, Context.Guild, await BotGuildHighestRole);
                         await Context.Channel.SendMessageAsync($"Link complete");
                     }
                     else
@@ -69,11 +69,11 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Module
             
         }
 
-        public static async Task UpdateDiscordGuildUsers(PublicDataProvider publicData,ICommandController tenantController, long tenantEntityID, int tenantEntityType, IESIAuthenticatedConfig esiConfig, IStaticDataCache cache,IGuild guild, int highestRole)
+        public static async Task UpdateDiscordGuildUsers(ILogger<object> logger, IPublicDataProvider publicData,ICommandController tenantController, long tenantEntityID, int tenantEntityType, IESIAuthenticatedConfig esiConfig, IStaticDataCache cache,IGuild guild, int highestRole)
         {
             foreach (LinkedUserAccount account in LinkedUserAccount.AllLinked(tenantController, (byte)eTenantLinkType.Discord))
             {
-                await UpdateLinkedAccount(esiConfig, publicData,tenantController, tenantEntityID,tenantEntityType, cache, guild, highestRole, account);
+                await UpdateLinkedAccount(logger,esiConfig, publicData,tenantController, tenantEntityID,tenantEntityType, cache, guild, highestRole, account);
             }
         }
 
@@ -96,95 +96,112 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Module
             
         }
 
-        public static async Task<bool> UpdateLinkedAccount(IESIAuthenticatedConfig esiconfig,PublicDataProvider publicDataProvider,ICommandController tenantController,long tenantEntityID,int tenantEntityType,IStaticDataCache cache,IGuild guild,int modifyingHighestRole,LinkedUserAccount account)
+        public static async Task<bool> UpdateLinkedAccount(ILogger<object> logger,IESIAuthenticatedConfig esiconfig, IPublicDataProvider publicDataProvider,ICommandController tenantController,long tenantEntityID,int tenantEntityType,IStaticDataCache cache,IGuild guild,int modifyingHighestRole,LinkedUserAccount account)
         {
             bool retVal = false;
             if(ulong.TryParse(account.Link,out ulong userID))
             {
+                logger.LogTrace($"Parsed Discord linked account link to user id {userID} for account {account.AccountGuid}");
                 IGuildUser user = await guild.GetUserAsync(userID);
-                if (userID != guild.OwnerId)
+                if(user != null)
                 {
-                    if (GetUserHighestRole(guild,user) <= modifyingHighestRole)
+                    if (userID != guild.OwnerId)
                     {
-
-                        List<AuthenticatedEntity> accountCharacters = AuthenticatedEntity.GetForAccount(esiconfig, tenantController, cache,publicDataProvider, account);
-                        if (accountCharacters.Count > 0)
+                        if (GetUserHighestRole(guild, user) <= modifyingHighestRole)
                         {
-                            AuthenticatedEntity firstCharacter = accountCharacters[0];
-                            ESICallResponse<CharacterInfo> character = await publicDataProvider.GetCharacterInfo(firstCharacter.EntityID,true);
-                            if (character.HasData)
+                            logger.LogTrace($"Non user guild owner with user id {userID} on guild {guild.Name} starting link");
+                            List<AuthenticatedEntity> accountCharacters = AuthenticatedEntity.GetForAccount(esiconfig, tenantController, cache, publicDataProvider, account);
+                            if (accountCharacters.Count > 0)
                             {
-                                bool containsPrefix = false;
-                                StringBuilder nickname = new StringBuilder();
-                                if (character.Data.AllianceId > 0)
+                                string setTo = await publicDataProvider.GetTaggedCharacterName(accountCharacters[0].EntityID);
+                                if (!string.IsNullOrWhiteSpace(setTo) && user.Nickname != setTo)
                                 {
-                                    if (tenantEntityType == (int)eESIEntityType.alliance && tenantEntityID != character.Data.AllianceId
-                                        || tenantEntityType == (int)eESIEntityType.corporation && tenantEntityID != character.Data.CorporationId)
+                                    await user?.ModifyAsync(x =>
                                     {
-                                        ESICallResponse<AllianceInfo> allianceInfo = await publicDataProvider.GetAllianceInfo(character.Data.AllianceId, true);
-                                        if (allianceInfo.HasData)
+                                        x.Nickname = setTo.ToString();
+                                    });
+                                }
+
+                                logger.LogInformation($"Linked {account.AccountGuid} to discord {guild.Id} with nickname {setTo.ToString()} on {(eESIEntityType)tenantEntityType}({tenantEntityID})");
+
+                                    retVal = true;
+
+                                Role role = await AuthRule.GetEntityRole(esiconfig, tenantController, cache, publicDataProvider, accountCharacters[0]);
+
+
+                                DiscordRoleConfiguration botConfiguration;
+
+                                List<ulong> toRemove = new List<ulong>();
+                                List<ulong> toAdd = new List<ulong>();
+                                if (role != null && (botConfiguration = DiscordRoleConfiguration.Get<DiscordRoleConfiguration>(tenantController, role.DiscordRoleConfigurationID)) != null)
+                                {
+                                    HashSet<ulong> currentRoles = user.RoleIds.Index();
+                                    foreach (ulong currentRole in currentRoles)
+                                    {
+                                        if (currentRole != guild.EveryoneRole.Id)
                                         {
-                                            nickname.Append($"[{allianceInfo.Data.Ticker}]");
-                                            containsPrefix = true;
+                                            if (!botConfiguration.AssignedRoles.Contains(currentRole))
+                                            {
+                                                toRemove.Add(currentRole);
+                                            }
                                         }
                                     }
-                                }
-                                if (tenantEntityType == (int)eESIEntityType.alliance
-                                    || tenantEntityType == (int)eESIEntityType.corporation && tenantEntityID != character.Data.CorporationId)
-                                {
-                                    ESICallResponse<CorporationInfo> corporationInfo = await publicDataProvider.GetCorporationInfo(character.Data.CorporationId, true);
-                                    if (corporationInfo.HasData)
+
+                                    foreach (ulong configRole in botConfiguration.AssignedRoles)
                                     {
-                                        nickname.Append($"[{corporationInfo.Data.Ticker}]");
-                                        containsPrefix = true;
+                                        if (!currentRoles.Contains(configRole))
+                                        {
+                                            toAdd.Add(configRole);
+                                        }
+                                    }
+                                    if (toAdd.Count > 0)
+                                    {
+                                        await user.AddRolesAsync(CreateRoleList(botConfiguration.AssignedRoles, guild.Roles));
+                                    }
+                                    if (toRemove.Count > 0)
+                                    {
+                                        await user.RemoveRolesAsync(CreateRoleList(toRemove, guild.Roles));
                                     }
                                 }
-
-                                if (containsPrefix)
+                                else
                                 {
-                                    nickname.Append(" ");
-                                }
-                                
-                                nickname.Append(character.Data.Name);
-                                await user?.ModifyAsync(x =>
-                                {
-                                    x.Nickname = nickname.ToString();
-                                });
-                                retVal = true;
-                            }
-
-                            Role role = await AuthRule.GetEntityRole(esiconfig, tenantController, cache, publicDataProvider, firstCharacter);
-                            DiscordRoleConfiguration botConfiguration;
-                            if (role != null && (botConfiguration = DiscordRoleConfiguration.Get<DiscordRoleConfiguration>(tenantController,role.DiscordRoleConfigurationID)) != null)
-                            {
-                                await user.AddRolesAsync(CreateRoleList(botConfiguration.AssignedRoles, guild.Roles));
-                            }
-                            else
-                            {
-                                List<ulong> toRemove = new List<ulong>();
-                                foreach(ulong currentRoll in user.RoleIds)
-                                {
-                                    if(currentRoll != guild.EveryoneRole.Id)
+                                    foreach (ulong currentRoll in user.RoleIds)
                                     {
-                                        toRemove.Add(currentRoll);
+                                        if (currentRoll != guild.EveryoneRole.Id)
+                                        {
+                                            toRemove.Add(currentRoll);
+                                        }
+                                    }
+                                    if (toRemove.Count > 0)
+                                    {
+                                        await user.RemoveRolesAsync(CreateRoleList(toRemove, guild.Roles));
                                     }
                                 }
-                                await user.RemoveRolesAsync(CreateRoleList(toRemove, guild.Roles));
+                                logger.LogInformation($"Linked {account.AccountGuid} to discord {guild.Id} with role {role?.Name ?? "NULL"}({role?.Id.ToString() ?? "NULL"}) causing +{toAdd.Count}/-{toRemove.Count} roles on {(eESIEntityType)tenantEntityType}({tenantEntityID})");
                             }
                         }
+                        else
+                        {
+                            var privateChat = await user.GetOrCreateDMChannelAsync();
+                            await privateChat.SendMessageAsync($"We are sorry can't automatically update you on {guild.Name} because you have higher roles than we do. You are still linked to the site but you will have to do your own details.");
+                        }
+
                     }
                     else
                     {
                         var privateChat = await user.GetOrCreateDMChannelAsync();
-                        await privateChat.SendMessageAsync($"We are sorry can't automatically update you on {guild.Name} because you have higher roles than we do. You are still linked to the site but you will have to do your own details.");
+                        await privateChat.SendMessageAsync($"We are sorry can't automatically update you on {guild.Name} because you are the owner of the guild and discord doesn't let us. You are still linked to the site but you will have to do your own details.");
                     }
-                    
                 }
                 else
                 {
-                    var privateChat = await user.GetOrCreateDMChannelAsync();
-                    await privateChat.SendMessageAsync($"We are sorry can't automatically update you on {guild.Name} because you are the owner of the guild and discord doesn't let us. You are still linked to the site but you will have to do your own details.");
+                    logger.LogError($"Failed to get guild user {userID} on guild {guild.Name}");
                 }
+                
+            }
+            else
+            {
+                logger.LogError($"Failed to parse link to ulong value {account.Link} for account {account.AccountGuid}");
             }
             return retVal;
         }

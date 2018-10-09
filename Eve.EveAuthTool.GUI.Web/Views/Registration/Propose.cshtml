@@ -1,14 +1,15 @@
 ﻿@model Eve.EveAuthTool.GUI.Web.Models.Registration.TenantProposal
-@inject Eve.EveAuthTool.Standard.Security.Middleware.IViewParameterProvider parameters
+@inject Eve.EveAuthTool.Standard.Helpers.ISingleParameters singles
+
 @{
     ViewData["Title"] = "Propose";
 }
 
-@section Styles{ 
+@section Styles{
     <link rel="stylesheet" href="~/css/spinner.css" />
     <link rel="stylesheet" href="~/css/propose.css" />
 }
-@section Scripts{ 
+@section Scripts{
     <script src="~/js/propose.js"></script>
 }
 <div class="width-100">
@@ -34,7 +35,7 @@
                 }
                 <h1 class="center">@Model.DisplayName</h1>
                 <div class="center">
-                    <img src="@parameters.Package.ESIConfiguration.GetImageSource(Model.EntityType,Model.EntityID,128)" />
+                    <img src="@singles.ESIConfiguration.GetImageSource(Model.EntityType,Model.EntityID,128)" />
                 </div>
 
                 <p>

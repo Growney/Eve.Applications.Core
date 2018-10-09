@@ -29,10 +29,10 @@ namespace Eve.ESI.Standard.AuthenticatedData
         public ICommandController TenantController { get; }
         public IStaticDataCache Cache { get; }
         public eESIEntityType EntityType { get; }
-        public PublicDataProvider PublicData { get; }
+        public IPublicDataProvider PublicData { get; }
         public long EntityID { get; }
 
-        private AuthenticatedEntity(IESIAuthenticatedConfig config, ICommandController tenantController, IStaticDataCache cache, IEnumerable<ESIToken> tokens, PublicDataProvider publicData, long entityID, eESIEntityType entityType)
+        private AuthenticatedEntity(IESIAuthenticatedConfig config, ICommandController tenantController, IStaticDataCache cache, IEnumerable<ESIToken> tokens, IPublicDataProvider publicData, long entityID, eESIEntityType entityType)
         {
             m_accountTokens = tokens;
             Config = config;
@@ -434,7 +434,7 @@ namespace Eve.ESI.Standard.AuthenticatedData
             return retVal;
         }
 
-        public static List<AuthenticatedEntity> GetForAccounts(IESIAuthenticatedConfig config,ICommandController tenantcontroller,IStaticDataCache cache, PublicDataProvider publicData,IEnumerable<UserAccount> accounts)
+        public static List<AuthenticatedEntity> GetForAccounts(IESIAuthenticatedConfig config,ICommandController tenantcontroller,IStaticDataCache cache, IPublicDataProvider publicData,IEnumerable<UserAccount> accounts)
         {
             List<AuthenticatedEntity> retVal = new List<AuthenticatedEntity>();
             foreach(UserAccount account in accounts)
@@ -443,15 +443,15 @@ namespace Eve.ESI.Standard.AuthenticatedData
             }
             return retVal;
         }
-        public static List<AuthenticatedEntity> GetForAccount(IESIAuthenticatedConfig config, ICommandController tenantController, IStaticDataCache cache, PublicDataProvider publicData, UserAccount account)
+        public static List<AuthenticatedEntity> GetForAccount(IESIAuthenticatedConfig config, ICommandController tenantController, IStaticDataCache cache, IPublicDataProvider publicData, UserAccount account)
         {
             return FromTokens(config,tenantController, cache, publicData, account?.GetTokens(tenantController));
         }
-        public static AuthenticatedEntity FromToken(IESIAuthenticatedConfig config,ICommandController tenantController,IStaticDataCache cache, PublicDataProvider publicData, ESIToken token)
+        public static AuthenticatedEntity FromToken(IESIAuthenticatedConfig config,ICommandController tenantController,IStaticDataCache cache, IPublicDataProvider publicData, ESIToken token)
         {
             return new AuthenticatedEntity(config,tenantController,cache,new List<ESIToken>() { token },publicData,token.EntityID,token.EntityType);
         }
-        public static List<AuthenticatedEntity> FromTokens(IESIAuthenticatedConfig config, ICommandController tenantController, IStaticDataCache cache, PublicDataProvider publicData, IEnumerable<ESIToken> tokens)
+        public static List<AuthenticatedEntity> FromTokens(IESIAuthenticatedConfig config, ICommandController tenantController, IStaticDataCache cache, IPublicDataProvider publicData, IEnumerable<ESIToken> tokens)
         {
             List<AuthenticatedEntity> retVal = new List<AuthenticatedEntity>();
             if(tokens != null)
@@ -475,15 +475,15 @@ namespace Eve.ESI.Standard.AuthenticatedData
             }
             return retVal;
         }
-        public static List<AuthenticatedEntity> GetForAccount(IESIAuthenticatedConfig config, ICommandController tenantcontroller, IStaticDataCache cache, PublicDataProvider publicData, string accountGuid)
+        public static List<AuthenticatedEntity> GetForAccount(IESIAuthenticatedConfig config, ICommandController tenantcontroller, IStaticDataCache cache, IPublicDataProvider publicData, string accountGuid)
         {
             return GetForAccount(config, tenantcontroller, cache, publicData, UserAccount.ForGuid(tenantcontroller, accountGuid));
         }
-        public static AuthenticatedEntity GetForTenant(IESIAuthenticatedConfig config,ICommandController tenantcontroller,IStaticDataCache cache, PublicDataProvider publicData, Tenant tenant)
+        public static AuthenticatedEntity GetForTenant(IESIAuthenticatedConfig config,ICommandController tenantcontroller,IStaticDataCache cache, IPublicDataProvider publicData, Tenant tenant)
         {
             return GetForEntity(config, tenantcontroller, cache, publicData, tenant.EntityId, (eESIEntityType)tenant.EntityType);
         }
-        public static AuthenticatedEntity GetForEntity(IESIAuthenticatedConfig config, ICommandController tenantcontroller, IStaticDataCache cache, PublicDataProvider publicData, long entityID,eESIEntityType entityType)
+        public static AuthenticatedEntity GetForEntity(IESIAuthenticatedConfig config, ICommandController tenantcontroller, IStaticDataCache cache, IPublicDataProvider publicData, long entityID,eESIEntityType entityType)
         {
             AuthenticatedEntity retVal = null;
             List<AuthenticatedEntity> authEntities = FromTokens(config, tenantcontroller, cache,publicData, ESIToken.ForEntityTypeAndID(tenantcontroller, entityID, entityType));
@@ -493,7 +493,7 @@ namespace Eve.ESI.Standard.AuthenticatedData
             }
             return retVal;
         }
-        public static async Task<List<AuthenticatedEntity>> GetRelevantForEntityType(IESIAuthenticatedConfig config, ICommandController tenantcontroller, IStaticDataCache cache, PublicDataProvider publicData, string accountGuid,eESIEntityType type,long entityID)
+        public static async Task<List<AuthenticatedEntity>> GetRelevantForEntityType(IESIAuthenticatedConfig config, ICommandController tenantcontroller, IStaticDataCache cache, IPublicDataProvider publicData, string accountGuid,eESIEntityType type,long entityID)
         {
             List<AuthenticatedEntity> all = GetForAccount(config, tenantcontroller, cache,publicData, accountGuid);
             List<AuthenticatedEntity> retval = new List<AuthenticatedEntity>();
@@ -536,12 +536,12 @@ namespace Eve.ESI.Standard.AuthenticatedData
             }
             return retval;
         }
-        public static Dictionary<eESIEntityType,List<AuthenticatedEntity>> GetAll(IESIAuthenticatedConfig config, ICommandController tenantcontroller, IStaticDataCache cache, PublicDataProvider publicData)
+        public static Dictionary<eESIEntityType,List<AuthenticatedEntity>> GetAll(IESIAuthenticatedConfig config, ICommandController tenantcontroller, IStaticDataCache cache, IPublicDataProvider publicData)
         {
             List<AuthenticatedEntity> authenticatedEntities = FromTokens(config, tenantcontroller, cache, publicData, ESIToken.GetAll(tenantcontroller));
             return authenticatedEntities.GroupWith(x => x.EntityType);
         }
-        public static List<AuthenticatedEntity> ForEntityType(IESIAuthenticatedConfig config, ICommandController tenantcontroller, IStaticDataCache cache, PublicDataProvider publicData,eESIEntityType entityType)
+        public static List<AuthenticatedEntity> ForEntityType(IESIAuthenticatedConfig config, ICommandController tenantcontroller, IStaticDataCache cache, IPublicDataProvider publicData,eESIEntityType entityType)
         {
             return FromTokens(config, tenantcontroller, cache, publicData, ESIToken.ForEntityType(tenantcontroller, entityType));
         }

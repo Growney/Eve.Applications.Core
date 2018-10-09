@@ -1,12 +1,13 @@
-﻿@inject Eve.EveAuthTool.Standard.Security.Middleware.IViewParameterProvider parameters
+﻿@inject Eve.EveAuthTool.Standard.Helpers.ISingleParameters singles
+@inject Eve.EveAuthTool.Standard.Helpers.IScopeParameters scoped
 @{
     ViewData["Title"] = "Welcome";
 
-    long? mainCharacterID = parameters.Package.MainCharacterID;
+    long? mainCharacterID = scoped.MainCharacterID;
     string characterName = "Could not find character name";
     if (mainCharacterID.HasValue)
     {
-        characterName = await parameters.Package.PublicDataProvider.GetEntityName(Eve.ESI.Standard.eESIEntityType.character, mainCharacterID.Value);
+        characterName = await singles.PublicDataProvider.GetEntityName(Eve.ESI.Standard.eESIEntityType.character, mainCharacterID.Value);
     }
 }
 

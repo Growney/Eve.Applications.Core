@@ -9,10 +9,12 @@ using Eve.EveAuthTool.Standard.Discord.Configuration;
 using Eve.EveAuthTool.Standard.Discord.Configuration.Tenant;
 using Eve.EveAuthTool.Standard.Discord.Service;
 using Eve.EveAuthTool.Standard.Discord.Service.Module;
+using Eve.EveAuthTool.Standard.Helpers;
 using Eve.EveAuthTool.Standard.Security.Middleware;
 using Eve.EveAuthTool.Standard.Security.Rules;
 using Gware.Standard.Collections.Generic;
 using Gware.Standard.Web.OAuth;
+using Gware.Standard.Web.Tenancy.Routing;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -20,6 +22,7 @@ using Microsoft.Extensions.Logging;
 namespace Eve.EveAuthTool.GUI.Web.Controllers
 {
     [Authorize]
+    [TenantRequired]
     public class DiscordController : Helpers.EveAuthBaseController<DiscordController>
     {
         private readonly OnceLoadedValue<string> m_linkString = new OnceLoadedValue<string>();
@@ -108,8 +111,9 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
         public IDiscordBotConfiguration DiscordConfiguration { get; }
         public IArgumentsStore<OAuthRequestArguments> OAuthArgStore { get; }
 
-        public DiscordController(ILogger<DiscordController> logger,IArgumentsStore<OAuthRequestArguments> oauthArgsStore,IDiscordBot bot,IDiscordBotConfiguration discordConfiguration,IArgumentsStore<DiscordLinkParameter> discordLinkStore, IViewParameterProvider parameters)
-            :base(logger,parameters)
+        public DiscordController(ILogger<DiscordController> logger,IArgumentsStore<OAuthRequestArguments> oauthArgsStore,IDiscordBot bot,IDiscordBotConfiguration discordConfiguration,IArgumentsStore<DiscordLinkParameter> discordLinkStore, 
+            ISingleParameters singles,IScopeParameters scopes)
+            :base(logger,singles,scopes)
         {
             DiscordLinkStore = discordLinkStore;
             DiscordConfiguration = discordConfiguration;
@@ -203,7 +207,7 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
         {
             return new JsonResult(DiscordLinkStore.StoreArguments(new DiscordLinkParameter(CurrentTenant.Id)));
         }
-
+        [Authorize]
         public async Task<IActionResult> LinkDiscordAccount(string state)
         {
             DiscordOAuthRequestArguments arguments = OAuthArgStore.ReCallArguments(state) as DiscordOAuthRequestArguments;
@@ -237,17 +241,19 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
 
                             await JoinCurrentGuild(client);
 
-                            await RegistrationCommands.UpdateLinkedAccount(ESIConfiguration, PublicDataProvider, TenantController, CurrentTenant.EntityId, CurrentTenant.EntityType, Cache, await CurrentGuild, EveAuthToolModuleBase.GetUserHighestRole(await CurrentGuild, await BotGuildUser), account);
-
-                            return View("/Views/Registration/AuthSuccess.cshtml");
+                            if(await RegistrationCommands.UpdateLinkedAccount(Logger,ESIConfiguration, PublicDataProvider, TenantController, CurrentTenant.EntityId, CurrentTenant.EntityType, Cache, await CurrentGuild, RegistrationCommands.GetUserHighestRole(await CurrentGuild, await BotGuildUser), account))
+                            {
+                                return View("/Views/Registration/AuthSuccess.cshtml");
+                            }
+                            else
+                            {
+                                return View("Error", new Models.Shared.ErrorModel() { Message = "Your account has been created on ESA but we failed to link it to discord"});
+                            }
                         }
                         else
                         {
                             return View("Error", new Models.Shared.ErrorModel() { Message = "Unable to login to discord account" });
                         }
-                        
-
-                        
                     }
                     else
                     {
@@ -256,11 +262,13 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
                 }
                 else
                 {
+                    
                     return View("Error", new Models.Shared.ErrorModel() { Message = "Bad Discord Authorisation" });
                 }
             }
             catch (Exception ex)
             {
+                Logger.LogError(ex, "Error Linking discord account");
                 return View("Error", new Models.Shared.ErrorModel() { Message = ex.Message });
             }
             

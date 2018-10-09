@@ -1,9 +1,10 @@
-﻿@inject Eve.EveAuthTool.Standard.Security.Middleware.IViewParameterProvider parameters
+﻿
+@inject Eve.EveAuthTool.Standard.Helpers.IScopeParameters scoped
 @{
     ViewData["Title"] = "WelcomeLoggedOut";
 }
 
-<h2>Welcome to the ESA page for @parameters.Package.CurrentTenant.DisplayName</h2>
+<h2>Welcome to the ESA page for @scoped.CurrentTenant.DisplayName</h2>
 
 <p>Please click on the account menu to login or register a new account with this tenant</p>
 

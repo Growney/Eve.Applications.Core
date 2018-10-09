@@ -1,6 +1,7 @@
 ﻿using Eve.ESI.Standard;
 using Eve.ESI.Standard.Account;
 using Eve.ESI.Standard.Authentication.Account;
+using Eve.EveAuthTool.Standard.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -30,9 +31,9 @@ namespace Eve.EveAuthTool.Standard.Security.Middleware
             new ScopeGroup(0x02, "Standings", "Access your corporation standings to allow allies permissions to be set automatically", eESIScope.esi_corporations_read_contacts_v1)
             );
 
-        private readonly IViewParameterProvider m_parameters;
+        private readonly IScopeParameters m_parameters;
 
-        public ScopeGroupProvider(IViewParameterProvider parameters)
+        public ScopeGroupProvider(IScopeParameters parameters)
         {
             m_parameters = parameters;
         }
@@ -42,7 +43,7 @@ namespace Eve.EveAuthTool.Standard.Security.Middleware
         }
         private uint GetCharacterRequired()
         {
-            return (m_parameters.Package.IsTenant ? CharacterScopes.GetValue("Security") : 0);
+            return (m_parameters.IsTenant ? CharacterScopes.GetValue("Security") : 0);
         }
 
         private uint GetCorporationRequired()

@@ -57,10 +57,4 @@
     <Folder Include="Configuration\" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="..\Eve.EveAuthTool.Configuration\NLog.config" Link="NLog.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
 </Project>

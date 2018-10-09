@@ -23,13 +23,13 @@ namespace Eve.EveAuthTool.Standard.Security.Routing
         }
         private class AllowedCharactersResolverFilterImpl : IActionFilter
         {
-            private readonly IControllerParameters m_parameters;
+            private readonly ISingleParameters m_singles;
+            private readonly IScopeParameters m_scoped;
 
-            public AllowedCharactersResolverFilterImpl(IControllerParameters controllerParameters)
+            public AllowedCharactersResolverFilterImpl(ISingleParameters singles,IScopeParameters scoped)
             {
-                m_parameters = controllerParameters;
-
-
+                m_singles = singles;
+                m_scoped = scoped;
             }
 
             public void OnActionExecuted(ActionExecutedContext context)
@@ -44,7 +44,6 @@ namespace Eve.EveAuthTool.Standard.Security.Routing
 
             private void CalculateCharacters(HttpContext context)
             {
-                ViewParameterPackage viewParameters = m_parameters.CreateViewParameters(context);
                 Dictionary<long, AuthenticatedEntity> characters = new Dictionary<long, AuthenticatedEntity>();
                 HashSet<long> hashedAccountCharacters = new HashSet<long>();
 
@@ -52,7 +51,7 @@ namespace Eve.EveAuthTool.Standard.Security.Routing
 
                 if (context.User.Identity.IsAuthenticated)
                 {
-                    List<AuthenticatedEntity> accountCharacters = AuthenticatedEntity.GetForAccount(viewParameters.ESIConfiguration,viewParameters.TenantController,viewParameters.Cache,viewParameters.PublicDataProvider,accountGuid: context.User.Identity.Name);
+                    List<AuthenticatedEntity> accountCharacters = AuthenticatedEntity.GetForAccount(m_singles.ESIConfiguration,m_scoped.TenantController,m_singles.Cache,m_singles.PublicDataProvider,accountGuid: context.User.Identity.Name);
                     avaliableCharacters.AddRange(accountCharacters);
                     for (int i = 0; i < accountCharacters.Count; i++)
                     {

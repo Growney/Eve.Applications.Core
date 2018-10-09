@@ -1,12 +1,13 @@
-﻿@inject Eve.EveAuthTool.Standard.Security.Middleware.IViewParameterProvider parameters
+﻿@inject Eve.EveAuthTool.Standard.Helpers.ISingleParameters singles
+@inject Eve.EveAuthTool.Standard.Helpers.IScopeParameters scoped
 @using Gware.Standard.Data;
 @model IEnumerable<Eve.EveAuthTool.Standard.Security.Rules.AuthRule>
 @{
     ViewData["Title"] = "Rules";
     var breadcrumbs = new List<Breadcrumb>()
-    {
-        new Breadcrumb(){ Controller="Management",Action="Index",Text="Management"  }
-    };
+{
+new Breadcrumb(){ Controller="Management",Action="Index",Text="Management"  }
+};
 }
 @section Breadcrumbs{
     <partial name="breadcrumbs" model="breadcrumbs">
@@ -14,14 +15,14 @@
 @section Styles{
     <link rel="stylesheet" href="~/css/rule.css" />
 }
-@section Scripts{ 
-        <script src="~/js/management.js"></script>
+@section Scripts{
+    <script src="~/js/management.js"></script>
 }
 <a asp-action="EditRule" asp-controller="Management" asp-route-ruleID="-1">Add</a>
 <div class="rule-list">
     @foreach (var rule in Model)
     {
-        var role = Eve.EveAuthTool.Standard.Security.Rules.Role.Get<Eve.EveAuthTool.Standard.Security.Rules.Role>(parameters.Package.TenantController, rule.RoleId);
+        var role = Eve.EveAuthTool.Standard.Security.Rules.Role.Get<Eve.EveAuthTool.Standard.Security.Rules.Role>(scoped.TenantController, rule.RoleId);
         <div data-rule-id="@rule.Id" class="theme-border theme-text rule">
             <div class="rule-info">
 
@@ -39,9 +40,9 @@
                 @foreach (var relationship in rule.Relationships)
                 {
                     <div class="rule-relationship">
-                        <img class="rule-relationship-image" src="@parameters.Package.ESIConfiguration.GetImageSource(relationship.EntityType,relationship.EntityID,32)">
+                        <img class="rule-relationship-image" src="@singles.ESIConfiguration.GetImageSource(relationship.EntityType,relationship.EntityID,32)">
                         <div class="rule-relationship-type">@(Gware.Standard.Data.EnumDisplayAttribute.GetEnumString(relationship.Relationship))</div>
-                        <div class="rule-relationship-entity-name">@await relationship.GetRelationshipEntityName(parameters.Package.TenantController,parameters.Package.PublicDataProvider)</div>
+                        <div class="rule-relationship-entity-name">@await relationship.GetRelationshipEntityName(scoped.TenantController, singles.PublicDataProvider)</div>
                     </div>
                 }
             </div>

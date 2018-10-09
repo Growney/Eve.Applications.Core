@@ -20,15 +20,13 @@
 @section Breadcrumbs{
     <partial name="breadcrumbs" model="breadcrumbs">
 }
-<form class="content-box theme-border width-50 center" asp-controller="Management" asp-action="EditRole">
+        <form class="content-box theme-border width-50 center" asp-controller="Management" asp-action="EditRole">
 
-    @Html.HiddenFor(x => Model.Id)
-    Name - @Html.TextBoxFor(x => Model.Name)
-    Manage - @Html.CheckBoxFor(x => Model.Manage)
-    Register - @Html.CheckBoxFor(x => Model.Register)
-
-    Discord Configuration @Html.DropDownListFor(x => Model.DiscordRoleConfigurationID, configurationSelectList)
-
-    <button type="submit">Save</button>
-</form>
+            @Html.HiddenFor(x => Model.Id)
+            <div>Name - @Html.TextBoxFor(x => Model.Name)</div>
+            <div>Discord Configuration @Html.DropDownListFor(x => Model.DiscordRoleConfigurationID, configurationSelectList)</div>
+            <div>Register - @Html.CheckBoxFor(x => Model.Register)</div>
+            <div>Manage - @Html.CheckBoxFor(x => Model.Manage)</div>
+            <div><button type="submit">Save</button></div>
+        </form>
 

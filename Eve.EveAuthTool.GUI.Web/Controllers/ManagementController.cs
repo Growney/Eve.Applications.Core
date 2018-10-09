@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Eve.EveAuthTool.Standard.Discord.Configuration.Tenant;
 using Microsoft.Extensions.Logging;
+using Eve.EveAuthTool.Standard.Helpers;
 
 namespace Eve.EveAuthTool.GUI.Web.Controllers
 {
@@ -21,8 +22,9 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
     [TenantRequired]
     public class ManagementController : Helpers.EveAuthBaseController<ManagementController>
     {
-        public ManagementController(ILogger<ManagementController> logger,IViewParameterProvider parameters)
-            :base(logger, parameters)
+        public ManagementController(ILogger<ManagementController> logger,
+            ISingleParameters singles, IScopeParameters scopes)
+            : base(logger, singles, scopes)
         {
 
         }

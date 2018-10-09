@@ -29,6 +29,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Eve.EveAuthTool.Standard.Discord.Configuration;
 using Eve.EveAuthTool.Standard.Discord.Service;
+using Eve.ESI.Standard.Authentication.Client;
 
 namespace Eve.EveAuthTool.GUI.Web
 {
@@ -54,6 +55,8 @@ namespace Eve.EveAuthTool.GUI.Web
                 return new MSSQLCommandController(Configuration[$"Controllers:{key}:Server"], Configuration[$"Controllers:{key}:Databasename"], Configuration[$"Controllers:{key}:Username"], Configuration[$"Controllers:{key}:Password"]);
             }
         }
+
+        
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -75,7 +78,7 @@ namespace Eve.EveAuthTool.GUI.Web
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            services.AddDelegatedControllerProvider(CreateController);
+            services.AddDelegatedControllerProvider(CreateController,Configuration["Controllers:PublicDataController"]);
 
             services.AddSingleton<IArgumentsStore<OAuthRequestArguments>, ArgumentsStore<OAuthRequestArguments>>();
             services.AddSingleton<IArgumentsStore<ESITokenRequestParameters>, ArgumentsStore<ESITokenRequestParameters>>();
@@ -84,11 +87,12 @@ namespace Eve.EveAuthTool.GUI.Web
             services.AddSingleton<IESIAuthenticatedConfig, ESIAuthenticatedConfig>();
             services.AddSingleton<IDiscordBotConfiguration, DiscordBotConfiguration>();
             services.AddSingleton<IStaticDataCache, StaticDataCache>();
+            services.AddSingleton<IPublicDataProvider, PublicDataProvider>();
+            services.AddSingleton<ISingleParameters, SingleParameters>();
 
             services.AddTransient<IDiscordBot, DiscordBot>();
             services.AddScoped<IAllowedCharactersProvider, AllowedCharacterProvider>();
-            services.AddScoped<IControllerParameters, ControllerParameters>();
-            services.AddScoped<IViewParameterProvider, ViewParameterProvider>();
+            services.AddTransient<IScopeParameters, HttpContextScopeParameters>();
             services.AddScoped<IScopeGroupProvider, ScopeGroupProvider>();
             
 
@@ -127,7 +131,6 @@ namespace Eve.EveAuthTool.GUI.Web
             {
                 config.Filters.Add(new TenantRequiredIfProvidedAttribute());
                 config.Filters.Add(new AllowedCharactersResolverFilter());
-                config.Filters.Add(new ViewParameterResolverFilter());
             }).SetCompatibilityVersion(CompatibilityVersion.Version_2_1); 
 
         }
@@ -153,6 +156,8 @@ namespace Eve.EveAuthTool.GUI.Web
             Microsoft.AspNetCore.Routing.RouteValueDictionary defaults = new Microsoft.AspNetCore.Routing.RouteValueDictionary { { "controller", c_defaultController }, { "action", c_defaultAction } };
 
             app.UseTenantMvc(configuration.Domains, defaults);
+
+            
         }
     }
 }

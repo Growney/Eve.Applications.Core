@@ -1,5 +1,7 @@
 ﻿@inject Eve.ESI.Standard.Authentication.Account.IScopeGroupProvider scopes
-@inject Eve.EveAuthTool.Standard.Security.Middleware.IViewParameterProvider parameters
+
+@inject Eve.EveAuthTool.Standard.Helpers.ISingleParameters singles
+@inject Eve.EveAuthTool.Standard.Helpers.IScopeParameters scoped
 
 <!DOCTYPE html>
 <html>
@@ -16,34 +18,34 @@
 
     @{
         ViewBag.menus = new List<object>()
-        {
-            new {text= "Account" },
-            new {text= "About ESA", path = "/Home/AboutESA/" },
-            new {text= "About Me", path = "/Home/AboutMe/" },
-            new {text= "Management", path = "/Management/Index" }
-        };
+{
+    new {text= "Account" },
+    new {text= "About ESA", path = "/Home/AboutESA/" },
+    new {text= "About Me", path = "/Home/AboutMe/" },
+    new {text= "Management", path = "/Management/Index" }
+};
     }
 
 </head>
 <body>
     <div class="site">
         <div class="site-logo">
-            <img class="center" src="@(parameters.Package.IsTenant ? parameters.Package.ESIConfiguration.GetImageSource((Eve.ESI.Standard.eESIEntityType)parameters.Package.CurrentTenant.EntityType,parameters.Package.CurrentTenant.EntityId,128) : "/images/logo.png")" />
+            <img class="center" src="@(scoped.IsTenant ? singles.ESIConfiguration.GetImageSource((Eve.ESI.Standard.eESIEntityType)scoped.CurrentTenant.EntityType,scoped.CurrentTenant.EntityId,128) : "/images/logo.png")" />
         </div>
         <div class="site-title">
-            @(parameters.Package.IsTenant ? parameters.Package.CurrentTenant.DisplayName : "")
+            @(scoped.IsTenant ? scoped.CurrentTenant.DisplayName : "")
         </div>
         <div class="site-info">
-            @if (parameters.Package.IsTenant)
+            @if (scoped.IsTenant)
             {
-                @if (parameters.Package.IsAuthenticated)
+                @if (scoped.IsAuthenticated)
                 {
-                    var characters = parameters.Package.Characters.GetAccountCharacters().ToList();
-                    if(characters.Count > 0)
+                    var characters = scoped.Characters.GetAccountCharacters().ToList();
+                    if (characters.Count > 0)
                     {
-                        @($"Welcome {await parameters.Package.PublicDataProvider.GetEntityName(Eve.ESI.Standard.eESIEntityType.character,characters[0].EntityID)}")
+                        @($"Welcome {await singles.PublicDataProvider.GetEntityName(Eve.ESI.Standard.eESIEntityType.character, characters[0].EntityID)}")
                     }
-                    
+
                     <a class="button-list-button registration-button-small" asp-action="Logout" asp-controller="Registration">Log Out</a>
                 }
                 else
@@ -63,7 +65,7 @@
             @RenderBody()
         </div>
         <div class="site-sidebar-left">
-            @if (parameters.Package.IsTenant)
+            @if (scoped.IsTenant)
             {
                 <a asp-controller="Management" asp-action="Index">Management</a>
             }

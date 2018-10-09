@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NLog.Web;
+using NLog.Config;
+using NLog.Internal.Fakeables;
+using NLog.Targets;
 namespace Eve.EveAuthTool.GUI.Web
 {
     public class Program
@@ -16,18 +19,19 @@ namespace Eve.EveAuthTool.GUI.Web
         {
             CreateWebHostBuilder(args).Build().Run();
         }
-
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
                 .ConfigureAppConfiguration((hostingContext, config) =>
                 {
-                    config.AddJsonFile(Path.Combine(AppContext.BaseDirectory, $"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json"), optional: false, reloadOnChange: true);
+                    config.AddJsonFile(Path.Combine(AppContext.BaseDirectory, $"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json"), optional: false, reloadOnChange: true);                 
                 })
-                .ConfigureLogging(logging =>
+                .ConfigureLogging((hostingContext,logging) =>
                 {
                     logging.ClearProviders();
                     logging.SetMinimumLevel(LogLevel.Trace);
-                }).UseNLog();
+                })
+                .UseNLog();
+
     }
 }

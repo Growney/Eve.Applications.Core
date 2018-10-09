@@ -73,7 +73,7 @@ namespace Eve.EveAuthTool.Standard.Security.Rules
             return Load<AuthRule>(controller.ExecuteCollectionCommand(command));
         }
 
-        private static async Task<bool> CheckHasFromRelationship(IESIAuthenticatedConfig config, ICommandController tenantcontroller, IStaticDataCache staticCache, PublicDataProvider publicData, AuthRuleRelationship relationship, IEnumerable<EntityRelationship> inRelationships)
+        private static async Task<bool> CheckHasFromRelationship(IESIAuthenticatedConfig config, ICommandController tenantcontroller, IStaticDataCache staticCache, IPublicDataProvider publicData, AuthRuleRelationship relationship, IEnumerable<EntityRelationship> inRelationships)
         {
             bool retVal = false;
             AuthenticatedEntity ruleRelationshipEntity = AuthenticatedEntity.GetForEntity(config, tenantcontroller, staticCache, publicData, relationship.EntityID, relationship.EntityType);
@@ -111,7 +111,7 @@ namespace Eve.EveAuthTool.Standard.Security.Rules
 
             return retVal;
         }
-        public static async Task<Role> GetEntityRole(IESIAuthenticatedConfig config, ICommandController tenantcontroller, IStaticDataCache staticCache, PublicDataProvider publicData, List<AuthRule> inOrderRules,IEnumerable<EntityRelationship> queryRelationships)
+        public static async Task<Role> GetEntityRole(IESIAuthenticatedConfig config, ICommandController tenantcontroller, IStaticDataCache staticCache, IPublicDataProvider publicData, List<AuthRule> inOrderRules,IEnumerable<EntityRelationship> queryRelationships)
         {
             long roleID = 0;
             EntityRelationshipCache cache = new EntityRelationshipCache(queryRelationships);
@@ -172,7 +172,7 @@ namespace Eve.EveAuthTool.Standard.Security.Rules
             
         }
 
-        public static async Task<Role> GetEntityRole(IESIAuthenticatedConfig config, ICommandController tenantcontroller, IStaticDataCache staticCache, PublicDataProvider publicData, AuthenticatedEntity entity)
+        public static async Task<Role> GetEntityRole(IESIAuthenticatedConfig config, ICommandController tenantcontroller, IStaticDataCache staticCache, IPublicDataProvider publicData, AuthenticatedEntity entity)
         {
             return await GetEntityRole(config, tenantcontroller, staticCache,publicData,InOrder(tenantcontroller),await entity.CalculateRelevantRelationships(false));
             

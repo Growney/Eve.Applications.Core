@@ -1,4 +1,5 @@
 ﻿using Eve.ESI.Standard;
+using Eve.ESI.Standard.Authentication.Client;
 using Eve.ESI.Standard.Authentication.Configuration;
 using Eve.EveAuthTool.Standard.Discord.Configuration;
 using Eve.EveAuthTool.Standard.Discord.Service;
@@ -49,6 +50,7 @@ namespace Eve.EveAuthTool.Service
 
             services.AddSingleton<IStaticDataCache, StaticDataCache>();
             services.AddSingleton<IESIAuthenticatedConfig, ESIAuthenticatedConfig>();
+            services.AddSingleton<IPublicDataProvider, PublicDataProvider>();
             services.AddSingleton<IDiscordBotConfiguration, DiscordBotConfiguration>();
             services.AddSingleton<Microsoft.Extensions.Hosting.IHostedService, DiscordBotService>();
             services.AddSingleton<IArgumentsStore<DiscordLinkParameter>, DiscordLinkParameterStore>();

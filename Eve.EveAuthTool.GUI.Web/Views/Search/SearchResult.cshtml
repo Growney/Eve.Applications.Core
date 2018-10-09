@@ -1,6 +1,6 @@
 ﻿@model Eve.EveAuthTool.GUI.Web.Models.Search.SearchResult
 
-@inject Eve.EveAuthTool.Standard.Security.Middleware.IViewParameterProvider parameters
+@inject Eve.EveAuthTool.Standard.Helpers.ISingleParameters singles
 <div>
     <ejs-accordion id="searchResultsAccordion">
         <e-accordion-accordionitems>
@@ -32,7 +32,7 @@
                 if (character.HasData)
                 {
                     <div class="search-result @Model.ResultID" searchResultId="@Model.ResultID" data-entityname="@character.Data.Name" data-entitytype="@((int)Eve.ESI.Standard.DataItem.Search.eSearchEntity.character)" data-entityid="@characterID">
-                        <img src="@parameters.Package.ESIConfiguration.GetImageSource(Eve.ESI.Standard.DataItem.Search.eSearchEntity.character,characterID,32)" />
+                        <img src="@singles.ESIConfiguration.GetImageSource(Eve.ESI.Standard.DataItem.Search.eSearchEntity.character,characterID,32)" />
                         <div>@character.Data.Name</div>
                     </div>
                 }
@@ -50,7 +50,7 @@
                 if (corporation.HasData)
                 {
                     <div class="search-result @Model.ResultID" searchResultId="@Model.ResultID" data-entityname="@corporation.Data.Name" data-entitytype="@((int)Eve.ESI.Standard.DataItem.Search.eSearchEntity.corporation)" data-entityid="@corporationID">
-                        <img src="@parameters.Package.ESIConfiguration.GetImageSource(Eve.ESI.Standard.DataItem.Search.eSearchEntity.corporation,corporationID,32)" />
+                        <img src="@singles.ESIConfiguration.GetImageSource(Eve.ESI.Standard.DataItem.Search.eSearchEntity.corporation,corporationID,32)" />
                         <div>@corporation.Data.Name</div>
                     </div>
                 }
@@ -67,7 +67,7 @@
                 if (alliance.HasData)
                 {
                     <div class="search-result @Model.ResultID" searchResultId="@Model.ResultID" data-entityname="@alliance.Data.Name" data-entitytype="@((int)Eve.ESI.Standard.DataItem.Search.eSearchEntity.alliance)" data-entityid="@allianceID">
-                        <img src="@parameters.Package.ESIConfiguration.GetImageSource(Eve.ESI.Standard.DataItem.Search.eSearchEntity.alliance,allianceID,32)" />
+                        <img src="@singles.ESIConfiguration.GetImageSource(Eve.ESI.Standard.DataItem.Search.eSearchEntity.alliance,allianceID,32)" />
                         <div>@alliance.Data.Name</div>
                     </div>
                 }
@@ -84,7 +84,7 @@
                 if (faction != null)
                 {
                     <div class="search-result @Model.ResultID" searchResultId="@Model.ResultID" data-entityname="@faction.FactionName" data-entitytype="@((int)Eve.ESI.Standard.DataItem.Search.eSearchEntity.faction)" data-entityid="@factionID">
-                        <img src="@parameters.Package.ESIConfiguration.GetImageSource(Eve.ESI.Standard.DataItem.Search.eSearchEntity.faction,factionID,32)" />
+                        <img src="@singles.ESIConfiguration.GetImageSource(Eve.ESI.Standard.DataItem.Search.eSearchEntity.faction,factionID,32)" />
                         <div>@faction.FactionName </div>
                     </div>
                 }

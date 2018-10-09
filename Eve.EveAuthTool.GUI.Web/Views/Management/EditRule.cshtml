@@ -1,9 +1,10 @@
 ﻿@model Eve.EveAuthTool.Standard.Security.Rules.AuthRule
-@inject Eve.EveAuthTool.Standard.Security.Middleware.IViewParameterProvider parameters
+@inject Eve.EveAuthTool.Standard.Helpers.ISingleParameters singles
+@inject Eve.EveAuthTool.Standard.Helpers.IScopeParameters scoped
 @{
     ViewData["Title"] = "EditRule";
     var roleObjectList = new List<Object>();
-    foreach (var role in Eve.EveAuthTool.Standard.Security.Rules.Role.All(parameters.Package.TenantController))
+    foreach (var role in Eve.EveAuthTool.Standard.Security.Rules.Role.All(scoped.TenantController))
     {
         roleObjectList.Add(new { id = role.Id, text = role.Name });
     }
@@ -17,7 +18,7 @@
         roleLocationList.Add(new { id = (int)location, text = Gware.Standard.Data.EnumDisplayAttribute.GetEnumString(location) });
     }
 
-    var allEntities = Eve.ESI.Standard.AuthenticatedData.AuthenticatedEntity.GetAll(parameters.Package.ESIConfiguration, parameters.Package.TenantController, parameters.Package.Cache, parameters.Package.PublicDataProvider);
+    var allEntities = Eve.ESI.Standard.AuthenticatedData.AuthenticatedEntity.GetAll(singles.ESIConfiguration, scoped.TenantController, singles.Cache, singles.PublicDataProvider);
 
     var breadcrumbs = new List<Breadcrumb>()
 {
@@ -26,7 +27,7 @@ new Breadcrumb() {Controller="Management",Action="Rules", Text="Rules"}
 };
 }
 @section Breadcrumbs{
-<partial name="breadcrumbs" model="breadcrumbs">
+    <partial name="breadcrumbs" model="breadcrumbs">
 }
 @section Styles{
 
@@ -143,14 +144,14 @@ new Breadcrumb() {Controller="Management",Action="Rules", Text="Rules"}
                         @foreach (var entity in allEntities[entityType])
                         {
                             <div class="standing-item">
-                                <img src="@parameters.Package.ESIConfiguration.GetImageSource(entityType,entity.EntityID,32)" />
-                                <div class="name">@( await parameters.Package.PublicDataProvider.GetEntityName(entityType, entity.EntityID))</div>
+                                <img src="@singles.ESIConfiguration.GetImageSource(entityType,entity.EntityID,32)" />
+                                <div class="name">@( await singles.PublicDataProvider.GetEntityName(entityType, entity.EntityID))</div>
                                 <div class="e-btn-group">
-                                    <ejs-button onclick="AddStanding(@entity.EntityID,@((int)entityType),4);" cssClass ="e-small" id="@($"{entityType}{entity.EntityID}Excellent")"content="Excellent"></ejs-button>
-                                    <ejs-button onclick="AddStanding(@entity.EntityID,@((int)entityType),3);" cssClass="e-small" id="@($"{entityType}{entity.EntityID}Good")"content="Good"></ejs-button>
-                                    <ejs-button onclick="AddStanding(@entity.EntityID,@((int)entityType),0);" cssClass="e-small" id="@($"{entityType}{entity.EntityID}Neutral")"content="Neutral"></ejs-button>
-                                    <ejs-button onclick="AddStanding(@entity.EntityID,@((int)entityType),2);" cssClass="e-small" id="@($"{entityType}{entity.EntityID}Bad")"content="Bad"></ejs-button>
-                                    <ejs-button onclick="AddStanding(@entity.EntityID,@((int)entityType),1);" cssClass="e-small" id="@($"{entityType}{entity.EntityID}Terrible")"content="Terrible"></ejs-button>
+                                    <ejs-button onclick="AddStanding(@entity.EntityID,@((int)entityType),4);" cssClass="e-small" id="@($"{entityType}{entity.EntityID}Excellent")" content="Excellent"></ejs-button>
+                                    <ejs-button onclick="AddStanding(@entity.EntityID,@((int)entityType),3);" cssClass="e-small" id="@($"{entityType}{entity.EntityID}Good")" content="Good"></ejs-button>
+                                    <ejs-button onclick="AddStanding(@entity.EntityID,@((int)entityType),0);" cssClass="e-small" id="@($"{entityType}{entity.EntityID}Neutral")" content="Neutral"></ejs-button>
+                                    <ejs-button onclick="AddStanding(@entity.EntityID,@((int)entityType),2);" cssClass="e-small" id="@($"{entityType}{entity.EntityID}Bad")" content="Bad"></ejs-button>
+                                    <ejs-button onclick="AddStanding(@entity.EntityID,@((int)entityType),1);" cssClass="e-small" id="@($"{entityType}{entity.EntityID}Terrible")" content="Terrible"></ejs-button>
                                 </div>
                             </div>
                         }
@@ -160,11 +161,11 @@ new Breadcrumb() {Controller="Management",Action="Rules", Text="Rules"}
         </div>
         <div id="titles" style="display:none;">
             @{
-                var authenticatedCorporations = Eve.ESI.Standard.AuthenticatedData.AuthenticatedEntity.ForEntityType(parameters.Package.ESIConfiguration, parameters.Package.TenantController, parameters.Package.Cache, parameters.Package.PublicDataProvider, Eve.ESI.Standard.eESIEntityType.corporation);
+                var authenticatedCorporations = Eve.ESI.Standard.AuthenticatedData.AuthenticatedEntity.ForEntityType(singles.ESIConfiguration, scoped.TenantController, singles.Cache, singles.PublicDataProvider, Eve.ESI.Standard.eESIEntityType.corporation);
                 var titleCorporationList = new List<Object>();
                 foreach (var corp in authenticatedCorporations)
                 {
-                    titleCorporationList.Add(new { id = corp.EntityID, text = await parameters.Package.PublicDataProvider.GetEntityName(corp.EntityType, corp.EntityID) });
+                    titleCorporationList.Add(new { id = corp.EntityID, text = await singles.PublicDataProvider.GetEntityName(corp.EntityType, corp.EntityID) });
                 }
             }
             <ejs-dropdownlist id="titleEntities" dataSource="titleCorporationList" placeholder="Select a Corporation" popupHeight="220px" change="OnTitleCorporationSelect">

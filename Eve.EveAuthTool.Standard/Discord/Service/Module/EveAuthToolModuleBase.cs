@@ -10,13 +10,14 @@ using Gware.Standard.Collections.Generic;
 using Gware.Standard.Storage.Controller;
 using Gware.Standard.Web.Tenancy;
 using Gware.Standard.Web.Tenancy.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Eve.EveAuthTool.Standard.Discord.Service.Module
 {
-    public abstract class EveAuthToolModuleBase : ModuleBase<ContextWithDI<SocketCommandContext>>
+    public abstract class EveAuthToolModuleBase<T> : ModuleBase<ContextWithDI<SocketCommandContext>>
     {
 
         protected OnceLoadedValue<Task<HashSet<ulong>>> m_botGuildRoleIDs = new OnceLoadedValue<Task<HashSet<ulong>>>();
@@ -36,13 +37,17 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Module
         {
             HashSet<ulong> retVal = new HashSet<ulong>();
 
-            foreach (ulong roleID in  user.RoleIds)
+            if (user != null)
             {
-                if (!retVal.Contains(roleID))
+                foreach (ulong roleID in user.RoleIds)
                 {
-                    retVal.Add(roleID);
+                    if (!retVal.Contains(roleID))
+                    {
+                        retVal.Add(roleID);
+                    }
                 }
             }
+            
 
             return retVal;
         }
@@ -127,6 +132,16 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Module
                 return m_cache.Value;
             }
         }
+        protected OnceLoadedValue<ILogger<T>> m_logger = new OnceLoadedValue<ILogger<T>>();
+        public ILogger<T> Logger
+        {
+            get
+            {
+                m_logger.Load = () => Context.Provider.GetService(typeof(ILogger<T>)) as ILogger<T>;
+                return m_logger.Value;
+            }
+        }
+
         protected OnceLoadedValue<ITenantConfiguration> m_tenantConfiguration = new OnceLoadedValue<ITenantConfiguration>();
         public ITenantConfiguration TenantConfiguration
         {
@@ -143,12 +158,12 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Module
                 return Cache.Controller;
             }
         }
-        protected OnceLoadedValue<PublicDataProvider> m_publicDataProvider = new OnceLoadedValue<PublicDataProvider>();
-        public PublicDataProvider PublicDataProvider
+        protected OnceLoadedValue<IPublicDataProvider> m_publicDataProvider = new OnceLoadedValue<IPublicDataProvider>();
+        public IPublicDataProvider PublicDataProvider
         {
             get
             {
-                m_publicDataProvider.Load = () => { return new PublicDataProvider(ESIConfig.Client, PublicDataController, Cache, TenantController); };
+                m_publicDataProvider.Load = () => Context.Provider.GetService(typeof(IPublicDataProvider)) as IPublicDataProvider;
                 return m_publicDataProvider.Value;
             }
         }
