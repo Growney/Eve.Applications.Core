@@ -17,28 +17,30 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Providers
         private readonly ILogger<DiscordLinkProvider> m_logger;
         private readonly ISingleParameters m_singles;
         private readonly IScopeParameters m_scoped;
-        public DiscordLinkProvider(ILogger<DiscordLinkProvider> logger,ISingleParameters singles,IScopeParameters scoped)
+        private readonly IDiscordBot m_bot;
+        public DiscordLinkProvider(ILogger<DiscordLinkProvider> logger, ISingleParameters singles, IScopeParameters scoped,IDiscordBot discordBot)
         {
             m_logger = logger;
             m_singles = singles;
             m_scoped = scoped;
+            m_bot = discordBot;
         }
 
-        public async Task<IGuildUser> GetAccountGuildUser(IGuild guild,LinkedUserAccount account)
+        public async Task<IGuildUser> GetAccountGuildUser(IGuild guild, LinkedUserAccount account,eCacheOptions cacheOptions = eCacheOptions.Default)
         {
-            if(guild == null)
+            if (guild == null)
             {
                 throw new ArgumentException("Guild");
             }
-            if(account == null)
+            if (account == null)
             {
                 throw new ArgumentNullException("Account");
             }
 
-            if(ulong.TryParse(account.Link,out ulong userID))
+            if (ulong.TryParse(account.Link, out ulong userID))
             {
-                IGuildUser retVal = await guild.GetUserAsync(userID);
-                if(retVal != null)
+                IGuildUser retVal = await m_bot.GetGuildUser(guild.Id,userID, cacheOptions);
+                if (retVal != null)
                 {
                     m_logger.LogTrace($"Account {account.AccountGuid} is returned guild user {retVal.Username} ({userID}) on guild {guild.Name}");
                 }
@@ -58,27 +60,27 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Providers
                 {
                     throw new ArgumentException("Account link must be a valid ulong");
                 }
-                
+
             }
         }
-        public bool CanActionUpdateOnUser(IGuild guild,IGuildUser botUser,IGuildUser updateOn)
+        public bool CanActionUpdateOnUser(IGuild guild, IGuildUser botUser, IGuildUser updateOn)
         {
-            if(botUser == null)
+            if (botUser == null)
             {
                 throw new ArgumentNullException("BotUser");
             }
-            if(updateOn == null)
+            if (updateOn == null)
             {
                 throw new ArgumentNullException("UpdateOn");
             }
-            
+
             if (guild.OwnerId != updateOn.Id)
             {
                 try
                 {
                     IReadOnlyCollection<IRole> roles = guild.Roles;
                     int[] highest = GetHighestRole(roles, botUser.RoleIds.Index(), updateOn.RoleIds.Index());
-                    if(highest.Length == 2)
+                    if (highest.Length == 2)
                     {
                         if (highest[0] >= highest[1])
                         {
@@ -92,12 +94,12 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Providers
                     else
                     {
                         throw new InvalidOperationException("Invalid number of highest roles");
-                    }       
+                    }
                 }
                 catch
                 {
                     m_logger.LogWarning($"Error getting guild {guild.Id} roles user {updateOn.Nickname} cannot perform update action");
-                } 
+                }
             }
             else
             {
@@ -106,9 +108,10 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Providers
             return false;
 
         }
-        public async Task UpdateNickname(IGuildUser updateOn,long characterID)
+        public async Task<(bool updated, string to)> UpdateNickname(IGuildUser updateOn, long characterID)
         {
-            if(updateOn == null)
+            (bool updated, string to) retVal = (false, string.Empty);
+            if (updateOn == null)
             {
                 throw new ArgumentNullException("updateOn");
             }
@@ -116,7 +119,7 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Providers
             string setTo = await m_singles.PublicDataProvider.GetTaggedCharacterName(characterID);
             if (!string.IsNullOrWhiteSpace(setTo))
             {
-                if(setTo != updateOn.Nickname)
+                if (setTo != updateOn.Nickname)
                 {
                     try
                     {
@@ -128,10 +131,13 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Providers
                             AuditLogReason = $"ESA updating nickname to match characterID {characterID}",
                             RetryMode = RetryMode.AlwaysRetry
                         });
+                        retVal.updated = true;
+                        retVal.to = setTo;
+                        m_logger.LogInformation($"User {updateOn.Nickname} ({updateOn.Id}) has had nickname updated to {setTo} on guild {updateOn.Guild.Name} ({updateOn.Guild.Id})");
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
-                        m_logger.LogError(ex,$"Failed to set user {updateOn.Nickname} ({updateOn.Id}) nickname to {setTo} on guild {updateOn.Guild.Name} ({updateOn.Guild.Id})");
+                        m_logger.LogError(ex, $"Failed to set user {updateOn.Nickname} ({updateOn.Id}) nickname to {setTo} on guild {updateOn.Guild.Name} ({updateOn.Guild.Id})");
                     }
                 }
                 else
@@ -143,14 +149,15 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Providers
             {
                 m_logger.LogWarning($"Cannot set tagged character name to null or empty string for user {updateOn.Nickname} ({updateOn.Id}) character id {characterID} on guild {updateOn.Guild.Name} ({updateOn.Guild.Id})");
             }
-
+            return retVal;
         }
-        public Task RemoveRoles(IEnumerable<IRole> guildRoles,IGuildUser updateOn)
+        public Task<(int addedCount, int removedCount, int shouldAdd, int shouldRemove)> RemoveRoles(IEnumerable<IRole> guildRoles, IGuildUser botUser, IGuildUser updateOn)
         {
-            return UpdateRoles(guildRoles,updateOn, null);
+            return UpdateRoles(guildRoles, botUser, updateOn, null);
         }
-        public async Task UpdateRoles(IEnumerable<IRole> guildRoles,IGuildUser updateOn, DiscordRoleConfiguration configuration)
+        public async Task<(int addedCount, int removedCount, int shouldAdd, int shouldRemove)> UpdateRoles(IEnumerable<IRole> guildRoles, IGuildUser botUser, IGuildUser updateOn, DiscordRoleConfiguration configuration)
         {
+            (int addedCount, int removedCount, int shouldAdd, int shouldRemove) retVal = (0, 0, 0, 0);
             if (updateOn == null)
             {
                 throw new ArgumentNullException("updateOn");
@@ -164,7 +171,7 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Providers
                 throw new ArgumentException("Guild everyone role cannot be null");
             }
             ulong everyoneRoleID = updateOn.Guild.EveryoneRole.Id;
-            HashSet<ulong> updateTo = configuration.AssignedRoles;
+            HashSet<ulong> updateTo = configuration?.AssignedRoles;
             if (updateTo == null)
             {
                 updateTo = new HashSet<ulong> { everyoneRoleID };
@@ -197,18 +204,57 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Providers
                     toAdd.Add(configRole);
                 }
             }
+            List<IRole> removeRoleList = null;
+            List<IRole> addRoleList = null;
+            int botHighest = int.MinValue;
+
+            if (toAdd.Count > 0 || toRemove.Count > 0)
+            {
+                botHighest = GetHighestRole(guildRoles, botUser.RoleIds.Index())[0];
+            }
+
             if (toAdd.Count > 0)
             {
-                await updateOn.AddRolesAsync(CreateRoleList(toAdd, guildRoles));
+                retVal.shouldAdd = toAdd.Count;
+                addRoleList = CreateRoleList(botHighest, toAdd, guildRoles);
+                if (addRoleList.Count > 0)
+                {
+                    retVal.addedCount = addRoleList.Count;
+                    try
+                    {
+                        await updateOn.AddRolesAsync(addRoleList);
+                    }
+                    catch (Exception ex)
+                    {
+                        m_logger.LogError(ex, $"Error adding roles to guild user  {updateOn.Nickname} ({updateOn.Id}) on guild {updateOn.Guild.Name} ({updateOn.Guild.Id})");
+                        retVal.addedCount = 0;
+                    }
+                }
+
             }
             if (toRemove.Count > 0)
             {
-                await updateOn.RemoveRolesAsync(CreateRoleList(toRemove, guildRoles));
+                retVal.shouldRemove = toRemove.Count;
+                removeRoleList = CreateRoleList(botHighest, toRemove, guildRoles);
+                if (removeRoleList.Count > 0)
+                {
+                    retVal.removedCount = removeRoleList.Count;
+                    try
+                    {
+                        await updateOn.RemoveRolesAsync(removeRoleList);
+                    }
+                    catch (Exception ex)
+                    {
+                        m_logger.LogError(ex, $"Error removing roles from guild user  {updateOn.Nickname} ({updateOn.Id}) on guild {updateOn.Guild.Name} ({updateOn.Guild.Id})");
+                        retVal.removedCount = 0;
+                    }
+                }
             }
 
-            m_logger.LogInformation($"Guild user {updateOn.Nickname} ({updateOn.Id}) had {toAdd.Count} roles added and {toAdd.Count} removed to assign them to configuration {configuration?.Name ?? "NULL"} ({configuration?.Id.ToString() ?? "NULL"}) on guild {updateOn.Guild.Name} ({updateOn.Guild.Id})");
+            m_logger.LogInformation($"Guild user {updateOn.Nickname} ({updateOn.Id}) had {addRoleList?.Count ?? 0} roles added and {removeRoleList?.Count ?? 0} removed to assign them to configuration {configuration?.Name ?? "NULL"} ({configuration?.Id.ToString() ?? "NULL"}) on guild {updateOn.Guild.Name} ({updateOn.Guild.Id})");
+            return retVal;
         }
-        public async Task JoinUserToGuild(IDiscordClient client,string inviteID)
+        public async Task JoinUserToGuild(IDiscordClient client, string inviteID)
         {
             IInvite invite = await client.GetInviteAsync(inviteID);
             if (invite != null)
@@ -219,7 +265,7 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Providers
 
         private static int[] GetHighestRole(IEnumerable<IRole> roles, params HashSet<ulong>[] usersRoleIds)
         {
-            if(roles == null)
+            if (roles == null)
             {
                 throw new ArgumentNullException("Roles");
             }
@@ -227,18 +273,21 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Providers
             {
                 throw new ArgumentException("userRoleIds must contain at least one collection of roles");
             }
-            
+
             int[] max = Enumerable.Repeat(int.MinValue, usersRoleIds.Length).ToArray();
             foreach (var role in roles)
             {
                 for (int i = 0; i < max.Length; i++)
                 {
-                    max[i] = Math.Max(role.Position, max[i]);
+                    if (usersRoleIds[i].Contains(role.Id))
+                    {
+                        max[i] = Math.Max(role.Position, max[i]);
+                    }
                 }
             }
             return max;
         }
-        private static IEnumerable<IRole> CreateRoleList(IEnumerable<ulong> selected, IEnumerable<IRole> allRoles)
+        private List<IRole> CreateRoleList(int highestAllowed, IEnumerable<ulong> selected, IEnumerable<IRole> allRoles)
         {
             HashSet<ulong> set = new HashSet<ulong>(selected);
             List<IRole> roles = new List<IRole>();
@@ -246,7 +295,14 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Providers
             {
                 if (set.Contains(role.Id))
                 {
-                    roles.Add(role);
+                    if (role.Position <= highestAllowed)
+                    {
+                        roles.Add(role);
+                    }
+                    else
+                    {
+                        m_logger.LogWarning($"Cannot add role {role.Name}[{role.Position}]({role.Id}) to list on guild {role.Guild.Name} ({role.Guild.Id}) as bots highest role is {highestAllowed}");
+                    }
                 }
             }
             return roles;

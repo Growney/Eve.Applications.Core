@@ -1,4 +1,5 @@
 ﻿using Gware.Standard.Web.OAuth;
+using System;
 
 namespace Eve.EveAuthTool.Standard.Discord.Configuration
 {
@@ -7,5 +8,6 @@ namespace Eve.EveAuthTool.Standard.Discord.Configuration
         string BotKey { get; }
         string CommandPrefix { get; }
         string GetAddBotUrl();
+        TimeSpan SyncCycleTime { get; }
     }
 }

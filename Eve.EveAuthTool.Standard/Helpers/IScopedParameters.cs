@@ -1,4 +1,5 @@
 ﻿using Eve.ESI.Standard.Account;
+using Eve.EveAuthTool.Standard.Discord.Configuration.Tenant;
 using Eve.EveAuthTool.Standard.Security.Middleware;
 using Eve.EveAuthTool.Standard.Security.Rules;
 using Gware.Standard.Storage.Controller;
@@ -22,5 +23,6 @@ namespace Eve.EveAuthTool.Standard.Helpers
         long? MainCharacterID { get; }
         UserAccount User { get; }
         Task<Role> CurrentRole { get; }
+        Task<DiscordRoleConfiguration> CurrentDiscordConfiguration { get; }
     }
 }

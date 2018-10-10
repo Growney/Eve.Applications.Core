@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Mvc;
 using Eve.EveAuthTool.Standard.Security.Rules;
 using Microsoft.Extensions.Logging;
 using Eve.EveAuthTool.Standard.Helpers;
+using Eve.EveAuthTool.Standard.Discord.Configuration.Tenant;
 
 namespace Eve.EveAuthTool.GUI.Web.Controllers.Helpers
 {
@@ -65,7 +66,13 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers.Helpers
                 return m_scopes.IsTenant;
             }
         }
-
+        protected bool IsAuthenticated
+        {
+            get
+            {
+                return m_scopes.IsAuthenticated;
+            }
+        }
         protected Tenant CurrentTenant
         {
             get
@@ -82,7 +89,7 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers.Helpers
         }
 
 
-        protected ITenantWebConfiguration TenantConfiguration
+        protected ITenantConfiguration TenantConfiguration
         {
             get
             {
@@ -110,6 +117,14 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers.Helpers
             get
             {
                 return m_scopes.MainCharacterID;
+            }
+        }
+
+        public Task<DiscordRoleConfiguration> CurrentDiscordConfiguration
+        {
+            get
+            {
+                return m_scopes.CurrentDiscordConfiguration;
             }
         }
         public ILogger<T> Logger { get; }

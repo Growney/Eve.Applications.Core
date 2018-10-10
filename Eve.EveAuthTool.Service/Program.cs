@@ -3,6 +3,9 @@ using Eve.ESI.Standard.Authentication.Client;
 using Eve.ESI.Standard.Authentication.Configuration;
 using Eve.EveAuthTool.Standard.Discord.Configuration;
 using Eve.EveAuthTool.Standard.Discord.Service;
+using Eve.EveAuthTool.Standard.Discord.Service.Providers;
+using Eve.EveAuthTool.Standard.Helpers;
+using Eve.EveAuthTool.Standard.Security.Middleware;
 using Eve.Static.Standard;
 using Gware.Core.MSSQL.Storage.Controller;
 using Gware.Standard.Collections.Generic;
@@ -12,6 +15,8 @@ using Gware.Standard.Web.Tenancy.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using NLog.Extensions.Logging;
 using System;
 using System.IO;
 using System.Reflection;
@@ -30,11 +35,16 @@ namespace Eve.EveAuthTool.Service
             .ConfigureAppConfiguration((hostingContext, config) =>
             {
                 config.AddJsonFile($"Configuration//appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json", optional: false, reloadOnChange: true);
+                //configure NLog
+                
             })
             .ConfigureServices(ConfigureServices)
             .ConfigureLogging((hostingContext, logging) =>
             {
-
+                logging.ClearProviders();
+                logging.SetMinimumLevel(LogLevel.Trace);
+                logging.AddNLog(new NLogProviderOptions { CaptureMessageTemplates = true, CaptureMessageProperties = true });
+                NLog.LogManager.LoadConfiguration("nlog.config");
             });
 
             await builder.RunConsoleAsync();
@@ -46,14 +56,27 @@ namespace Eve.EveAuthTool.Service
             services.AddDelegatedControllerProvider(x =>
             {
                 return CreateController(hostContext.Configuration, x);
-            });
+            },hostContext.Configuration["Controllers:PublicDataController"]);
+
+            services.AddTransient(typeof(ICache<,>), typeof(FixedTimeCache<,>));
 
             services.AddSingleton<IStaticDataCache, StaticDataCache>();
             services.AddSingleton<IESIAuthenticatedConfig, ESIAuthenticatedConfig>();
             services.AddSingleton<IPublicDataProvider, PublicDataProvider>();
             services.AddSingleton<IDiscordBotConfiguration, DiscordBotConfiguration>();
             services.AddSingleton<Microsoft.Extensions.Hosting.IHostedService, DiscordBotService>();
+            services.AddSingleton<Microsoft.Extensions.Hosting.IHostedService, DiscordSyncService>();
             services.AddSingleton<IArgumentsStore<DiscordLinkParameter>, DiscordLinkParameterStore>();
+            services.AddSingleton<ISingleParameters, SingleParameters>();
+            services.AddSingleton<IDiscordBot, DiscordBot>();
+
+            services.AddScoped<IDiscordSyncProvider, DiscordSyncProvider>();
+            services.AddScoped<IDiscordCommandContextAccessor, DiscordCommandContextAccessor>();
+            services.AddScoped<IAllowedCharactersProvider, AllowedCharacterProvider>();
+            services.AddScoped<IScopeParameters, DiscordCommandContextScopeParameters>();
+            services.AddScoped<IScopeParameters, DiscordSyncScopeParameters>();
+            services.AddScoped<IDiscordLinkProvider, DiscordLinkProvider>();
+
             services.AddTenant(x =>
             {
                 

@@ -39,12 +39,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\Eve.EveAuthTool.Configuration\NLog.config" Link="NLog.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Eve.ESI.Standard\Eve.ESI.Standard.csproj" />
     <ProjectReference Include="..\Eve.EveAuthTool.Standard\Eve.EveAuthTool.Standard.csproj" />
     <ProjectReference Include="..\Eve.StaticData.Standard\Eve.StaticData.Standard.csproj" />
@@ -60,6 +54,12 @@
     <Reference Include="Gware.Standard.Web">
       <HintPath>..\..\GWareBase\GWareBase\Gware.Standard.Web\bin\Debug\netstandard2.0\Gware.Standard.Web.dll</HintPath>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

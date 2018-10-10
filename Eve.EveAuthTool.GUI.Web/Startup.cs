@@ -81,6 +81,7 @@ namespace Eve.EveAuthTool.GUI.Web
 
             services.AddDelegatedControllerProvider(CreateController,Configuration["Controllers:PublicDataController"]);
 
+            services.AddTransient(typeof(ICache<,>), typeof(FixedTimeCache<,>));
             services.AddSingleton<IArgumentsStore<OAuthRequestArguments>, ArgumentsStore<OAuthRequestArguments>>();
             services.AddSingleton<IArgumentsStore<ESITokenRequestParameters>, ArgumentsStore<ESITokenRequestParameters>>();
             services.AddSingleton<IArgumentsStore<DiscordLinkParameter>, DiscordLinkParameterStore>();
@@ -90,8 +91,8 @@ namespace Eve.EveAuthTool.GUI.Web
             services.AddSingleton<IStaticDataCache, StaticDataCache>();
             services.AddSingleton<IPublicDataProvider, PublicDataProvider>();
             services.AddSingleton<ISingleParameters, SingleParameters>();
+            services.AddSingleton<IDiscordBot, DiscordBot>();
 
-            services.AddScoped<IDiscordBot, DiscordBot>();
             services.AddScoped<IAllowedCharactersProvider, AllowedCharacterProvider>();
             services.AddScoped<IScopeGroupProvider, ScopeGroupProvider>();
             services.AddScoped<IScopeParameters, HttpContextScopeParameters>();

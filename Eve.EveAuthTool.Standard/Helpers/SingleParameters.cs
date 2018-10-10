@@ -24,10 +24,10 @@ namespace Eve.EveAuthTool.Standard.Helpers
         public IStaticDataCache Cache { get; }
         public IESIAuthenticatedConfig ESIConfiguration { get; }
         public IPublicDataProvider PublicDataProvider { get; }
-        public ITenantWebConfiguration TenantConfiguration { get; }
+        public ITenantConfiguration TenantConfiguration { get; }
         public IServiceProvider ServiceProvider { get; }
 
-        public SingleParameters(IServiceProvider serviceProvider,IStaticDataCache cache, IESIAuthenticatedConfig esiConfiguration, IPublicDataProvider publicData, ITenantWebConfiguration tenantconfiguration)
+        public SingleParameters(IServiceProvider serviceProvider,IStaticDataCache cache, IESIAuthenticatedConfig esiConfiguration, IPublicDataProvider publicData, ITenantConfiguration tenantconfiguration)
         {
             ServiceProvider = serviceProvider;
             Cache = cache;

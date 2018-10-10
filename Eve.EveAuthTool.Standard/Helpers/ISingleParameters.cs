@@ -16,7 +16,7 @@ namespace Eve.EveAuthTool.Standard.Helpers
         IStaticDataCache Cache { get; }
         IESIAuthenticatedConfig ESIConfiguration { get; }
         IPublicDataProvider PublicDataProvider { get; }
-        ITenantWebConfiguration TenantConfiguration { get; }
+        ITenantConfiguration TenantConfiguration { get; }
         IServiceProvider ServiceProvider { get; }
         
     }

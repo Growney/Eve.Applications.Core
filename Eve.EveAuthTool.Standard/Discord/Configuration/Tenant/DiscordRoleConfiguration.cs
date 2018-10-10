@@ -1,6 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
+using Eve.ESI.Standard.Account;
+using Eve.ESI.Standard.Authentication.Client;
+using Eve.ESI.Standard.Authentication.Configuration;
+using Eve.EveAuthTool.Standard.Security.Rules;
+using Eve.Static.Standard;
 using Gware.Standard.Storage;
 using Gware.Standard.Storage.Adapter;
 using Gware.Standard.Storage.Command;
@@ -65,7 +71,19 @@ namespace Eve.EveAuthTool.Standard.Discord.Configuration.Tenant
             DataCommand command = new DataCommand("DiscordRoleConfiguration", "All");
             return Load<DiscordRoleConfiguration>(controller.ExecuteCollectionCommand(command));
         }
-    
+        public static async Task<DiscordRoleConfiguration> ForAccount(Task<Role> roleTask, ICommandController tenantController)
+        {
+            Role role = await roleTask;
+            if(role != null)
+            {
+                return DiscordRoleConfiguration.Get<DiscordRoleConfiguration>(tenantController,role.DiscordRoleConfigurationID);
+            }
+            return null;
+        }
+        public static Task<DiscordRoleConfiguration> ForAccount(IESIAuthenticatedConfig esiConfiguration, ICommandController tenantController, IStaticDataCache cache, IPublicDataProvider publicDataProvider, UserAccount user)
+        {
+            return ForAccount(Role.ForAccount(esiConfiguration, tenantController, cache, publicDataProvider, user), tenantController);
+        }
 
     }
 }

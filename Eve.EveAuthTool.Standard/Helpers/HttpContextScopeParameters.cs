@@ -15,38 +15,24 @@ using Microsoft.AspNetCore.Http;
 
 namespace Eve.EveAuthTool.Standard.Helpers
 {
-    public class HttpContextScopeParameters : IScopeParameters
+    public class HttpContextScopeParameters : ScopeParametersBase
     {
-        public Tenant CurrentTenant
+        public override Tenant CurrentTenant
         {
             get
             {
                 return m_storage.Tenant;
             }
         }
-        public ICommandController TenantController
+        public override ICommandController TenantController
         {
             get
             {
                 return m_controllerProvider.GetController();
             }
         }
-        public IAllowedCharactersProvider Characters { get; }
-        public bool IsAuthenticated {
-            get
-            {
-                return m_context.HttpContext.User.Identity.IsAuthenticated;
-            }
-        }
-        public long? MainCharacterID
-        {
-            get
-            {
-                return User?.GetMainCharacterID(TenantController);
-            }
-        }
         private readonly OnceLoadedValue<UserAccount> m_user = new OnceLoadedValue<UserAccount>();
-        public UserAccount User
+        public override UserAccount User
         {
             get
             {
@@ -54,24 +40,6 @@ namespace Eve.EveAuthTool.Standard.Helpers
                 return m_user.Value;
             }
         }
-        private readonly OnceLoadedValue<Task<Role>> m_currentRole = new OnceLoadedValue<Task<Role>>();
-        public Task<Role> CurrentRole
-        {
-            get
-            {
-                m_currentRole.Load = () => GetCurrentRole();
-                return m_currentRole.Value;
-            }
-        }
-
-        public bool IsTenant
-        {
-            get
-            {
-                return CurrentTenant != null;
-            }
-        }
-
         //the reason we store all the providers instead of calculating from the constructor is that the tenant is not calculated when the object is created.
         private readonly ISingleParameters m_singles;
         private readonly ITenantStorage m_storage;
@@ -79,6 +47,7 @@ namespace Eve.EveAuthTool.Standard.Helpers
         private readonly IHttpContextAccessor m_context;
 
         public HttpContextScopeParameters(ISingleParameters singles,IHttpContextAccessor context,ITenantStorage storage,ITenantControllerProvider controllerProvider,IAllowedCharactersProvider characterProvider)
+            :base(singles)
         {
             m_singles = singles;
             m_storage = storage;
@@ -87,21 +56,5 @@ namespace Eve.EveAuthTool.Standard.Helpers
 
             Characters = characterProvider;        
         }
-
-        private async Task<Role> GetCurrentRole()
-        {
-            Role retVal = null;
-            List<AuthenticatedEntity> characters = AuthenticatedEntity.GetForAccount(m_singles.ESIConfiguration, TenantController, m_singles.Cache, m_singles.PublicDataProvider, User);
-            foreach (AuthenticatedEntity character in characters)
-            {
-                retVal = await AuthRule.GetEntityRole(m_singles.ESIConfiguration, TenantController, m_singles.Cache, m_singles.PublicDataProvider, character);
-                if (retVal != null)
-                {
-                    break;
-                }
-            }
-            return retVal;
-        }
-
     }
 }

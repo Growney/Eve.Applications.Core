@@ -20,60 +20,90 @@ using Eve.ESI.Standard.Authentication.Client;
 using Eve.EveAuthTool.Standard.Security.Rules;
 using Eve.EveAuthTool.Standard.Discord.Configuration.Tenant;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
+using System;
+
 namespace Eve.EveAuthTool.Standard.Discord.Service.Module
 {
     public class RegistrationCommands : EveAuthToolModuleBase<RegistrationCommands>
     {
-        
+
+        [Command("Refresh")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task Refresh()
+        {
+            await Context.Channel.SendMessageAsync($"Refreshing guild settings");
+            await UpdateDiscordGuild(ScopeParameters.CurrentTenant, SingleParameters.ESIConfiguration, Context.Guild);
+            await Context.Channel.SendMessageAsync($"Refreshing users");
+            await UpdateDiscordGuildUsers();
+            await Context.Channel.SendMessageAsync($"Refresh complete");
+        }
         [Command("Link")]
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task Link([Remainder]string code)
         {
             string guild = Context.Guild.Id.ToString();
-            if (CurrentTenant == null)
+            if (ScopeParameters.CurrentTenant == null)
             {
-                if (Context.Provider.GetService(typeof(IArgumentsStore<DiscordLinkParameter>)) is IArgumentsStore<DiscordLinkParameter> config)
+                
+                Tenant tenant = null;
+                long? tenantID = DiscordLinkStore.ReCallArguments(code)?.TenantID;
+                if (tenantID.HasValue)
                 {
-                    Tenant tenant = null;
-                    long? tenantID = config.ReCallArguments(code)?.TenantID;
-                    if (tenantID.HasValue)
+                    tenant = SingleParameters.TenantConfiguration.GetTenant(tenantID.Value);
+                }
+                if (tenant != null)
+                {
+                    DiscordLinkStore.DiscardArguments(code);
+                    SingleParameters.TenantConfiguration.CreateTenantLink(tenant.Id, (byte)eTenantLinkType.Discord, guild);
+                    //After we create the link we create a new scope to allow the process to update the tenant
+                    using(IServiceScope scope = ScopeFactory.CreateScope())
                     {
-                        tenant = TenantConfiguration.GetTenant(tenantID.Value);
-                    }
-                    if (tenant != null)
-                    {
-                        config.DiscardArguments(code);
-                        TenantConfiguration.CreateTenantLink(tenant.Id, (byte)eTenantLinkType.Discord, guild);
-                        m_currentTenant.Reset();
+                        DiscordBotService.ConfigureServiceScope(SingleParameters.TenantConfiguration, scope, Context);
+                        Context.Provider = scope.ServiceProvider;
+                        Tenant linkedTenant = SingleParameters.TenantConfiguration.GetTenantFromLink(guild);
                         await Context.Channel.SendMessageAsync($"Link to {tenant.DisplayName} updating guild settings");
-                        await UpdateDiscordGuild(CurrentTenant, ESIConfig, Context.Guild);
+                        await UpdateDiscordGuild(linkedTenant, SingleParameters.ESIConfiguration, Context.Guild);
                         await Context.Channel.SendMessageAsync($"Linking users");
-                        await UpdateDiscordGuildUsers(Logger,PublicDataProvider,TenantController,CurrentTenant.EntityId,CurrentTenant.EntityType,ESIConfig, Cache, Context.Guild, await BotGuildHighestRole);
+                        await UpdateDiscordGuildUsers();
                         await Context.Channel.SendMessageAsync($"Link complete");
                     }
-                    else
-                    {
-                        await Context.Channel.SendMessageAsync($"Invalid Code");
-                    }
+                        
                 }
                 else
                 {
-                    await Context.Channel.SendMessageAsync($"No Config");
+                    await Context.Channel.SendMessageAsync($"Invalid Code");
                 }
-                return;
             }
             else
             {
-                await Context.Channel.SendMessageAsync($"Already linked to {CurrentTenant.DisplayName}");
+                await Context.Channel.SendMessageAsync($"Already linked to {ScopeParameters.CurrentTenant.DisplayName}");
+            }
+        }
+        private async Task UpdateAccountGuildUser(LinkedUserAccount account)
+        {
+            IGuildUser updateOn = await LinkProvider.GetAccountGuildUser(Context.Guild, account);
+            if(updateOn != null)
+            {
+                IGuildUser botUser = await Bot.GetBotGuildUser(Context.Guild.Id);
+                if (LinkProvider.CanActionUpdateOnUser(Context.Guild, botUser, updateOn))
+                {
+                    DiscordRoleConfiguration discordRoleConfiguration = await DiscordRoleConfiguration.ForAccount(SingleParameters.ESIConfiguration, ScopeParameters.TenantController, SingleParameters.Cache, SingleParameters.PublicDataProvider, account);
+                    long? characterID = account.GetMainCharacterID(ScopeParameters.TenantController);
+                    if(characterID.HasValue)
+                    {
+                        await LinkProvider.UpdateNickname(updateOn, characterID.Value);
+                        await LinkProvider.UpdateRoles(Context.Guild.Roles, botUser, updateOn, discordRoleConfiguration);
+                    }
+                }
             }
             
         }
-
-        public static async Task UpdateDiscordGuildUsers(ILogger<object> logger, IPublicDataProvider publicData,ICommandController tenantController, long tenantEntityID, int tenantEntityType, IESIAuthenticatedConfig esiConfig, IStaticDataCache cache,IGuild guild, int highestRole)
+        private async Task UpdateDiscordGuildUsers()
         {
-            foreach (LinkedUserAccount account in LinkedUserAccount.AllLinked(tenantController, (byte)eTenantLinkType.Discord))
+            foreach (LinkedUserAccount account in LinkedUserAccount.AllLinked(ScopeParameters.TenantController, (byte)eTenantLinkType.Discord))
             {
-                await UpdateLinkedAccount(logger,esiConfig, publicData,tenantController, tenantEntityID,tenantEntityType, cache, guild, highestRole, account);
+                await UpdateAccountGuildUser(account);
             }
         }
 
@@ -96,116 +126,6 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Module
             
         }
 
-        public static async Task<bool> UpdateLinkedAccount(ILogger<object> logger,IESIAuthenticatedConfig esiconfig, IPublicDataProvider publicDataProvider,ICommandController tenantController,long tenantEntityID,int tenantEntityType,IStaticDataCache cache,IGuild guild,int modifyingHighestRole,LinkedUserAccount account)
-        {
-            bool retVal = false;
-            if(ulong.TryParse(account.Link,out ulong userID))
-            {
-                logger.LogTrace($"Parsed Discord linked account link to user id {userID} for account {account.AccountGuid}");
-                IGuildUser user = await guild.GetUserAsync(userID);
-                if(user != null)
-                {
-                    if (userID != guild.OwnerId)
-                    {
-                        if (GetUserHighestRole(guild, user) <= modifyingHighestRole)
-                        {
-                            logger.LogTrace($"Non user guild owner with user id {userID} on guild {guild.Name} starting link");
-                            List<AuthenticatedEntity> accountCharacters = AuthenticatedEntity.GetForAccount(esiconfig, tenantController, cache, publicDataProvider, account);
-                            if (accountCharacters.Count > 0)
-                            {
-                                string setTo = await publicDataProvider.GetTaggedCharacterName(accountCharacters[0].EntityID);
-                                if (!string.IsNullOrWhiteSpace(setTo) && user.Nickname != setTo)
-                                {
-                                    await user?.ModifyAsync(x =>
-                                    {
-                                        x.Nickname = setTo.ToString();
-                                    });
-                                }
-
-                                logger.LogInformation($"Linked {account.AccountGuid} to discord {guild.Id} with nickname {setTo.ToString()} on {(eESIEntityType)tenantEntityType}({tenantEntityID})");
-
-                                    retVal = true;
-
-                                Role role = await AuthRule.GetEntityRole(esiconfig, tenantController, cache, publicDataProvider, accountCharacters[0]);
-
-
-                                DiscordRoleConfiguration botConfiguration;
-
-                                List<ulong> toRemove = new List<ulong>();
-                                List<ulong> toAdd = new List<ulong>();
-                                if (role != null && (botConfiguration = DiscordRoleConfiguration.Get<DiscordRoleConfiguration>(tenantController, role.DiscordRoleConfigurationID)) != null)
-                                {
-                                    HashSet<ulong> currentRoles = user.RoleIds.Index();
-                                    foreach (ulong currentRole in currentRoles)
-                                    {
-                                        if (currentRole != guild.EveryoneRole.Id)
-                                        {
-                                            if (!botConfiguration.AssignedRoles.Contains(currentRole))
-                                            {
-                                                toRemove.Add(currentRole);
-                                            }
-                                        }
-                                    }
-
-                                    foreach (ulong configRole in botConfiguration.AssignedRoles)
-                                    {
-                                        if (!currentRoles.Contains(configRole))
-                                        {
-                                            toAdd.Add(configRole);
-                                        }
-                                    }
-                                    if (toAdd.Count > 0)
-                                    {
-                                        await user.AddRolesAsync(CreateRoleList(botConfiguration.AssignedRoles, guild.Roles));
-                                    }
-                                    if (toRemove.Count > 0)
-                                    {
-                                        await user.RemoveRolesAsync(CreateRoleList(toRemove, guild.Roles));
-                                    }
-                                }
-                                else
-                                {
-                                    foreach (ulong currentRoll in user.RoleIds)
-                                    {
-                                        if (currentRoll != guild.EveryoneRole.Id)
-                                        {
-                                            toRemove.Add(currentRoll);
-                                        }
-                                    }
-                                    if (toRemove.Count > 0)
-                                    {
-                                        await user.RemoveRolesAsync(CreateRoleList(toRemove, guild.Roles));
-                                    }
-                                }
-                                logger.LogInformation($"Linked {account.AccountGuid} to discord {guild.Id} with role {role?.Name ?? "NULL"}({role?.Id.ToString() ?? "NULL"}) causing +{toAdd.Count}/-{toRemove.Count} roles on {(eESIEntityType)tenantEntityType}({tenantEntityID})");
-                            }
-                        }
-                        else
-                        {
-                            var privateChat = await user.GetOrCreateDMChannelAsync();
-                            await privateChat.SendMessageAsync($"We are sorry can't automatically update you on {guild.Name} because you have higher roles than we do. You are still linked to the site but you will have to do your own details.");
-                        }
-
-                    }
-                    else
-                    {
-                        var privateChat = await user.GetOrCreateDMChannelAsync();
-                        await privateChat.SendMessageAsync($"We are sorry can't automatically update you on {guild.Name} because you are the owner of the guild and discord doesn't let us. You are still linked to the site but you will have to do your own details.");
-                    }
-                }
-                else
-                {
-                    logger.LogError($"Failed to get guild user {userID} on guild {guild.Name}");
-                }
-                
-            }
-            else
-            {
-                logger.LogError($"Failed to parse link to ulong value {account.Link} for account {account.AccountGuid}");
-            }
-            return retVal;
-        }
-
         private static IEnumerable<IRole> CreateRoleList(IEnumerable<ulong> selected,IEnumerable<IRole> allRoles)
         {
             HashSet<ulong> set = new HashSet<ulong>(selected);
@@ -224,10 +144,10 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Module
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task Unlink()
         {
-            if (CurrentTenant != null)
+            if (ScopeParameters.CurrentTenant != null)
             {
-                TenantConfiguration.DeleteTenantLink(CurrentTenant.Id, (byte)eTenantLinkType.Discord);
-                await Context.Channel.SendMessageAsync($"Unlinked from {CurrentTenant.DisplayName}");
+                SingleParameters.TenantConfiguration.DeleteTenantLink(ScopeParameters.CurrentTenant.Id, (byte)eTenantLinkType.Discord);
+                await Context.Channel.SendMessageAsync($"Unlinked from {ScopeParameters.CurrentTenant.DisplayName}");
             }
             else
             {
@@ -238,9 +158,9 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Module
         [Command("Url")]
         public async Task Url()
         {
-            if (CurrentTenant != null)
+            if (ScopeParameters.CurrentTenant != null)
             {
-                await Context.Channel.SendMessageAsync($"ESA Url : {TenantConfiguration.GetTenantRedirect(CurrentTenant.Name,string.Empty)}");
+                await Context.Channel.SendMessageAsync($"ESA Url : {SingleParameters.TenantConfiguration.GetTenantRedirect(ScopeParameters.CurrentTenant.Name,string.Empty)}");
             }
             else
             {
@@ -251,11 +171,11 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Module
         [Command("Characters")]
         public async Task Characters()
         {
-            if(CurrentTenant != null)
+            if(ScopeParameters.CurrentTenant != null)
             {
-                if(CurrentAccount != null)
+                if(ScopeParameters.User != null)
                 {
-                    List<AuthenticatedEntity> characters = AuthenticatedEntity.GetForAccount(ESIConfig,TenantController, Cache, PublicDataProvider,CurrentAccount.AccountGuid.ToString());
+                    List<AuthenticatedEntity> characters = AuthenticatedEntity.GetForAccount(SingleParameters.ESIConfiguration, ScopeParameters.TenantController, SingleParameters.Cache, SingleParameters.PublicDataProvider, ScopeParameters.User.AccountGuid.ToString());
                     StringBuilder message = new StringBuilder();
                     foreach (var character in characters)
                     {

@@ -6,8 +6,14 @@ namespace Eve.EveAuthTool.Standard.Discord.Service
 {
     public class ContextWithDI<T> : ICommandContext where T : ICommandContext
     {
+        public Action ResetDIProvider;
         private T DiscordContext { get; }
-        public IServiceProvider Provider { get; }
+        private IServiceProvider m_serviceProvider;
+        public IServiceProvider Provider
+        {
+            get { return m_serviceProvider; }
+            set { m_serviceProvider = value; ResetDIProvider?.Invoke(); }
+        }
 
         public IDiscordClient Client => DiscordContext.Client;
 

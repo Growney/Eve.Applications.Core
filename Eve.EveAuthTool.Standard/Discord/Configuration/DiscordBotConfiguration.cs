@@ -1,5 +1,6 @@
 ﻿using Eve.EveAuthTool.Standard.Discord.Configuration;
 using Microsoft.Extensions.Configuration;
+using System;
 
 namespace Eve.EveAuthTool.Standard.Discord.Configuration
 {
@@ -12,6 +13,7 @@ namespace Eve.EveAuthTool.Standard.Discord.Configuration
         public string CallBackUrl { get; }
         public string Secret { get; }
         public string BotPermissions { get; }
+        public TimeSpan SyncCycleTime { get; }
 
         public DiscordBotConfiguration(IConfiguration configuration)
         {
@@ -22,6 +24,16 @@ namespace Eve.EveAuthTool.Standard.Discord.Configuration
             CallBackUrl = configuration["Discord:CallbackURL"].ToString();
             Secret = configuration["Discord:Secret"].ToString();
             BotPermissions =  configuration["Discord:BotPermissions"].ToString();
+
+            string syncCycleTime = configuration["Discord:SyncCycleTime"];
+            if(int.TryParse(syncCycleTime,out int time))
+            {
+                SyncCycleTime = TimeSpan.FromMinutes(time);
+            }
+            else
+            {
+                SyncCycleTime = TimeSpan.FromHours(1);
+            }
         }
 
         public string GetAddBotUrl()

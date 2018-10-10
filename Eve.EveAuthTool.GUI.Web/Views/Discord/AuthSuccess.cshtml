@@ -1,0 +1,31 @@
+﻿@model Eve.EveAuthTool.GUI.Web.Models.Discord.DiscordAuthSuccessResults
+
+<h1>Auth Successfull</h1>
+<p>Thank you for registering with ESA you have now been given roles and authorised on Discord</p>
+@if (Model.UpdatedNickname)
+{
+    <p>We have updated your nickname to: @Model.UpdatedNicknameTo</p>
+}
+@if (Model.RolesFailedToAdd > 0)
+{
+    <p>
+        We had some issues updating your roles you should have had @Model.RolesShouldHaveBeenAdded roles added but we
+        only managed to give you @Model.RolesAdded roles
+    </p>
+}
+else
+{
+    <p>You have been assigned @Model.RolesAdded new roles</p>
+}
+
+@if (Model.RolesFailedToRemove > 0)
+{
+    <p>
+        We had some issues updating your roles you should have had @Model.RolesShouldHaveBeenRemoved roles removed but we
+        only managed to remove @Model.RolesRemoved roles
+    </p>
+}
+else
+{
+    <p>You have had @Model.RolesRemoved roles removed</p>
+}

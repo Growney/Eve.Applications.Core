@@ -38,8 +38,9 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
         public IArgumentsStore<ESITokenRequestParameters> TokenStore { get; }
         public IArgumentsStore<OAuthRequestArguments> OAuthArgStore { get; }
         public IScopeGroupProvider Scopes { get; }
+        public ITenantWebConfiguration TenantWebConfiguration { get; }
 
-        public RegistrationController(ILogger<RegistrationController> logger,IDiscordBotConfiguration discordConfiguration,IArgumentsStore<ESITokenRequestParameters> tokenStore,IArgumentsStore<OAuthRequestArguments> oAuthArgStore,IScopeGroupProvider scopeGroups,
+        public RegistrationController(ITenantWebConfiguration tenantWebConfiguration,ILogger<RegistrationController> logger,IDiscordBotConfiguration discordConfiguration,IArgumentsStore<ESITokenRequestParameters> tokenStore,IArgumentsStore<OAuthRequestArguments> oAuthArgStore,IScopeGroupProvider scopeGroups,
             ISingleParameters singles, IScopeParameters scopes)
             : base(logger, singles, scopes)
         {
@@ -47,6 +48,7 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
             OAuthArgStore = oAuthArgStore;
             Scopes = scopeGroups;
             DiscordConfiguration = discordConfiguration;
+            TenantWebConfiguration = tenantWebConfiguration;
         }
         public IActionResult Group()
         {
@@ -517,7 +519,7 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
                 int validation = ValidateTenant(proposal.Name, proposal.DisplayName, (int)token.EntityType, token.EntityID);
                 if (validation == 0)
                 {
-                    bool createdTenant = await TenantConfiguration.CreateTenant(proposal.Name, proposal.DisplayName, (int)token.EntityType, token.EntityID);
+                    bool createdTenant = await TenantWebConfiguration.CreateTenant(proposal.Name, proposal.DisplayName, (int)token.EntityType, token.EntityID);
                     if (createdTenant)
                     {
                         result.IsSuccess = true;
@@ -602,14 +604,21 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
 
         public IActionResult QuickAuth()
         {
-            ESIAuthRequestArguments args = HttpContext.GetLocalArguments<ESIAuthRequestArguments>(
+            if (!IsAuthenticated)
+            {
+                ESIAuthRequestArguments args = HttpContext.GetLocalArguments<ESIAuthRequestArguments>(
                 currentTenant: CurrentTenant,
                 redirectPath: "Registration/QuickAuthCharacter");
-            args.Scopes = Scopes.GetCharacterQuickAuthScopes();
+                args.Scopes = Scopes.GetCharacterQuickAuthScopes();
 
-            return Redirect(args.GetAuthenticationUrl(
-                state: OAuthArgStore.StoreArguments(args),
-                config: ESIConfiguration));
+                return Redirect(args.GetAuthenticationUrl(
+                    state: OAuthArgStore.StoreArguments(args),
+                    config: ESIConfiguration));
+            }
+            else
+            {
+                return RedirectToAction("QuickAuthDiscord");
+            }
         }
         public Task<IActionResult> QuickAuthCharacter(string state)
         {
