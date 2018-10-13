@@ -5,8 +5,12 @@ using System.Text;
 
 namespace Eve.EveAuthTool.Standard.Configuration
 {
-    public enum eUserSetting
+    public enum eUserSetting : long
     {
-        
+        [ConfigurationDefault(false)]
+        UpdateDiscordName,
+
+        [ConfigurationDefault(false)]
+        UpdateDiscordImage,
     }
 }
