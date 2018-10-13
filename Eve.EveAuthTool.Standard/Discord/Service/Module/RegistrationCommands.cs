@@ -33,7 +33,11 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Module
         public async Task Refresh()
         {
             await Context.Channel.SendMessageAsync($"Refreshing guild settings");
-            await UpdateDiscordGuild(ScopeParameters.CurrentTenant, SingleParameters.ESIConfiguration, Context.Guild);
+            if (LinkProvider.ShouldUpdateGuildInfo())
+            {
+                await Context.Channel.SendMessageAsync($"Refreshing Guild Configuration");
+                await LinkProvider.UpdateGuild(Context.Guild, ScopeParameters.CurrentTenant.DisplayName, (eESIEntityType)ScopeParameters.CurrentTenant.EntityType, ScopeParameters.CurrentTenant.EntityId);
+            }
             await Context.Channel.SendMessageAsync($"Refreshing users");
             await UpdateDiscordGuildUsers();
             await Context.Channel.SendMessageAsync($"Refresh complete");
@@ -62,8 +66,13 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Module
                         DiscordBotService.ConfigureServiceScope(SingleParameters.TenantConfiguration, scope, Context);
                         Context.Provider = scope.ServiceProvider;
                         Tenant linkedTenant = SingleParameters.TenantConfiguration.GetTenantFromLink(guild);
-                        await Context.Channel.SendMessageAsync($"Link to {tenant.DisplayName} updating guild settings");
-                        await UpdateDiscordGuild(linkedTenant, SingleParameters.ESIConfiguration, Context.Guild);
+                        await Context.Channel.SendMessageAsync($"Linking to {tenant.DisplayName}");
+                        if (LinkProvider.ShouldUpdateGuildInfo())
+                        {
+                            await Context.Channel.SendMessageAsync($"Linking Guild Configuration");
+                            await LinkProvider.UpdateGuild(Context.Guild, linkedTenant.DisplayName, (eESIEntityType)linkedTenant.EntityType, linkedTenant.EntityId);
+                        }
+                        
                         await Context.Channel.SendMessageAsync($"Linking users");
                         await UpdateDiscordGuildUsers();
                         await Context.Channel.SendMessageAsync($"Link complete");
@@ -107,24 +116,6 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Module
             }
         }
 
-        public static async Task UpdateDiscordGuild(Tenant tenant,IESIAuthenticatedConfig esiConfig,IGuild guild)
-        {
-            Image? image = null;
-            using (System.Net.WebClient client = new System.Net.WebClient())
-            {
-                byte[] imageData = await client.DownloadDataTaskAsync(esiConfig.GetImageSource((eESIEntityType)tenant.EntityType, tenant.EntityId, 128));
-                using (System.IO.MemoryStream stream = new System.IO.MemoryStream(imageData))
-                {
-                    image = new Image(stream);
-                    await guild.ModifyAsync(x =>
-                    {
-                        x.Name = new Optional<string>(tenant.DisplayName);
-                        x.Icon = new Optional<Image?>(image);
-                    });
-                }
-            }
-            
-        }
 
         private static IEnumerable<IRole> CreateRoleList(IEnumerable<ulong> selected,IEnumerable<IRole> allRoles)
         {

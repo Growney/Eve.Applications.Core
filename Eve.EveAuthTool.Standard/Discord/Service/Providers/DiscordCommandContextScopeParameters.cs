@@ -1,9 +1,11 @@
 ﻿using Eve.ESI.Standard.Account;
 using Eve.ESI.Standard.AuthenticatedData;
+using Eve.EveAuthTool.Standard.Configuration;
 using Eve.EveAuthTool.Standard.Helpers;
 using Eve.EveAuthTool.Standard.Security.Middleware;
 using Eve.EveAuthTool.Standard.Security.Rules;
 using Gware.Standard.Collections.Generic;
+using Gware.Standard.Configuration;
 using Gware.Standard.Storage.Controller;
 using Gware.Standard.Web.Tenancy;
 using Gware.Standard.Web.Tenancy.Configuration;
@@ -17,8 +19,8 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Providers
 {
     public class DiscordCommandContextScopeParameters : ScopeParametersBase
     {
-        public DiscordCommandContextScopeParameters(ISingleParameters singles,IDiscordCommandContextAccessor accessor,ITenantStorage storage, ITenantControllerProvider controllerProvider, IAllowedCharactersProvider characterProvider)
-            :base(singles)
+        public DiscordCommandContextScopeParameters(ITypeSafeConfigurationProvider<eUserSetting> userConfig,ISingleParameters singles,IDiscordCommandContextAccessor accessor,ITenantStorage storage, ITenantControllerProvider controllerProvider, IAllowedCharactersProvider characterProvider)
+            :base(singles,userConfig)
         {
             CurrentTenant = storage.Tenant;
             TenantController = controllerProvider.GetController();

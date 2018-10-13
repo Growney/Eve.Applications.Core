@@ -4,9 +4,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Eve.ESI.Standard.Account;
 using Eve.ESI.Standard.AuthenticatedData;
+using Eve.EveAuthTool.Standard.Configuration;
 using Eve.EveAuthTool.Standard.Security.Middleware;
 using Eve.EveAuthTool.Standard.Security.Rules;
 using Gware.Standard.Collections.Generic;
+using Gware.Standard.Configuration;
 using Gware.Standard.Storage.Controller;
 using Gware.Standard.Web.Tenancy;
 using Gware.Standard.Web.Tenancy.Configuration;
@@ -46,8 +48,8 @@ namespace Eve.EveAuthTool.Standard.Helpers
         private readonly ITenantControllerProvider m_controllerProvider;
         private readonly IHttpContextAccessor m_context;
 
-        public HttpContextScopeParameters(ISingleParameters singles,IHttpContextAccessor context,ITenantStorage storage,ITenantControllerProvider controllerProvider,IAllowedCharactersProvider characterProvider)
-            :base(singles)
+        public HttpContextScopeParameters(ITypeSafeConfigurationProvider<eUserSetting> userConfig,ISingleParameters singles,IHttpContextAccessor context,ITenantStorage storage,ITenantControllerProvider controllerProvider,IAllowedCharactersProvider characterProvider)
+            :base(singles,userConfig)
         {
             m_singles = singles;
             m_storage = storage;

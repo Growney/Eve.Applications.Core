@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Eve.ESI.Standard;
 using Eve.ESI.Standard.Account;
 using Eve.EveAuthTool.Standard.Discord.Configuration.Tenant;
 using Eve.EveAuthTool.Standard.Helpers;
@@ -30,39 +31,42 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Providers
         }
         public async Task SyncDiscordTenant()
         {
-            foreach (LinkedUserAccount account in LinkedUserAccount.AllLinked(m_scopes.TenantController, (byte)eTenantLinkType.Discord))
-            {
-                await UpdateAccountGuildUser(account);
-            }
-        }
-
-        private async Task UpdateAccountGuildUser(LinkedUserAccount account)
-        {
             string tenantLink = m_singles.TenantConfiguration.GetLink(m_tenant.Id, (byte)eTenantLinkType.Discord);
-            if(ulong.TryParse(tenantLink, out ulong guildID))
+            if (ulong.TryParse(tenantLink, out ulong guildID))
             {
                 IGuild guild = await m_discordBot.GetGuild(guildID);
-                if(guild != null)
+                if (guild != null)
                 {
-                    IGuildUser updateOn = await m_linkProvider.GetAccountGuildUser(guild, account);
-                    if (updateOn != null)
+                    if (m_linkProvider.ShouldUpdateGuildInfo())
                     {
-                        IGuildUser botUser = await m_discordBot.GetBotGuildUser(guild.Id);
-                        if (m_linkProvider.CanActionUpdateOnUser(guild, botUser, updateOn))
-                        {
-                            DiscordRoleConfiguration discordRoleConfiguration = await DiscordRoleConfiguration.ForAccount(m_singles.ESIConfiguration, m_scopes.TenantController, m_singles.Cache, m_singles.PublicDataProvider, account);
-                            long? characterID = account.GetMainCharacterID(m_scopes.TenantController);
-                            if (characterID.HasValue)
-                            {
-                                await m_linkProvider.UpdateNickname(updateOn, characterID.Value);
-                                await m_linkProvider.UpdateRoles(guild.Roles, botUser, updateOn, discordRoleConfiguration);
-                            }
-                        }
+                        await m_linkProvider.UpdateGuild(guild, m_tenant.DisplayName, (eESIEntityType)m_tenant.EntityType, m_tenant.EntityId);
+                    }
+                    foreach (LinkedUserAccount account in LinkedUserAccount.AllLinked(m_scopes.TenantController, (byte)eTenantLinkType.Discord))
+                    {
+                        await UpdateAccountGuildUser(guild,account);
                     }
                 }
             }
-            
+        }
 
+        private async Task UpdateAccountGuildUser(IGuild guild,LinkedUserAccount account)
+        {
+            
+            IGuildUser updateOn = await m_linkProvider.GetAccountGuildUser(guild, account);
+            if (updateOn != null)
+            {
+                IGuildUser botUser = await m_discordBot.GetBotGuildUser(guild.Id);
+                if (m_linkProvider.CanActionUpdateOnUser(guild, botUser, updateOn))
+                {
+                    DiscordRoleConfiguration discordRoleConfiguration = await DiscordRoleConfiguration.ForAccount(m_singles.ESIConfiguration, m_scopes.TenantController, m_singles.Cache, m_singles.PublicDataProvider, account);
+                    long? characterID = account.GetMainCharacterID(m_scopes.TenantController);
+                    if (characterID.HasValue)
+                    {
+                        await m_linkProvider.UpdateNickname(updateOn, characterID.Value);
+                        await m_linkProvider.UpdateRoles(guild.Roles, botUser, updateOn, discordRoleConfiguration);
+                    }
+                }
+            }
         }
     }
 }

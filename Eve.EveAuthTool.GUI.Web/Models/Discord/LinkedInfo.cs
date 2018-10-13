@@ -9,5 +9,7 @@ namespace Eve.EveAuthTool.GUI.Web.Models.Discord
     {
         public string GuildName { get; set; }
         public List<DiscordConfiguration> Configurations { get; set; }
+        public bool UpdateGuildName { get; set; }
+        public bool UpdateGuildImage { get; set; }
     }
 }

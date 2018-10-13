@@ -1,7 +1,9 @@
 ﻿using Eve.ESI.Standard.Account;
+using Eve.EveAuthTool.Standard.Configuration;
 using Eve.EveAuthTool.Standard.Discord.Configuration.Tenant;
 using Eve.EveAuthTool.Standard.Security.Middleware;
 using Eve.EveAuthTool.Standard.Security.Rules;
+using Gware.Standard.Configuration;
 using Gware.Standard.Storage.Controller;
 using Gware.Standard.Web.Tenancy;
 using Gware.Standard.Web.Tenancy.Configuration;
@@ -15,6 +17,7 @@ namespace Eve.EveAuthTool.Standard.Helpers
 {
     public interface IScopeParameters
     {
+        ITypeSafeConfigurationProvider<eUserSetting> UserConfiguration { get; }
         bool IsTenant { get; }
         Tenant CurrentTenant { get; }
         ICommandController TenantController { get; }
@@ -24,5 +27,7 @@ namespace Eve.EveAuthTool.Standard.Helpers
         UserAccount User { get; }
         Task<Role> CurrentRole { get; }
         Task<DiscordRoleConfiguration> CurrentDiscordConfiguration { get; }
+
+
     }
 }

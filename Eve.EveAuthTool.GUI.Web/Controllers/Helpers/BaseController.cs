@@ -18,6 +18,8 @@ using Eve.EveAuthTool.Standard.Security.Rules;
 using Microsoft.Extensions.Logging;
 using Eve.EveAuthTool.Standard.Helpers;
 using Eve.EveAuthTool.Standard.Discord.Configuration.Tenant;
+using Gware.Standard.Configuration;
+using Eve.EveAuthTool.Standard.Configuration;
 
 namespace Eve.EveAuthTool.GUI.Web.Controllers.Helpers
 {
@@ -96,7 +98,13 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers.Helpers
                 return m_singles.TenantConfiguration;
             }
         }
-
+        protected ITypeSafeConfigurationProvider<eUserSetting> UserConfiguration
+        {
+            get
+            {
+                return m_scopes.UserConfiguration;
+            }
+        }
         public Task<Role> CurrentRole
         {
             get

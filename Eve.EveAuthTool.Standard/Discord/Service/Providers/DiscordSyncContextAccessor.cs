@@ -1,4 +1,6 @@
-﻿using Eve.EveAuthTool.Standard.Helpers;
+﻿using Eve.EveAuthTool.Standard.Configuration;
+using Eve.EveAuthTool.Standard.Helpers;
+using Gware.Standard.Configuration;
 using Gware.Standard.Web.Tenancy.Configuration;
 using Gware.Standard.Web.Tenancy.Routing;
 using System;
@@ -9,8 +11,8 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Providers
 {
     public class DiscordSyncScopeParameters : ScopeParametersBase
     {
-        public DiscordSyncScopeParameters(ISingleParameters singles, ITenantStorage storage, ITenantControllerProvider controllerProvider)
-            : base(singles)
+        public DiscordSyncScopeParameters(ITypeSafeConfigurationProvider<eUserSetting> userConfig,ISingleParameters singles, ITenantStorage storage, ITenantControllerProvider controllerProvider)
+            : base(singles,userConfig)
         {
             CurrentTenant = storage.Tenant;
             TenantController = controllerProvider?.GetController();

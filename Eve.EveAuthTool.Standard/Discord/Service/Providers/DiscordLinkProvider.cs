@@ -1,8 +1,12 @@
 ﻿using Discord;
+using Eve.ESI.Standard;
 using Eve.ESI.Standard.Account;
+using Eve.ESI.Standard.Authentication.Configuration;
+using Eve.EveAuthTool.Standard.Configuration;
 using Eve.EveAuthTool.Standard.Discord.Configuration.Tenant;
 using Eve.EveAuthTool.Standard.Helpers;
 using Gware.Standard.Collections.Generic;
+using Gware.Standard.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -14,16 +18,20 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Providers
 {
     public class DiscordLinkProvider : IDiscordLinkProvider
     {
+        private readonly ITypeSafeConfigurationProvider<eUserSetting> m_userConfiguration;
         private readonly ILogger<DiscordLinkProvider> m_logger;
         private readonly ISingleParameters m_singles;
         private readonly IScopeParameters m_scoped;
         private readonly IDiscordBot m_bot;
-        public DiscordLinkProvider(ILogger<DiscordLinkProvider> logger, ISingleParameters singles, IScopeParameters scoped,IDiscordBot discordBot)
+        private readonly IESIAuthenticatedConfig m_esiConfiguration;
+        public DiscordLinkProvider(ILogger<DiscordLinkProvider> logger, ISingleParameters singles, IScopeParameters scoped,IDiscordBot discordBot, IESIAuthenticatedConfig esiConfiguration, ITypeSafeConfigurationProvider<eUserSetting> userConfiguration)
         {
             m_logger = logger;
             m_singles = singles;
             m_scoped = scoped;
             m_bot = discordBot;
+            m_esiConfiguration = esiConfiguration;
+            m_userConfiguration = userConfiguration;
         }
 
         public async Task<IGuildUser> GetAccountGuildUser(IGuild guild, LinkedUserAccount account,eCacheOptions cacheOptions = eCacheOptions.Default)
@@ -262,7 +270,76 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Providers
                 await invite.AcceptAsync();
             }
         }
+        public async Task UpdateGuild(IGuild guild,string name,eESIEntityType type,long entityID)
+        {
+            Optional<string> newName = new Optional<string>();
+            if (m_userConfiguration.GetBoolean(eUserSetting.UpdateDiscordName))
+            {
+                if(guild.Name != name && !string.IsNullOrWhiteSpace(name))
+                {
+                    newName = new Optional<string>(name);
+                    m_logger.LogTrace($"Updating the name of guild {guild.Name} ({guild.Id}) to {name}");
+                }
+                else
+                {
+                    m_logger.LogTrace($"Not updating the name of guild {guild.Name} ({guild.Id}) as the name already matches");
+                }
+            }
+            else
+            {
+                m_logger.LogTrace($"Not updating the name of guild {guild.Name} ({guild.Id}) as it is configured not to");
+            }
+            Optional<Image?> image = new Optional<Image?>();
+            System.IO.MemoryStream stream = null;
+            if (m_userConfiguration.GetBoolean(eUserSetting.UpdateDiscordImage))
+            {
+                try
+                {
+                    using (System.Net.WebClient client = new System.Net.WebClient())
+                    {
+                        byte[] imageData = await client.DownloadDataTaskAsync(m_esiConfiguration.GetImageSource(type, entityID, 128));
+                        stream = new System.IO.MemoryStream(imageData);
+                        image = new Optional<Image?>(new Image(stream));
+                        m_logger.LogTrace($"Updating the image of guild {guild.Name} ({guild.Id})");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    m_logger.LogError(ex, "Failed to download tenant image for discord link");
+                }
+            }
+            else
+            {
+                m_logger.LogTrace($"Not updating the image of guild {guild.Name} ({guild.Id}) as it is configured not to");
+            }
+            try
+            {
+                if (newName.IsSpecified || (image.IsSpecified && stream != null))
+                {
+                    await guild.ModifyAsync(x =>
+                    {
+                        x.Name = newName;
+                        x.Icon = image;
+                    });
 
+                    if(image.IsSpecified && stream != null)
+                    {
+                        m_userConfiguration.SetValue(eUserSetting.UpdateDiscordImage, false);
+                    }
+                   
+                }
+            }
+            finally
+            {
+                stream?.Dispose();
+            }
+            
+            
+        }
+        public bool ShouldUpdateGuildInfo()
+        {
+            return m_userConfiguration.GetBoolean(eUserSetting.UpdateDiscordName) || m_userConfiguration.GetBoolean(eUserSetting.UpdateDiscordImage);
+        }
         private static int[] GetHighestRole(IEnumerable<IRole> roles, params HashSet<ulong>[] usersRoleIds)
         {
             if (roles == null)
@@ -307,5 +384,7 @@ namespace Eve.EveAuthTool.Standard.Discord.Service.Providers
             }
             return roles;
         }
+
+        
     }
 }

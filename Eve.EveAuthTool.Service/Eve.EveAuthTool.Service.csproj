@@ -9,19 +9,19 @@
 
   <ItemGroup>
     <Content Include="..\Eve.EveAuthTool.Configuration\appsettings.Development.json" Link="Configuration\appsettings.Development.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="..\Eve.EveAuthTool.Configuration\appsettings.example.json" Link="Configuration\appsettings.example.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="..\Eve.EveAuthTool.Configuration\appsettings.json" Link="Configuration\appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="..\Eve.EveAuthTool.Configuration\appsettings.live.json" Link="Configuration\appsettings.live.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="..\Eve.EveAuthTool.Configuration\appsettings.Testing.json" Link="Configuration\appsettings.Testing.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 

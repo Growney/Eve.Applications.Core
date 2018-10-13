@@ -9,18 +9,23 @@ namespace Eve.EveAuthTool.Standard.Configuration
 {
     public class UserConfigurationProvider : ITypeSafeConfigurationProvider<eUserSetting>
     {
-        private readonly ICommandController m_tenantController;
+        private ICommandController TenantController
+        {
+            get
+            {
+                return m_provider.GetController();
+            }
+        }
         private readonly ITenantControllerProvider m_provider;
 
         public UserConfigurationProvider(ITenantControllerProvider provider)
         {
             m_provider = provider;
-            m_tenantController = provider.GetController();
         }
 
         public bool GetBoolean(eUserSetting settingID)
         {
-            UserConfigurationSetting stored = UserConfigurationSetting.Get<UserConfigurationSetting, eUserSetting>(m_tenantController, settingID);
+            UserConfigurationSetting stored = UserConfigurationSetting.Get<UserConfigurationSetting, eUserSetting>(TenantController, settingID);
             return BitConverter.ToBoolean(stored?.Value ?? ConfigurationDefaultAttribute.GetDefaultValue(settingID), 0);
         }
 
@@ -31,25 +36,25 @@ namespace Eve.EveAuthTool.Standard.Configuration
 
         public DateTime GetDateTime(eUserSetting settingID)
         {
-            UserConfigurationSetting stored = UserConfigurationSetting.Get<UserConfigurationSetting, eUserSetting>(m_tenantController, settingID);
+            UserConfigurationSetting stored = UserConfigurationSetting.Get<UserConfigurationSetting, eUserSetting>(TenantController, settingID);
             return new DateTime(BitConverter.ToInt64(stored?.Value ?? ConfigurationDefaultAttribute.GetDefaultValue(settingID), 0));
         }
 
         public int GetInt(eUserSetting settingID)
         {
-            UserConfigurationSetting stored = UserConfigurationSetting.Get<UserConfigurationSetting, eUserSetting>(m_tenantController, settingID);
+            UserConfigurationSetting stored = UserConfigurationSetting.Get<UserConfigurationSetting, eUserSetting>(TenantController, settingID);
             return BitConverter.ToInt32(stored?.Value ?? ConfigurationDefaultAttribute.GetDefaultValue(settingID), 0);
         }
 
         public long GetLong(eUserSetting settingID)
         {
-            UserConfigurationSetting stored = UserConfigurationSetting.Get<UserConfigurationSetting, eUserSetting>(m_tenantController, settingID);
+            UserConfigurationSetting stored = UserConfigurationSetting.Get<UserConfigurationSetting, eUserSetting>(TenantController, settingID);
             return BitConverter.ToInt64(stored?.Value ?? ConfigurationDefaultAttribute.GetDefaultValue(settingID), 0);
         }
 
         public string GetString(eUserSetting settingID)
         {
-            UserConfigurationSetting stored = UserConfigurationSetting.Get<UserConfigurationSetting, eUserSetting>(m_tenantController, settingID);
+            UserConfigurationSetting stored = UserConfigurationSetting.Get<UserConfigurationSetting, eUserSetting>(TenantController, settingID);
             return Encoding.Unicode.GetString(stored?.Value ?? ConfigurationDefaultAttribute.GetDefaultValue(settingID));
         }
 
@@ -60,7 +65,7 @@ namespace Eve.EveAuthTool.Standard.Configuration
                 Id = (long)settingID,
                 Value = BitConverter.GetBytes(value)
             }
-            .Save(m_tenantController);
+            .Save(TenantController);
         }
 
         public void SetValue(eUserSetting settingID, int value)
@@ -70,7 +75,7 @@ namespace Eve.EveAuthTool.Standard.Configuration
                 Id = (long)settingID,
                 Value = BitConverter.GetBytes(value)
             }
-            .Save(m_tenantController);
+            .Save(TenantController);
         }
 
         public void SetValue(eUserSetting settingID, long value)
@@ -80,7 +85,7 @@ namespace Eve.EveAuthTool.Standard.Configuration
                 Id = (long)settingID,
                 Value = BitConverter.GetBytes(value)
             }
-            .Save(m_tenantController);
+            .Save(TenantController);
         }
 
         public void SetValue(eUserSetting settingID, string value)
@@ -90,7 +95,7 @@ namespace Eve.EveAuthTool.Standard.Configuration
                 Id = (long)settingID,
                 Value = Encoding.Unicode.GetBytes(value)
             }
-            .Save(m_tenantController);
+            .Save(TenantController);
         }
 
         public void SetValue(eUserSetting settingID, DateTime value)
@@ -100,7 +105,7 @@ namespace Eve.EveAuthTool.Standard.Configuration
                 Id = (long)settingID,
                 Value = BitConverter.GetBytes(value.Ticks)
             }
-            .Save(m_tenantController);
+            .Save(TenantController);
         }
 
         public void SetValue(eUserSetting settingID, IConfigurationType configurationType)
@@ -110,7 +115,7 @@ namespace Eve.EveAuthTool.Standard.Configuration
                 Id = (long)settingID,
                 Value = configurationType.GetBytes()
             }
-            .Save(m_tenantController);
+            .Save(TenantController);
         }
     }
 }

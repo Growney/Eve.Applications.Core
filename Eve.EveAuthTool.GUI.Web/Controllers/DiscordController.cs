@@ -105,6 +105,16 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
             }
             return allRoles;
         }
+        [HttpPost]
+        [Authorize(Roles ="Manage")]
+        public IActionResult UpdateLinkConfiguration(LinkedInfo info)
+        {
+            UserConfiguration.SetValue(Standard.Configuration.eUserSetting.UpdateDiscordImage, info.UpdateGuildImage);
+            UserConfiguration.SetValue(Standard.Configuration.eUserSetting.UpdateDiscordName, info.UpdateGuildName);
+
+            return RedirectToAction("Index");
+        }
+
         [Authorize(Roles ="Manage")]
         public async Task<IActionResult> Index()
         {
@@ -114,6 +124,8 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
                 return View("LinkedIndex", new Models.Discord.LinkedInfo()
                 {
                     GuildName = currentGuild.Name,
+                    UpdateGuildImage = UserConfiguration.GetBoolean(Standard.Configuration.eUserSetting.UpdateDiscordImage),
+                    UpdateGuildName = UserConfiguration.GetBoolean(Standard.Configuration.eUserSetting.UpdateDiscordName),
                     Configurations = Models.Discord.DiscordConfiguration.CreateFrom<Models.Discord.DiscordConfiguration>(DiscordRoleConfiguration.All(TenantController), GetAllRoles(currentGuild),await GetInvites(currentGuild))
                 });
 

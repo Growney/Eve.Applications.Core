@@ -4,10 +4,12 @@ using System.Text;
 using System.Threading.Tasks;
 using Eve.ESI.Standard.Account;
 using Eve.ESI.Standard.AuthenticatedData;
+using Eve.EveAuthTool.Standard.Configuration;
 using Eve.EveAuthTool.Standard.Discord.Configuration.Tenant;
 using Eve.EveAuthTool.Standard.Security.Middleware;
 using Eve.EveAuthTool.Standard.Security.Rules;
 using Gware.Standard.Collections.Generic;
+using Gware.Standard.Configuration;
 using Gware.Standard.Storage.Controller;
 using Gware.Standard.Web.Tenancy;
 
@@ -22,6 +24,7 @@ namespace Eve.EveAuthTool.Standard.Helpers
                 return CurrentTenant != null;
             }
         }
+        public ITypeSafeConfigurationProvider<eUserSetting> UserConfiguration { get; protected set; }
         public virtual Tenant CurrentTenant { get; protected set; }
         public virtual ICommandController TenantController { get; protected set; }
         public virtual IAllowedCharactersProvider Characters { get; protected set; }
@@ -66,9 +69,10 @@ namespace Eve.EveAuthTool.Standard.Helpers
         }
         private readonly ISingleParameters m_singles;
 
-        public ScopeParametersBase(ISingleParameters singles)
+        public ScopeParametersBase(ISingleParameters singles, ITypeSafeConfigurationProvider<eUserSetting> userConfig)
         {
             m_singles = singles;
+            UserConfiguration = userConfig;
         }
     }
 }

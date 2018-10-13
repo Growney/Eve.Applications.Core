@@ -7,55 +7,69 @@
     };
 }
 @section Breadcrumbs{
-    <partial name="breadcrumbs" model="breadcrumbs">
+<partial name="breadcrumbs" model="breadcrumbs">
 }
-<h3>You are linked to discord guild - @Model.GuildName</h3>
-<p> Discord configurations allow you to create collections of Discord roles that will be given to users. Invites can be added to configurations to automatically join users to the guild when performing quick authorisation. </p>
-<a asp-controller="Discord" asp-action="EditConfiguration" asp-route-configID="0">Add</a>
 
+    <div class="content-box theme-border">
+        <h3>You are linked to discord guild - @Model.GuildName</h3>
+        <p> Discord configurations allow you to create collections of Discord roles that will be given to users. Invites can be added to configurations to automatically join users to the guild when performing quick authorisation. </p>
+
+        <form asp-controller="Discord" asp-action="UpdateLinkConfiguration">
+            <div>
+                Update Guild Name -@Html.CheckBoxFor(x => Model.UpdateGuildName)
+            </div>
+            <div>
+                Update Guild Image - @Html.CheckBoxFor(x => Model.UpdateGuildImage) (This will update once then disable to limit its usage)
+            </div>
+            <div>
+                <button type="submit">Save</button>
+            </div>
+        </form>
+    </div>
+<a asp-controller="Discord" asp-action="EditConfiguration" asp-route-configID="0">Add</a>
 <div>
     @foreach (var config in Model.Configurations)
     {
-        
-    <div class="content-box theme-border">
-        <div class="bold">@config.Name</div>
-        <div>
-            Invite =
-            @if (!string.IsNullOrEmpty(config.InviteUrl))
-            {
-                <a href="@config.InviteUrl">@config.InviteUrl</a>
-            }
-            else
-            {
-                @("None")
-            }
 
-        </div>
-        <div>
-            Discord Roles -
-            @{
-                int selected = 0;
-                for (int i = 0; i < config.Roles.Count; i++)
+        <div class="content-box theme-border">
+            <div class="bold">@config.Name</div>
+            <div>
+                Invite =
+                @if (!string.IsNullOrEmpty(config.InviteUrl))
                 {
-                    var role = config.Roles[i];
-
-                    if (role.Selected)
-                    {
-                        if (selected > 0)
-                        {
-                            @(", ")
-                        }
-                        @role.Name
-                        selected++;
-                    }
-
+                    <a href="@config.InviteUrl">@config.InviteUrl</a>
                 }
-            }
-        </div>
+                else
+                {
+                    @("None")
+                }
 
-        <div>
-            <a asp-action="EditConfiguration" asp-controller="Discord" asp-route-configID="@config.Id"><i class="fas fa-edit"></i></a>
+            </div>
+            <div>
+                Discord Roles -
+                @{
+                    int selected = 0;
+                    for (int i = 0; i < config.Roles.Count; i++)
+                    {
+                        var role = config.Roles[i];
+
+                        if (role.Selected)
+                        {
+                            if (selected > 0)
+                            {
+                                @(", ")
+                            }
+                            @role.Name
+                            selected++;
+                        }
+
+                    }
+                }
+            </div>
+
+            <div>
+                <a asp-action="EditConfiguration" asp-controller="Discord" asp-route-configID="@config.Id"><i class="fas fa-edit"></i></a>
+            </div>
         </div>
-    </div>
     }
 </div>

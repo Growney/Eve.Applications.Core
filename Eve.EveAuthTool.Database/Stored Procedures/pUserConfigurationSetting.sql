@@ -10,14 +10,14 @@ BEGIN
 	BEGIN
 
 		INSERT INTO UserConfigurationSetting(Id,[Value])
-		VALUES(Id,[Value])
+		VALUES(@Id,@Value)
 
 	END
 	ELSE
 	BEGIN
 
 		UPDATE UserConfigurationSetting
-		SET Value = @Value
+		SET [Value] = @Value
 		WHERE Id = @Id
 
 	END
