@@ -622,7 +622,7 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
         }
         public Task<IActionResult> QuickAuthCharacter(string state)
         {
-            return GenericCharacterRegistration(state, RedirectToAction("QuickAuthDiscord", "Registration"));
+            return GenericCharacterRegistration(state, RedirectToAction("QuickAuthDiscord", "Discord"));
         }
         
 
