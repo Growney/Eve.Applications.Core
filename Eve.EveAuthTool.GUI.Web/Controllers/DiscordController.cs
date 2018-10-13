@@ -21,6 +21,7 @@ using Gware.Standard.Web.Tenancy.Routing;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Gware.Standard.Web.Tenancy.Configuration;
 
 namespace Eve.EveAuthTool.GUI.Web.Controllers
 {
@@ -188,6 +189,24 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
             };
             return client;
         }
+        public IActionResult QuickAuthDiscord()
+        {
+            if (IsGuildLinked)
+            {
+                DiscordOAuthRequestArguments args = HttpContext.GetLocalArguments<DiscordOAuthRequestArguments>(
+                currentTenant: CurrentTenant,
+                redirectPath: "Discord/LinkDiscordAccount");
+
+                return Redirect(args.GetAuthenticationUrl(
+                    state: OAuthArgStore.StoreArguments(args),
+                    config: DiscordConfiguration));
+            }
+            else
+            {
+                return View("Error", new Models.Shared.ErrorModel() { Message = "No Discord link" });
+            }
+            
+        }
         [Authorize]
         public async Task<IActionResult> LinkDiscordAccount([FromServices]IDiscordLinkProvider linkProvider,string state)
         {
@@ -297,11 +316,9 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
                     {
                         return View("Error", new Models.Shared.ErrorModel() { Message = "No Discord link" });
                     }
-                    
                 }
                 else
                 {
-                    
                     return View("Error", new Models.Shared.ErrorModel() { Message = "Bad Discord Authorisation" });
                 }
             }

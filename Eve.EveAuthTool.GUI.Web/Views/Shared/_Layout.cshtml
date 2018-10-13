@@ -34,8 +34,17 @@
         </div>
         <div class="site-title">
             @(scoped.IsTenant ? scoped.CurrentTenant.DisplayName : "")
+            
         </div>
         <div class="site-info">
+            @if (scoped.IsTenant)
+            {
+                string authUrl = singles.TenantConfiguration.GetTenantRedirect(scoped.CurrentTenant.Name, "registration/quickauth");
+                <div><a href="@authUrl">Quick Auth</a></div>
+            }
+
+        </div>
+        <div class="site-user-info">
             @if (scoped.IsTenant)
             {
                 @if (scoped.IsAuthenticated)
@@ -46,17 +55,14 @@
                         @($"Welcome {await singles.PublicDataProvider.GetEntityName(Eve.ESI.Standard.eESIEntityType.character, characters[0].EntityID)}")
                     }
 
-                    <a class="button-list-button registration-button-small" asp-action="Logout" asp-controller="Registration">Log Out</a>
+                    <a class="button-list-button registration-button-small center" asp-action="Logout" asp-controller="Registration">Log Out</a>
                 }
                 else
                 {
-                    <a asp-action="EveLogin" asp-controller="Registration" asp-route-ReturnUrl="@Context.Request.Path" class="button-list-button registration-button-small hover-image-button">Login<img src="~/images/eve-sso-login-black-small.png" /></a>
-                    <a class="button-list-button registration-button-small" href="#" onclick="showDialog('characterRegistrationDialog')">Register</a>
+                    <a asp-action="EveLogin" asp-controller="Registration" asp-route-ReturnUrl="@Context.Request.Path" class="button-list-button registration-button-small hover-image-button center">Login<img src="~/images/eve-sso-login-black-small.png" /></a>
+                    <a class="button-list-button registration-button-small center" href="#" onclick="showDialog('characterRegistrationDialog')">Register</a>
                 }
             }
-        </div>
-        <div class="site-user-info">
-
         </div>
         <div class="site-breadcrumbs">
             @RenderSection("Breadcrumbs", false)

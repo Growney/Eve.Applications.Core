@@ -617,23 +617,14 @@ namespace Eve.EveAuthTool.GUI.Web.Controllers
             }
             else
             {
-                return RedirectToAction("QuickAuthDiscord");
+                return RedirectToAction("QuickAuthDiscord","Discord");
             }
         }
         public Task<IActionResult> QuickAuthCharacter(string state)
         {
             return GenericCharacterRegistration(state, RedirectToAction("QuickAuthDiscord", "Registration"));
         }
-        public IActionResult QuickAuthDiscord()
-        {
-            DiscordOAuthRequestArguments args = HttpContext.GetLocalArguments<DiscordOAuthRequestArguments>(
-                currentTenant: CurrentTenant,
-                redirectPath: "Discord/LinkDiscordAccount");
-
-            return Redirect(args.GetAuthenticationUrl(
-                state: OAuthArgStore.StoreArguments(args),
-                config: DiscordConfiguration));
-        }
+        
 
         [IgnoreVersionCheckAttribute]
         public IActionResult TenantUpgrade(string returnUrl)

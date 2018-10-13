@@ -35,7 +35,7 @@ namespace Eve.EveAuthTool.Standard.Discord.Service
         }
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            m_logger.LogInformation("Discord Sync service is stopping");
+            m_logger.LogInformation("Discord Sync service is starting");
             m_timer = new Timer(DoWork,null,TimeSpan.Zero,m_botConfiguration.SyncCycleTime);
 
             return Task.CompletedTask;

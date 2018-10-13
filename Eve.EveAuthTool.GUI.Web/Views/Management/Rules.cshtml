@@ -10,7 +10,7 @@ new Breadcrumb(){ Controller="Management",Action="Index",Text="Management"  }
 };
 }
 @section Breadcrumbs{
-    <partial name="breadcrumbs" model="breadcrumbs">
+<partial name="breadcrumbs" model="breadcrumbs">
 }
 @section Styles{
     <link rel="stylesheet" href="~/css/rule.css" />
@@ -18,6 +18,7 @@ new Breadcrumb(){ Controller="Management",Action="Index",Text="Management"  }
 @section Scripts{
     <script src="~/js/management.js"></script>
 }
+    <p>Rules allow you to configure what roles in game characters are given. Each rule is checked in ascending order by priority. The match all option will force the character to meet all of the relationships in a rule before they are matched. When match all is checked and no rules are provided the rule will always match, this is useful for creating a public rule. Make sure you put your rules in the correct order!   </p>
 <a asp-action="EditRule" asp-controller="Management" asp-route-ruleID="-1">Add</a>
 <div class="rule-list">
     @foreach (var rule in Model)

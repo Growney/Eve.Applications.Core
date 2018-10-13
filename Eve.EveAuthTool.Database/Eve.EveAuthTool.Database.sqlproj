@@ -84,6 +84,8 @@
     <None Include="Clear.publish.xml" />
     <None Include="Upgrade.publish.xml" />
     <None Include="UpgradeTesting.publish.xml" />
+    <None Include="Eve.EveAuthTool.Database.publish.xml" />
+    <None Include="Live.publish.xml" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="Eve.EveAuthTool.Database.refactorlog" />

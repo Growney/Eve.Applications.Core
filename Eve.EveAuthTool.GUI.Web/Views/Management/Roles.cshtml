@@ -11,16 +11,17 @@
 }
 @section Breadcrumbs{
     <partial name="breadcrumbs" model="breadcrumbs">
-}
-<a asp-action="EditRole" asp-controller="Management" asp-route-roleID="-1">Add</a>
-@foreach (var role in Model)
-{
-<div class="content-box theme-border">
-    <div class="bold">@role.Name</div>
-    <div>Discord Config - @role.DiscordRoleConfigurationName</div>
-    <div>Register - @role.Register</div>
-    <div>Manage - @role.Manage</div>
-    <a asp-action="EditRole" asp-controller="Management" asp-route-roleID="@role.Id"><i class="fas fa-edit"></i></a>
-</div>
-}
+    }
+    <p>Roles are used to assign re usable permissions to rules. In order to use the system a user with a given role must have the register option selected. If the user should be able to update the ESA system then they should be given the manage permission. Discord configurations can be assigned to roles to give the user permissions on the linked Discord guild</p>
+    <a asp-action="EditRole" asp-controller="Management" asp-route-roleID="-1">Add</a>
+    @foreach (var role in Model)
+    {
+        <div class="content-box theme-border">
+            <div class="bold">@role.Name</div>
+            <div>Discord Config - @role.DiscordRoleConfigurationName</div>
+            <div>Register - @role.Register</div>
+            <div>Manage - @role.Manage</div>
+            <a asp-action="EditRole" asp-controller="Management" asp-route-roleID="@role.Id"><i class="fas fa-edit"></i></a>
+        </div>
+    }
 

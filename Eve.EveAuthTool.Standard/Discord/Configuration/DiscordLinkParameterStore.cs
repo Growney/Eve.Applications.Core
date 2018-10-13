@@ -11,10 +11,11 @@ namespace Eve.EveAuthTool.Standard.Discord.Configuration
     public class DiscordLinkParameterStore : GuidArgumentStore<DiscordLinkParameter>
     {
         private readonly ICommandController m_controller;
-        public DiscordLinkParameterStore(ILogger<DiscordLinkParameterStore> logger,IControllerProvider provider,ITenantConfiguration configuration)
+
+        public DiscordLinkParameterStore(ILogger<DiscordLinkParameterStore> logger,IControllerProvider provider)
             :base(logger)
         {
-            m_controller = provider.CreateController(configuration.ControllerKey);
+            m_controller = provider.GetDefaultDataController();
         }
         public override DiscordLinkParameter RecallArguments(Guid guid)
         {

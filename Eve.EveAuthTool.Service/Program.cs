@@ -36,7 +36,7 @@ namespace Eve.EveAuthTool.Service
             {
                 config.AddJsonFile($"Configuration//appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json", optional: false, reloadOnChange: true);
                 //configure NLog
-                
+
             })
             .ConfigureServices(ConfigureServices)
             .ConfigureLogging((hostingContext, logging) =>
@@ -48,15 +48,14 @@ namespace Eve.EveAuthTool.Service
             });
 
             await builder.RunConsoleAsync();
-            
+
         }
 
-        public static void ConfigureServices(HostBuilderContext hostContext,IServiceCollection services)
+        public static void ConfigureServices(HostBuilderContext hostContext, IServiceCollection services)
         {
-            services.AddDelegatedControllerProvider(x =>
-            {
-                return CreateController(hostContext.Configuration, x);
-            },hostContext.Configuration["Controllers:PublicDataController"]);
+            services.AddDelegatedControllerProvider<MSSQLCommandController>(
+                (l, x) => CreateController(l, hostContext.Configuration, x),
+                hostContext.Configuration["Controllers:PublicDataController"]);
 
             services.AddTransient(typeof(ICache<,>), typeof(FixedTimeCache<,>));
 
@@ -77,12 +76,9 @@ namespace Eve.EveAuthTool.Service
             services.AddScoped<IScopeParameters, DiscordSyncScopeParameters>();
             services.AddScoped<IDiscordLinkProvider, DiscordLinkProvider>();
 
-            services.AddTenant(x =>
+
+            services.AddTenantConfiguration<TenantConfiguration<MSSQLCommandController>>(x =>
             {
-                
-                x.SchemaFile = hostContext.Configuration["TenantConfig:SchemaFile"];
-                x.DBNameFormat = hostContext.Configuration["TenantConfig:DBNameFormat"];
-                x.Domains = hostContext.Configuration.GetSection("TenantConfig:Domains").Get<RouteTemplateDomain[]>();
                 x.CreateComposite = true;
                 x.OnDeployTenantSchema = async (ICommandController controller) =>
                 {
@@ -95,23 +91,23 @@ namespace Eve.EveAuthTool.Service
 
                     return retVal;
                 };
-                x.Controller = CreateController(hostContext.Configuration,"TenantDB");
-                x.SearchIn = new Assembly[] { typeof(MSSQLCommandController).Assembly };
             });
+
+            services.AddTenant();
         }
 
-        public static ICommandController CreateController(IConfiguration config,string key)
+        public static MSSQLCommandController CreateController(ILogger<MSSQLCommandController> logger, IConfiguration config, string key)
         {
             bool isTrusted = config[$"Controllers:{key}:Trusted"]?.ToLower().ToString() == "true";
             if (isTrusted)
             {
-                return new MSSQLCommandController(config[$"Controllers:{key}:Server"], config[$"Controllers:{key}:Databasename"]);
+                return new MSSQLCommandController(logger, config[$"Controllers:{key}:Server"], config[$"Controllers:{key}:Databasename"]);
             }
             else
             {
-                return new MSSQLCommandController(config[$"Controllers:{key}:Server"], config[$"Controllers:{key}:Databasename"], config[$"Controllers:{key}:Username"], config[$"Controllers:{key}:Password"]);
+                return new MSSQLCommandController(logger, config[$"Controllers:{key}:Server"], config[$"Controllers:{key}:Databasename"], config[$"Controllers:{key}:Username"], config[$"Controllers:{key}:Password"]);
             }
         }
-        
+
     }
 }

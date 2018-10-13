@@ -31,6 +31,7 @@ using Eve.EveAuthTool.Standard.Discord.Configuration;
 using Eve.EveAuthTool.Standard.Discord.Service;
 using Eve.ESI.Standard.Authentication.Client;
 using Eve.EveAuthTool.Standard.Discord.Service.Providers;
+using Microsoft.Extensions.Logging;
 
 namespace Eve.EveAuthTool.GUI.Web
 {
@@ -44,16 +45,16 @@ namespace Eve.EveAuthTool.GUI.Web
         }
 
         public IConfiguration Configuration { get; }
-        public ICommandController CreateController(string key)
+        public MSSQLCommandController CreateController(ILogger<MSSQLCommandController> logger,string key)
         {
             bool isTrusted = Configuration[$"Controllers:{key}:Trusted"]?.ToLower().ToString() == "true";
             if (isTrusted)
             {
-                return new MSSQLCommandController(Configuration[$"Controllers:{key}:Server"], Configuration[$"Controllers:{key}:Databasename"]);
+                return new MSSQLCommandController(logger,Configuration[$"Controllers:{key}:Server"], Configuration[$"Controllers:{key}:Databasename"]);
             }
             else
             {
-                return new MSSQLCommandController(Configuration[$"Controllers:{key}:Server"], Configuration[$"Controllers:{key}:Databasename"], Configuration[$"Controllers:{key}:Username"], Configuration[$"Controllers:{key}:Password"]);
+                return new MSSQLCommandController(logger,Configuration[$"Controllers:{key}:Server"], Configuration[$"Controllers:{key}:Databasename"], Configuration[$"Controllers:{key}:Username"], Configuration[$"Controllers:{key}:Password"]);
             }
         }
 
@@ -79,7 +80,9 @@ namespace Eve.EveAuthTool.GUI.Web
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            services.AddDelegatedControllerProvider(CreateController,Configuration["Controllers:PublicDataController"]);
+            services.AddDelegatedControllerProvider<MSSQLCommandController>(
+                (l, x) => CreateController(l, x),
+                Configuration["Controllers:PublicDataController"]);
 
             services.AddTransient(typeof(ICache<,>), typeof(FixedTimeCache<,>));
             services.AddSingleton<IArgumentsStore<OAuthRequestArguments>, ArgumentsStore<OAuthRequestArguments>>();
@@ -99,13 +102,8 @@ namespace Eve.EveAuthTool.GUI.Web
 
             services.AddScoped<IDiscordLinkProvider, DiscordLinkProvider>();
 
-            RouteTemplateDomain[] domains = Configuration.GetSection("TenantConfig:Domains").Get<RouteTemplateDomain[]>();
-            services.AddTenantMVC(x =>
+            services.AddTenantConfiguration<TenantConfiguration<MSSQLCommandController>>(x=>
             {
-                x.Controller = CreateController("TenantDB");
-                x.SchemaFile = Configuration["TenantConfig:SchemaFile"];
-                x.DBNameFormat = Configuration["TenantConfig:DBNameFormat"];
-                x.Domains = domains;
                 x.CreateComposite = true;
                 x.OnDeployTenantSchema = async (ICommandController controller) =>
                 {
@@ -118,19 +116,20 @@ namespace Eve.EveAuthTool.GUI.Web
 
                     return retVal;
                 };
-                x.SearchIn = new Assembly[] { typeof(MSSQLCommandController).Assembly };
-            },
-            x =>
+            });
+
+            services.AddTenantWebConfiguration<TenantWebConfiguration>((web,config) =>
             {
-                x.TenantHome = new RedirectToActionResult("Welcome", "Home", null);
-                x.CreateNewResult = new RedirectResult($"{domains[0].GetAddress()}/Home/CreateNewTenant", false, false);
-                x.NotFoundResult = new RedirectToActionResult("TenantNotFound", "Home", null);
-                x.Upgrading = context =>
+                web.TenantHome = new RedirectToActionResult("Welcome", "Home", null);
+                web.CreateNewResult = new RedirectResult($"{config.Domains[0].GetAddress()}/Home/CreateNewTenant", false, false);
+                web.NotFoundResult = new RedirectToActionResult("TenantNotFound", "Home", null);
+                web.Upgrading = context =>
                 {
                     return new RedirectToActionResult("TenantUpgrade", "Registration", new { returnUrl = context.HttpContext.Request.Path });
                 };
-            },
-            config =>
+            });
+
+            services.AddTenantMVC(config =>
             {
                 config.Filters.Add(new TenantRequiredIfProvidedAttribute());
                 config.Filters.Add(new AllowedCharactersResolverFilter());

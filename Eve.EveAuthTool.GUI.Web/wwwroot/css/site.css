@@ -2,7 +2,7 @@
     --theme-primary-back-colour: rgb(212, 212, 206);
     --theme-secondary-back-colour: #5f5f5f;
     --theme-fore-colour: #000000;
-    --breadcrumb-height: 45px;
+    --breadcrumb-height: 1.75em;
     --headerbar-height: 40px;
 }
 * {
@@ -15,7 +15,7 @@ body{
     display: grid;
     grid-template-columns: 270px 1fr 270px;
     grid-template-rows: calc(128px - var(--breadcrumb-height)) var(--breadcrumb-height) 1fr 1.5em;
-    grid-template-areas: "logo title info" "logo breadcrumbs userinfo" "sidebarleft content content" "sidebarleft footer footer";
+    grid-template-areas: "logo title userinfo" "logo breadcrumbs info" "sidebarleft content content" "sidebarleft footer footer";
     height: 100vh;
 }
 
@@ -45,9 +45,14 @@ body{
 .site-user-info {
     grid-area: userinfo;
     background-color: var(--theme-primary-back-colour);
+    text-align:center;
+
+    
 }
-.site-info{
-    grid-area:info;
+.site-info {
+    grid-area: info;
+    text-align: center;
+    line-height: var(--breadcrumb-height);
 }
 
 .site-breadcrumbs {
