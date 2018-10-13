@@ -7,7 +7,7 @@ using Gware.Standard.Web.Tenancy.Configuration;
 
 namespace Eve.EveAuthTool.Standard.Configuration
 {
-    public class UserConfigurationProvider : IConfigurationProvider<eUserSetting>
+    public class UserConfigurationProvider : ITypeSafeConfigurationProvider<eUserSetting>
     {
         private readonly ICommandController m_tenantController;
         private readonly ITenantControllerProvider m_provider;

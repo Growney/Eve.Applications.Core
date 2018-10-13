@@ -32,6 +32,8 @@ using Eve.EveAuthTool.Standard.Discord.Service;
 using Eve.ESI.Standard.Authentication.Client;
 using Eve.EveAuthTool.Standard.Discord.Service.Providers;
 using Microsoft.Extensions.Logging;
+using Gware.Standard.Configuration;
+using Eve.EveAuthTool.Standard.Configuration;
 
 namespace Eve.EveAuthTool.GUI.Web
 {
@@ -99,8 +101,8 @@ namespace Eve.EveAuthTool.GUI.Web
             services.AddScoped<IAllowedCharactersProvider, AllowedCharacterProvider>();
             services.AddScoped<IScopeGroupProvider, ScopeGroupProvider>();
             services.AddScoped<IScopeParameters, HttpContextScopeParameters>();
-
             services.AddScoped<IDiscordLinkProvider, DiscordLinkProvider>();
+            services.AddScoped<ITypeSafeConfigurationProvider<eUserSetting>, UserConfigurationProvider>();
 
             services.AddTenantConfiguration<TenantConfiguration<MSSQLCommandController>>(x=>
             {

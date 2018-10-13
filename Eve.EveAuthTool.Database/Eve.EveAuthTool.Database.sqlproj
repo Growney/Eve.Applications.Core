@@ -103,5 +103,7 @@
     <Build Include="DataTypes\DataList.sql" />
     <Build Include="Tables\DiscordLinkParameter.sql" />
     <Build Include="Stored Procedures\pDiscordLinkParameter.sql" />
+    <Build Include="Tables\UserConfigurationSetting.sql" />
+    <Build Include="Stored Procedures\pUserConfigurationSetting.sql" />
   </ItemGroup>
 </Project>

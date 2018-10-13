@@ -1,6 +1,7 @@
 ﻿using Eve.ESI.Standard;
 using Eve.ESI.Standard.Authentication.Client;
 using Eve.ESI.Standard.Authentication.Configuration;
+using Eve.EveAuthTool.Standard.Configuration;
 using Eve.EveAuthTool.Standard.Discord.Configuration;
 using Eve.EveAuthTool.Standard.Discord.Service;
 using Eve.EveAuthTool.Standard.Discord.Service.Providers;
@@ -9,6 +10,7 @@ using Eve.EveAuthTool.Standard.Security.Middleware;
 using Eve.Static.Standard;
 using Gware.Core.MSSQL.Storage.Controller;
 using Gware.Standard.Collections.Generic;
+using Gware.Standard.Configuration;
 using Gware.Standard.Storage.Controller;
 using Gware.Standard.Web.Tenancy.Configuration;
 using Gware.Standard.Web.Tenancy.Routing;
@@ -75,6 +77,7 @@ namespace Eve.EveAuthTool.Service
             services.AddScoped<IScopeParameters, DiscordCommandContextScopeParameters>();
             services.AddScoped<IScopeParameters, DiscordSyncScopeParameters>();
             services.AddScoped<IDiscordLinkProvider, DiscordLinkProvider>();
+            services.AddScoped<ITypeSafeConfigurationProvider<eUserSetting>, UserConfigurationProvider>();
 
 
             services.AddTenantConfiguration<TenantConfiguration<MSSQLCommandController>>(x =>
